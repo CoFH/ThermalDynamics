@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "thermal:block/ender_tunnel",
+      "x": 90
+    },
+    "facing=east": {
+      "model": "thermal:block/ender_tunnel",
+      "x": 90,
+      "y": 90
+    },
+    "facing=south": {
+      "model": "thermal:block/ender_tunnel",
+      "x": 90,
+      "y": 180
+    },
+    "facing=west": {
+      "model": "thermal:block/ender_tunnel",
+      "x": 90,
+      "y": 270
+    },
+    "facing=up": {
+      "model": "thermal:block/ender_tunnel"
+    },
+    "facing=down": {
+      "model": "thermal:block/ender_tunnel",
+      "x": 180
+    }
+  }
+}
