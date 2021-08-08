@@ -1,8 +1,10 @@
-package cofh.thermal.dynamics.tileentity.ender;
+package cofh.thermal.dynamics.tileentity;
 
 import cofh.core.tileentity.TileCoFH;
+import cofh.core.util.helpers.ChatHelper;
 import cofh.lib.util.Utils;
 import cofh.lib.util.helpers.BlockHelper;
+import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.block.BlockState;
@@ -11,7 +13,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -20,8 +30,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.UUID;
 
-import static cofh.lib.util.constants.Constants.EMPTY_UUID;
-import static cofh.lib.util.constants.Constants.FACING_ALL;
+import static cofh.lib.util.constants.Constants.*;
 import static cofh.lib.util.constants.NBTTags.*;
 import static cofh.thermal.dynamics.init.TDynReferences.ENDER_TUNNEL_TILE;
 
@@ -39,6 +48,16 @@ public class EnderTunnelTile extends TileCoFH {
     public EnderTunnelTile() {
 
         super(ENDER_TUNNEL_TILE);
+    }
+
+    @Override
+    public boolean onActivatedDelegate(World world, BlockPos pos, BlockState state, PlayerEntity player, Hand hand, BlockRayTraceResult result) {
+
+        IFormattableTextComponent myAddress = new StringTextComponent("My address: ").append(new StringTextComponent(myId.toString()).mergeStyle(ENDER_STYLE));
+        IFormattableTextComponent targetAddress = new StringTextComponent("Target address: ").append(new StringTextComponent(targetId.toString()).mergeStyle(ENDER_STYLE));
+
+        ChatHelper.sendIndexedChatMessagesToPlayer(player, Lists.newArrayList(myAddress, targetAddress));
+        return super.onActivatedDelegate(world, pos, state, player, hand, result);
     }
 
     @Override
@@ -106,7 +125,7 @@ public class EnderTunnelTile extends TileCoFH {
 
         nbt.putUniqueId(TAG_UUID, myId);
         if (targetId != EMPTY_UUID) {
-            nbt.putUniqueId(TAG_FACING, targetId);
+            nbt.putUniqueId(TAG_ENDER_ADDRESS, targetId);
         }
         if (!nbt.isEmpty()) {
             stack.setTagInfo(TAG_BLOCK_ENTITY, nbt);
@@ -121,7 +140,7 @@ public class EnderTunnelTile extends TileCoFH {
         super.read(state, nbt);
 
         myId = nbt.getUniqueId(TAG_UUID);
-        targetId = nbt.getUniqueId(TAG_ENDER_FREQUENCY);
+        targetId = nbt.getUniqueId(TAG_ENDER_ADDRESS);
     }
 
     @Override
@@ -130,7 +149,7 @@ public class EnderTunnelTile extends TileCoFH {
         super.write(nbt);
 
         nbt.putUniqueId(TAG_UUID, myId);
-        nbt.putUniqueId(TAG_ENDER_FREQUENCY, targetId);
+        nbt.putUniqueId(TAG_ENDER_ADDRESS, targetId);
 
         return nbt;
     }
@@ -164,8 +183,8 @@ public class EnderTunnelTile extends TileCoFH {
     // region IConveyableData
     public void readConveyableData(PlayerEntity player, CompoundNBT tag) {
 
-        if (tag.contains(TAG_ENDER_FREQUENCY)) {
-            UUID newTarget = tag.getUniqueId(TAG_ENDER_FREQUENCY);
+        if (tag.contains(TAG_ENDER_ADDRESS)) {
+            UUID newTarget = tag.getUniqueId(TAG_ENDER_ADDRESS);
             if (!myId.equals(newTarget)) {
                 targetId = newTarget;
             }
@@ -174,7 +193,7 @@ public class EnderTunnelTile extends TileCoFH {
 
     public void writeConveyableData(PlayerEntity player, CompoundNBT tag) {
 
-        tag.putUniqueId(TAG_ENDER_FREQUENCY, myId);
+        tag.putUniqueId(TAG_ENDER_ADDRESS, myId);
     }
     // endregion
 }

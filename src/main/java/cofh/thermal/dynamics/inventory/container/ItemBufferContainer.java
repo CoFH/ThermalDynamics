@@ -1,25 +1,25 @@
-package cofh.thermal.dynamics.inventory.container.logistics;
+package cofh.thermal.dynamics.inventory.container;
 
 import cofh.core.inventory.container.TileContainer;
 import cofh.lib.inventory.container.slot.SlotCoFH;
 import cofh.lib.inventory.wrapper.InvWrapperCoFH;
 import cofh.thermal.dynamics.inventory.container.slot.SlotFalseBuffer;
-import cofh.thermal.dynamics.tileentity.logistics.LogisticsItemBufferTile;
+import cofh.thermal.dynamics.tileentity.ItemBufferTile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import static cofh.thermal.dynamics.init.TDynReferences.LOGISTICS_ITEM_BUFFER_CONTAINER;
+import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_CONTAINER;
 
-public class LogisticsItemBufferContainer extends TileContainer {
+public class ItemBufferContainer extends TileContainer {
 
-    public final LogisticsItemBufferTile tile;
+    public final ItemBufferTile tile;
 
-    public LogisticsItemBufferContainer(int windowId, World world, BlockPos pos, PlayerInventory inventory, PlayerEntity player) {
+    public ItemBufferContainer(int windowId, World world, BlockPos pos, PlayerInventory inventory, PlayerEntity player) {
 
-        super(LOGISTICS_ITEM_BUFFER_CONTAINER, windowId, world, pos, inventory, player);
-        this.tile = (LogisticsItemBufferTile) world.getTileEntity(pos);
+        super(ITEM_BUFFER_CONTAINER, windowId, world, pos, inventory, player);
+        this.tile = (ItemBufferTile) world.getTileEntity(pos);
         InvWrapperCoFH tileInv = new InvWrapperCoFH(this.tile.getItemInv());
 
         for (int i = 0; i < 3; ++i) {

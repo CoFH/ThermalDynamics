@@ -1,10 +1,11 @@
-package cofh.thermal.dynamics.tileentity.logistics;
+package cofh.thermal.dynamics.tileentity;
 
 import cofh.core.network.packet.server.TileConfigPacket;
+import cofh.core.tileentity.TileCoFH;
+import cofh.lib.inventory.IOItemInv;
 import cofh.lib.inventory.ItemStorageCoFH;
-import cofh.thermal.dynamics.inventory.BufferItemInv;
-import cofh.thermal.dynamics.inventory.BufferItemStorage;
-import cofh.thermal.dynamics.inventory.container.logistics.LogisticsItemBufferContainer;
+import cofh.lib.inventory.StackValidatedItemStorage;
+import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import cofh.thermal.lib.tileentity.ThermalTileSecurable;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,6 +17,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.IBlockReader;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -24,31 +26,31 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static cofh.lib.util.StorageGroup.ACCESSIBLE;
-import static cofh.lib.util.StorageGroup.INTERNAL;
+import static cofh.lib.util.StorageGroup.*;
+import static cofh.lib.util.constants.Constants.FACING_ALL;
 import static cofh.lib.util.constants.NBTTags.*;
-import static cofh.thermal.dynamics.init.TDynReferences.LOGISTICS_ITEM_BUFFER_TILE;
+import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_TILE;
 
-public class LogisticsItemBufferTile extends ThermalTileSecurable implements INamedContainerProvider {
+public class ItemBufferTile extends ThermalTileSecurable implements INamedContainerProvider {
 
-    protected BufferItemInv inventory = new BufferItemInv(this, TAG_ITEM_INV);
+    protected IOItemInv inventory = new IOItemInv(this, TAG_ITEM_INV);
 
-    protected boolean latchMode;
-    protected boolean checkNBT;
+    protected boolean latchMode = true;
+    protected boolean checkNBT = true;
 
     protected boolean inputLock;
     protected boolean outputLock;
 
-    public LogisticsItemBufferTile() {
+    public ItemBufferTile() {
 
-        super(LOGISTICS_ITEM_BUFFER_TILE);
+        super(ITEM_BUFFER_TILE);
 
-        BufferItemStorage[] accessible = new BufferItemStorage[9];
+        StackValidatedItemStorage[] accessible = new StackValidatedItemStorage[9];
         ItemStorageCoFH[] internal = new ItemStorageCoFH[9];
 
         for (int i = 0; i < 9; ++i) {
             internal[i] = new ItemStorageCoFH();
-            accessible[i] = new BufferItemStorage(internal[i]).setCheckNBT(() -> checkNBT);
+            accessible[i] = new StackValidatedItemStorage(internal[i]).setCheckNBT(() -> checkNBT);
         }
         for (int i = 0; i < 9; ++i) {
             inventory.addSlot(accessible[i], ACCESSIBLE);
@@ -61,12 +63,27 @@ public class LogisticsItemBufferTile extends ThermalTileSecurable implements INa
     }
 
     @Override
+    public TileCoFH worldContext(BlockState state, IBlockReader world) {
+
+        updateHandlers();
+
+        return this;
+    }
+
+    @Override
+    public void updateContainingBlockInfo() {
+
+        super.updateContainingBlockInfo();
+        updateHandlers();
+    }
+
+    @Override
     public int invSize() {
 
         return inventory.getSlots();
     }
 
-    public BufferItemInv getItemInv() {
+    public IOItemInv getItemInv() {
 
         return inventory;
     }
@@ -75,7 +92,7 @@ public class LogisticsItemBufferTile extends ThermalTileSecurable implements INa
     @Override
     public Container createMenu(int i, PlayerInventory inventory, PlayerEntity player) {
 
-        return new LogisticsItemBufferContainer(i, world, pos, inventory, player);
+        return new ItemBufferContainer(i, world, pos, inventory, player);
     }
 
     public void setLatchMode(boolean latchMode) {
@@ -176,6 +193,8 @@ public class LogisticsItemBufferTile extends ThermalTileSecurable implements INa
 
         latchMode = nbt.getBoolean(TAG_MODE);
         checkNBT = nbt.getBoolean(TAG_FILTER_OPT_NBT);
+
+        updateHandlers();
     }
 
     @Override
@@ -221,7 +240,23 @@ public class LogisticsItemBufferTile extends ThermalTileSecurable implements INa
     // endregion
 
     // region CAPABILITIES
-    protected LazyOptional<?> itemCap = LazyOptional.empty();
+    protected LazyOptional<?> inputCap = LazyOptional.empty();
+    protected LazyOptional<?> outputCap = LazyOptional.empty();
+
+    protected void updateHandlers() {
+
+        LazyOptional<?> prevInputCap = inputCap;
+        LazyOptional<?> prevOutputCap = outputCap;
+
+        IItemHandler inputHandler = inventory.getHandler(INPUT);
+        IItemHandler outputHandler = inventory.getHandler(OUTPUT);
+
+        inputCap = LazyOptional.of(() -> inputHandler);
+        outputCap = LazyOptional.of(() -> outputHandler);
+
+        prevInputCap.invalidate();
+        prevOutputCap.invalidate();
+    }
 
     @Nonnull
     @Override
@@ -235,11 +270,10 @@ public class LogisticsItemBufferTile extends ThermalTileSecurable implements INa
 
     protected <T> LazyOptional<T> getItemHandlerCapability(@Nullable Direction side) {
 
-        if (!itemCap.isPresent()) {
-            IItemHandler handler = inventory.getHandler(ACCESSIBLE);
-            itemCap = LazyOptional.of(() -> handler);
+        if (side == getBlockState().get(FACING_ALL)) {
+            return outputCap.cast();
         }
-        return itemCap.cast();
+        return inputCap.cast();
     }
     // endregion
 }

@@ -1,11 +1,11 @@
-package cofh.thermal.dynamics.client.gui.logistics;
+package cofh.thermal.dynamics.client.gui;
 
 import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.SimpleTooltip;
 import cofh.lib.util.helpers.StringHelper;
-import cofh.thermal.dynamics.inventory.container.logistics.LogisticsItemBufferContainer;
-import cofh.thermal.dynamics.tileentity.logistics.LogisticsItemBufferTile;
+import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
+import cofh.thermal.dynamics.tileentity.ItemBufferTile;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -16,9 +16,9 @@ import static cofh.lib.util.constants.Constants.ID_COFH_CORE;
 import static cofh.lib.util.constants.Constants.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 
-public class LogisticsItemBufferScreen extends ContainerScreenCoFH<LogisticsItemBufferContainer> {
+public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
 
-    public static final String TEX_PATH = ID_THERMAL + ":textures/gui/logistics/item_buffer.png";
+    public static final String TEX_PATH = ID_THERMAL + ":textures/gui/container/item_buffer.png";
     public static final ResourceLocation TEXTURE = new ResourceLocation(TEX_PATH);
 
     public static final String TEX_MODE_LATCH_OFF = ID_COFH_CORE + ":textures/gui/filters/filter_deny_list.png";
@@ -27,14 +27,14 @@ public class LogisticsItemBufferScreen extends ContainerScreenCoFH<LogisticsItem
     public static final String TEX_IGNORE_NBT = ID_COFH_CORE + ":textures/gui/filters/filter_ignore_nbt.png";
     public static final String TEX_USE_NBT = ID_COFH_CORE + ":textures/gui/filters/filter_use_nbt.png";
 
-    protected LogisticsItemBufferTile tile;
+    protected ItemBufferTile tile;
 
-    public LogisticsItemBufferScreen(LogisticsItemBufferContainer container, PlayerInventory inv, ITextComponent titleIn) {
+    public ItemBufferScreen(ItemBufferContainer container, PlayerInventory inv, ITextComponent titleIn) {
 
-        super(container, inv, StringHelper.getTextComponent("block.thermal.logistics_item_buffer"));
+        super(container, inv, StringHelper.getTextComponent("block.thermal.item_buffer"));
         tile = container.tile;
         texture = TEXTURE;
-        info = generatePanelInfo("info.thermal.logistics_item_buffer");
+        info = generatePanelInfo("info.thermal.item_buffer");
         ySize = 178;
     }
 
@@ -61,7 +61,7 @@ public class LogisticsItemBufferScreen extends ContainerScreenCoFH<LogisticsItem
         }
                 .setSize(20, 20)
                 .setTexture(TEX_MODE_LATCH_OFF, 40, 20)
-                .setTooltipFactory(new SimpleTooltip(new TranslationTextComponent("info.thermal.logistics_item_buffer.mode.0")))
+                .setTooltipFactory(new SimpleTooltip(new TranslationTextComponent("info.thermal.item_buffer.mode.0")))
                 .setVisible(() -> !tile.getLatchMode()));
 
         addElement(new ElementButton(this, 78, 27) {
@@ -76,7 +76,7 @@ public class LogisticsItemBufferScreen extends ContainerScreenCoFH<LogisticsItem
         }
                 .setSize(20, 20)
                 .setTexture(TEX_MODE_LATCH_ON, 40, 20)
-                .setTooltipFactory(new SimpleTooltip(new TranslationTextComponent("info.thermal.logistics_item_buffer.mode.1")))
+                .setTooltipFactory(new SimpleTooltip(new TranslationTextComponent("info.thermal.item_buffer.mode.1")))
                 .setVisible(() -> tile.getLatchMode()));
 
         addElement(new ElementButton(this, 78, 51) {

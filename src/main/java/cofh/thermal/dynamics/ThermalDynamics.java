@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics;
 
-import cofh.thermal.dynamics.client.gui.logistics.LogisticsItemBufferScreen;
+import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
 import cofh.thermal.dynamics.init.TDynBlocks;
 import cofh.thermal.dynamics.init.TDynContainers;
 import cofh.thermal.dynamics.init.TDynItems;
@@ -15,12 +15,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.core.ThermalCore.BLOCKS;
-import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_COLLECTOR;
-import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_NULLIFIER;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ENDER_TUNNEL;
-import static cofh.thermal.dynamics.init.TDynReferences.LOGISTICS_ITEM_BUFFER_CONTAINER;
+import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_CONTAINER;
 import static cofh.thermal.lib.common.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
 import static cofh.thermal.lib.common.ThermalFlags.setFlag;
+import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_COLLECTOR;
+import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_NULLIFIER;
 
 @Mod(ID_THERMAL_DYNAMICS)
 public class ThermalDynamics {
@@ -63,7 +63,7 @@ public class ThermalDynamics {
     // region HELPERS
     private void registerGuiFactories() {
 
-        ScreenManager.registerFactory(LOGISTICS_ITEM_BUFFER_CONTAINER, LogisticsItemBufferScreen::new);
+        ScreenManager.registerFactory(ITEM_BUFFER_CONTAINER, ItemBufferScreen::new);
     }
 
     private void registerRenderLayers() {
