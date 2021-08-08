@@ -14,12 +14,11 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -45,6 +44,26 @@ public class EnderTunnelTile extends TileCoFH {
 
     protected Set<LazyOptional<?>> adjCapabilities = new ObjectOpenHashSet<>();
 
+    private static final char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p'};
+
+    public static long SEP_MASK_HIGH = 0x00000000_f000f000L;
+    public static long SEP_MASK_LOW = 0xf000f000_00000000L;
+
+    public static String toCharMap(long value, long sepMask) {
+
+        StringBuilder o = new StringBuilder();
+        long msk = 0xf0000000_00000000L, sft = Long.numberOfTrailingZeros(msk);
+        do {
+            if ((msk & sepMask) == msk) {
+                o.append('-');
+            }
+            o.append(CHARS[(int) ((value & msk) >>> sft)]);
+            msk >>>= 4;
+            sft -= 4;
+        } while (msk > 0);
+        return o.toString();
+    }
+
     public EnderTunnelTile() {
 
         super(ENDER_TUNNEL_TILE);
@@ -53,8 +72,8 @@ public class EnderTunnelTile extends TileCoFH {
     @Override
     public boolean onActivatedDelegate(World world, BlockPos pos, BlockState state, PlayerEntity player, Hand hand, BlockRayTraceResult result) {
 
-        IFormattableTextComponent myAddress = new StringTextComponent("My address: ").append(new StringTextComponent(myId.toString()).mergeStyle(ENDER_STYLE));
-        IFormattableTextComponent targetAddress = new StringTextComponent("Target address: ").append(new StringTextComponent(targetId.toString()).mergeStyle(ENDER_STYLE));
+        IFormattableTextComponent myAddress = new StringTextComponent("My address: ").append(new StringTextComponent(toCharMap(myId.getMostSignificantBits(), SEP_MASK_HIGH) + toCharMap(myId.getLeastSignificantBits(), SEP_MASK_LOW)).mergeStyle(ENDER_STYLE));
+        IFormattableTextComponent targetAddress = targetId.equals(EMPTY_UUID) ? new TranslationTextComponent("info.cofh.none") : new StringTextComponent("Target address: ").append(new StringTextComponent(toCharMap(targetId.getMostSignificantBits(), SEP_MASK_HIGH) + toCharMap(targetId.getLeastSignificantBits(), SEP_MASK_LOW)).mergeStyle(ENDER_STYLE));
 
         ChatHelper.sendIndexedChatMessagesToPlayer(player, Lists.newArrayList(myAddress, targetAddress));
         return super.onActivatedDelegate(world, pos, state, player, hand, result);
