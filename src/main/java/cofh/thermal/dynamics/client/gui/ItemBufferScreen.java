@@ -21,7 +21,7 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
     public static final String TEX_PATH = ID_THERMAL + ":textures/gui/container/item_buffer.png";
     public static final ResourceLocation TEXTURE = new ResourceLocation(TEX_PATH);
 
-    public static final String TEX_MODE_LATCH_OFF = ID_COFH_CORE + ":textures/gui/filters/filter_deny_list.png";
+    public static final String TEX_MODE_LATCH_OFF = ID_THERMAL + ":textures/gui/container/item_buffer_mode_normal.png";
     public static final String TEX_MODE_LATCH_ON = ID_THERMAL + ":textures/gui/container/item_buffer_mode_latch.png";
 
     public static final String TEX_IGNORE_NBT = ID_COFH_CORE + ":textures/gui/filters/filter_ignore_nbt.png";

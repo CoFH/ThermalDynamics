@@ -35,7 +35,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
 
     protected IOItemInv inventory = new IOItemInv(this, TAG_ITEM_INV);
 
-    protected boolean latchMode = true;
+    protected boolean latchMode = false;
     protected boolean checkNBT = true;
 
     protected boolean inputLock;

@@ -28,6 +28,7 @@ public class TDynDataGen {
         ExistingFileHelper exFileHelper = event.getExistingFileHelper();
 
         gen.addProvider(new TDynLootTableProvider(gen));
+        gen.addProvider(new TDynRecipeProvider(gen));
     }
 
     private static void registerClientProviders(GatherDataEvent event) {

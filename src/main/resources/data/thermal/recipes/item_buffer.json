@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IQI",
+    "RCR",
+    "IQI"
+  ],
+  "key": {
+    "C": {
+      "tag": "forge:ingots/signalum"
+    },
+    "I": {
+      "tag": "forge:ingots/tin"
+    },
+    "Q": {
+      "tag": "forge:gems/quartz"
+    },
+    "R": {
+      "item": "thermal:cured_rubber"
+    }
+  },
+  "result": {
+    "item": "thermal:item_buffer"
+  }
+}
