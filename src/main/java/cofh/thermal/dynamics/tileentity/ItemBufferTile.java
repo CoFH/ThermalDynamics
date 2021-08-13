@@ -220,7 +220,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     // endregion
 
     // region ITileCallback
-    public void onInventoryChange(int slot) {
+    public void onInventoryChanged(int slot) {
 
         if (latchMode) {
             if (inventory.isConfigEmpty() || inventory.isBufferEmpty()) {
