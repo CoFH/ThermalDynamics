@@ -4,6 +4,7 @@ import cofh.thermal.dynamics.item.EnderTunerItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 
+import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.core.util.RegistrationHelper.registerItem;
 import static cofh.thermal.lib.common.ThermalItemGroups.THERMAL_TOOLS;
 
@@ -23,7 +24,7 @@ public class TDynItems {
 
         ItemGroup group = THERMAL_TOOLS;
 
-        registerItem("ender_tuner", () -> new EnderTunerItem(new Item.Properties().maxStackSize(1).group(group)));
+        registerItem("ender_tuner", () -> new EnderTunerItem(new Item.Properties().maxStackSize(1).group(group)).setModId(ID_THERMAL_DYNAMICS));
     }
     // endregion
 }

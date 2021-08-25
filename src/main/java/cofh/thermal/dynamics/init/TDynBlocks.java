@@ -9,6 +9,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.common.ToolType;
 
+import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
+import static cofh.lib.util.constants.Constants.ID_THERMAL_LOCOMOTION;
 import static cofh.thermal.core.ThermalCore.TILE_ENTITIES;
 import static cofh.thermal.core.util.RegistrationHelper.registerBlock;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ENDER_TUNNEL;
@@ -32,9 +34,9 @@ public class TDynBlocks {
     // region HELPERS
     private static void registerTileBlocks() {
 
-        registerBlock(ID_ITEM_BUFFER, () -> new TileBlock6Way(create(Material.IRON).sound(SoundType.NETHERITE).hardnessAndResistance(2.0F).harvestTool(ToolType.PICKAXE), ItemBufferTile::new));
+        registerBlock(ID_ITEM_BUFFER, () -> new TileBlock6Way(create(Material.IRON).sound(SoundType.NETHERITE).hardnessAndResistance(2.0F).harvestTool(ToolType.PICKAXE), ItemBufferTile::new), ID_THERMAL_DYNAMICS);
 
-        registerBlock(ID_ENDER_TUNNEL, () -> new TileBlockEnderTunnel(create(Material.IRON).sound(SoundType.NETHERITE).hardnessAndResistance(10.0F).harvestTool(ToolType.PICKAXE), EnderTunnelTile::new));
+        registerBlock(ID_ENDER_TUNNEL, () -> new TileBlockEnderTunnel(create(Material.IRON).sound(SoundType.NETHERITE).hardnessAndResistance(10.0F).harvestTool(ToolType.PICKAXE), EnderTunnelTile::new), ID_THERMAL_DYNAMICS);
     }
 
     private static void registerTileEntities() {
