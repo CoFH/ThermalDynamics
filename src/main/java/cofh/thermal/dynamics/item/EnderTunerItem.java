@@ -41,13 +41,13 @@ public class EnderTunerItem extends ItemCoFH implements IPlacementItem {
     }
 
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
+    public ActionResultType useOn(ItemUseContext context) {
 
         PlayerEntity player = context.getPlayer();
         if (player == null) {
             return ActionResultType.FAIL;
         }
-        return player.canPlayerEdit(context.getPos(), context.getFace(), context.getItem()) ? ActionResultType.SUCCESS : ActionResultType.FAIL;
+        return player.mayUseItemAt(context.getClickedPos(), context.getClickedFace(), context.getItemInHand()) ? ActionResultType.SUCCESS : ActionResultType.FAIL;
     }
 
     @Override
@@ -57,21 +57,21 @@ public class EnderTunerItem extends ItemCoFH implements IPlacementItem {
         if (player == null) {
             return ActionResultType.PASS;
         }
-        return player.canPlayerEdit(context.getPos(), context.getFace(), stack) && useDelegate(stack, context) ? ActionResultType.SUCCESS : ActionResultType.PASS;
+        return player.mayUseItemAt(context.getClickedPos(), context.getClickedFace(), stack) && useDelegate(stack, context) ? ActionResultType.SUCCESS : ActionResultType.PASS;
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
+    public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
 
-        ItemStack stack = player.getHeldItem(hand);
+        ItemStack stack = player.getItemInHand(hand);
         if (player.isSecondaryUseActive()) {
             if (stack.getTag() != null) {
-                player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 0.3F);
+                player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 0.5F, 0.3F);
             }
             stack.setTag(null);
         }
-        player.swingArm(hand);
-        return ActionResult.resultSuccess(stack);
+        player.swing(hand);
+        return ActionResult.success(stack);
     }
 
     // region IPlacementItem

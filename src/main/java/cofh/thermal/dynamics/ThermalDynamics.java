@@ -63,13 +63,13 @@ public class ThermalDynamics {
     // region HELPERS
     private void registerGuiFactories() {
 
-        ScreenManager.registerFactory(ITEM_BUFFER_CONTAINER, ItemBufferScreen::new);
+        ScreenManager.register(ITEM_BUFFER_CONTAINER, ItemBufferScreen::new);
     }
 
     private void registerRenderLayers() {
 
-        RenderType cutout = RenderType.getCutout();
-        RenderType translucent = RenderType.getTranslucent();
+        RenderType cutout = RenderType.cutout();
+        RenderType translucent = RenderType.translucent();
 
         RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_ENDER_TUNNEL), cutout);
         // RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_ENDER_TUNNEL), translucent);

@@ -35,7 +35,7 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
         tile = container.tile;
         texture = TEXTURE;
         info = generatePanelInfo("info.thermal.item_buffer");
-        ySize = 178;
+        imageHeight = 178;
     }
 
     @Override

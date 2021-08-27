@@ -24,7 +24,7 @@ public class TDynItems {
 
         ItemGroup group = THERMAL_TOOLS;
 
-        registerItem("ender_tuner", () -> new EnderTunerItem(new Item.Properties().maxStackSize(1).group(group)).setModId(ID_THERMAL_DYNAMICS));
+        registerItem("ender_tuner", () -> new EnderTunerItem(new Item.Properties().stacksTo(1).tab(group)).setModId(ID_THERMAL_DYNAMICS));
     }
     // endregion
 }

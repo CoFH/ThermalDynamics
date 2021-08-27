@@ -19,7 +19,7 @@ public class ItemBufferContainer extends TileContainer {
     public ItemBufferContainer(int windowId, World world, BlockPos pos, PlayerInventory inventory, PlayerEntity player) {
 
         super(ITEM_BUFFER_CONTAINER, windowId, world, pos, inventory, player);
-        this.tile = (ItemBufferTile) world.getTileEntity(pos);
+        this.tile = (ItemBufferTile) world.getBlockEntity(pos);
         InvWrapperCoFH tileInv = new InvWrapperCoFH(this.tile.getItemInv());
 
         for (int i = 0; i < 3; ++i) {
@@ -27,9 +27,9 @@ public class ItemBufferContainer extends TileContainer {
                 addSlot(new SlotCoFH(tileInv, j + i * 3, 107 + j * 18, 23 + i * 18) {
 
                     @Override
-                    public void onSlotChanged() {
+                    public void setChanged() {
 
-                        ((InvWrapperCoFH) inventory).onInventoryChange(slotIndex);
+                        ((InvWrapperCoFH) container).onInventoryChange(slot);
                     }
                 });
             }

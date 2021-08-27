@@ -31,7 +31,7 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
     }
 
     @Override
-    protected void registerRecipes(Consumer<IFinishedRecipe> consumer) {
+    protected void buildShapelessRecipes(Consumer<IFinishedRecipe> consumer) {
 
         generateTileRecipes(consumer);
     }
@@ -42,16 +42,16 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
 
         Item redstoneServo = reg.get("redstone_servo");
 
-        ShapedRecipeBuilder.shapedRecipe(reg.get(ID_ITEM_BUFFER))
-                .key('C', ItemTagsCoFH.INGOTS_SIGNALUM)
-                .key('I', ItemTagsCoFH.INGOTS_TIN)
-                .key('Q', Tags.Items.GEMS_QUARTZ)
-                .key('R', reg.get("cured_rubber"))
-                .patternLine("IQI")
-                .patternLine("RCR")
-                .patternLine("IQI")
-                .addCriterion("has_quartz", hasItem(Tags.Items.GEMS_QUARTZ))
-                .build(consumer);
+        ShapedRecipeBuilder.shaped(reg.get(ID_ITEM_BUFFER))
+                .define('C', ItemTagsCoFH.INGOTS_SIGNALUM)
+                .define('I', ItemTagsCoFH.INGOTS_TIN)
+                .define('Q', Tags.Items.GEMS_QUARTZ)
+                .define('R', reg.get("cured_rubber"))
+                .pattern("IQI")
+                .pattern("RCR")
+                .pattern("IQI")
+                .unlockedBy("has_quartz", has(Tags.Items.GEMS_QUARTZ))
+                .save(consumer);
     }
 
 }

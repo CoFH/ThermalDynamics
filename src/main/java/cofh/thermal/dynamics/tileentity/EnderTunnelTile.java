@@ -72,8 +72,8 @@ public class EnderTunnelTile extends TileCoFH {
     @Override
     public boolean onActivatedDelegate(World world, BlockPos pos, BlockState state, PlayerEntity player, Hand hand, BlockRayTraceResult result) {
 
-        IFormattableTextComponent myAddress = new StringTextComponent("My address: ").append(new StringTextComponent(toCharMap(myId.getMostSignificantBits(), SEP_MASK_HIGH) + toCharMap(myId.getLeastSignificantBits(), SEP_MASK_LOW)).mergeStyle(ENDER_STYLE));
-        IFormattableTextComponent targetAddress = targetId.equals(EMPTY_UUID) ? new TranslationTextComponent("info.cofh.none") : new StringTextComponent("Target address: ").append(new StringTextComponent(toCharMap(targetId.getMostSignificantBits(), SEP_MASK_HIGH) + toCharMap(targetId.getLeastSignificantBits(), SEP_MASK_LOW)).mergeStyle(ENDER_STYLE));
+        IFormattableTextComponent myAddress = new StringTextComponent("My address: ").append(new StringTextComponent(toCharMap(myId.getMostSignificantBits(), SEP_MASK_HIGH) + toCharMap(myId.getLeastSignificantBits(), SEP_MASK_LOW)).withStyle(ENDER_STYLE));
+        IFormattableTextComponent targetAddress = targetId.equals(EMPTY_UUID) ? new TranslationTextComponent("info.cofh.none") : new StringTextComponent("Target address: ").append(new StringTextComponent(toCharMap(targetId.getMostSignificantBits(), SEP_MASK_HIGH) + toCharMap(targetId.getLeastSignificantBits(), SEP_MASK_LOW)).withStyle(ENDER_STYLE));
 
         ChatHelper.sendIndexedChatMessagesToPlayer(player, Lists.newArrayList(myAddress, targetAddress));
         return super.onActivatedDelegate(world, pos, state, player, hand, result);
@@ -82,7 +82,7 @@ public class EnderTunnelTile extends TileCoFH {
     @Override
     public TileCoFH worldContext(BlockState state, IBlockReader world) {
 
-        facing = state.get(FACING_ALL);
+        facing = state.getValue(FACING_ALL);
         return this;
     }
 
@@ -90,15 +90,15 @@ public class EnderTunnelTile extends TileCoFH {
     public void onLoad() {
 
         super.onLoad();
-        if (world != null && Utils.isServerWorld(world)) {
+        if (level != null && Utils.isServerWorld(level)) {
             tunnelMap.put(myId, this);
         }
     }
 
     @Override
-    public void remove() {
+    public void setRemoved() {
 
-        super.remove();
+        super.setRemoved();
         tunnelMap.remove(myId);
 
         for (LazyOptional<?> opt : adjCapabilities) {
@@ -108,9 +108,9 @@ public class EnderTunnelTile extends TileCoFH {
     }
 
     @Override
-    public void updateContainingBlockInfo() {
+    public void clearCache() {
 
-        super.updateContainingBlockInfo();
+        super.clearCache();
         updateFacing();
     }
 
@@ -125,7 +125,7 @@ public class EnderTunnelTile extends TileCoFH {
     protected void updateFacing() {
 
         Direction prevFacing = facing;
-        Direction curFacing = getBlockState().get(FACING_ALL);
+        Direction curFacing = getBlockState().getValue(FACING_ALL);
 
         facing = curFacing; // Facing must be updated before invalidation or some things may improperly reacquire.
 
@@ -140,35 +140,35 @@ public class EnderTunnelTile extends TileCoFH {
     @Override
     public ItemStack createItemStackTag(ItemStack stack) {
 
-        CompoundNBT nbt = stack.getOrCreateChildTag(TAG_BLOCK_ENTITY);
+        CompoundNBT nbt = stack.getOrCreateTagElement(TAG_BLOCK_ENTITY);
 
-        nbt.putUniqueId(TAG_UUID, myId);
+        nbt.putUUID(TAG_UUID, myId);
         if (targetId != EMPTY_UUID) {
-            nbt.putUniqueId(TAG_ENDER_ADDRESS, targetId);
+            nbt.putUUID(TAG_ENDER_ADDRESS, targetId);
         }
         if (!nbt.isEmpty()) {
-            stack.setTagInfo(TAG_BLOCK_ENTITY, nbt);
+            stack.addTagElement(TAG_BLOCK_ENTITY, nbt);
         }
         return super.createItemStackTag(stack);
     }
 
     // region NBT
     @Override
-    public void read(BlockState state, CompoundNBT nbt) {
+    public void load(BlockState state, CompoundNBT nbt) {
 
-        super.read(state, nbt);
+        super.load(state, nbt);
 
-        myId = nbt.getUniqueId(TAG_UUID);
-        targetId = nbt.getUniqueId(TAG_ENDER_ADDRESS);
+        myId = nbt.getUUID(TAG_UUID);
+        targetId = nbt.getUUID(TAG_ENDER_ADDRESS);
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
+    public CompoundNBT save(CompoundNBT nbt) {
 
-        super.write(nbt);
+        super.save(nbt);
 
-        nbt.putUniqueId(TAG_UUID, myId);
-        nbt.putUniqueId(TAG_ENDER_ADDRESS, targetId);
+        nbt.putUUID(TAG_UUID, myId);
+        nbt.putUUID(TAG_ENDER_ADDRESS, targetId);
 
         return nbt;
     }
@@ -203,7 +203,7 @@ public class EnderTunnelTile extends TileCoFH {
     public void readConveyableData(PlayerEntity player, CompoundNBT tag) {
 
         if (tag.contains(TAG_ENDER_ADDRESS)) {
-            UUID newTarget = tag.getUniqueId(TAG_ENDER_ADDRESS);
+            UUID newTarget = tag.getUUID(TAG_ENDER_ADDRESS);
             if (!myId.equals(newTarget)) {
                 targetId = newTarget;
             }
@@ -212,7 +212,7 @@ public class EnderTunnelTile extends TileCoFH {
 
     public void writeConveyableData(PlayerEntity player, CompoundNBT tag) {
 
-        tag.putUniqueId(TAG_ENDER_ADDRESS, myId);
+        tag.putUUID(TAG_ENDER_ADDRESS, myId);
     }
     // endregion
 }

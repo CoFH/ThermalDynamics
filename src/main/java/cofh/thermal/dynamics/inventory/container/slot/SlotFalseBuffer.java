@@ -15,13 +15,13 @@ public class SlotFalseBuffer extends SlotFalseCopy {
     }
 
     @Override
-    public void putStack(ItemStack stack) {
+    public void set(ItemStack stack) {
 
-        if (!isItemValid(stack)) {
+        if (!mayPlace(stack)) {
             return;
         }
-        inventory.setInventorySlotContents(this.slotIndex, stack);
-        onSlotChanged();
+        container.setItem(this.slot, stack);
+        setChanged();
     }
 
 }

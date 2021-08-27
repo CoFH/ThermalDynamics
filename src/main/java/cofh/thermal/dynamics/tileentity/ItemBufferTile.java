@@ -71,9 +71,9 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     }
 
     @Override
-    public void updateContainingBlockInfo() {
+    public void clearCache() {
 
-        super.updateContainingBlockInfo();
+        super.clearCache();
         updateHandlers();
     }
 
@@ -92,7 +92,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     @Override
     public Container createMenu(int i, PlayerInventory inventory, PlayerEntity player) {
 
-        return new ItemBufferContainer(i, world, pos, inventory, player);
+        return new ItemBufferContainer(i, level, worldPosition, inventory, player);
     }
 
     public void setLatchMode(boolean latchMode) {
@@ -185,9 +185,9 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
 
     // region NBT
     @Override
-    public void read(BlockState state, CompoundNBT nbt) {
+    public void load(BlockState state, CompoundNBT nbt) {
 
-        super.read(state, nbt);
+        super.load(state, nbt);
 
         inventory.read(nbt);
 
@@ -198,9 +198,9 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
+    public CompoundNBT save(CompoundNBT nbt) {
 
-        super.write(nbt);
+        super.save(nbt);
 
         inventory.write(nbt);
 
@@ -215,7 +215,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     @Override
     public ITextComponent getDisplayName() {
 
-        return new TranslationTextComponent(this.getBlockState().getBlock().getTranslationKey());
+        return new TranslationTextComponent(this.getBlockState().getBlock().getDescriptionId());
     }
     // endregion
 
@@ -270,7 +270,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
 
     protected <T> LazyOptional<T> getItemHandlerCapability(@Nullable Direction side) {
 
-        if (side == getBlockState().get(FACING_ALL)) {
+        if (side == getBlockState().getValue(FACING_ALL)) {
             return outputCap.cast();
         }
         return inputCap.cast();

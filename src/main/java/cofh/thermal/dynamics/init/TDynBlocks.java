@@ -17,7 +17,7 @@ import static cofh.thermal.dynamics.init.TDynIDs.ID_ENDER_TUNNEL;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ITEM_BUFFER;
 import static cofh.thermal.dynamics.init.TDynReferences.ENDER_TUNNEL_BLOCK;
 import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_BLOCK;
-import static net.minecraft.block.AbstractBlock.Properties.create;
+import static net.minecraft.block.AbstractBlock.Properties.of;
 
 public class TDynBlocks {
 
@@ -34,16 +34,16 @@ public class TDynBlocks {
     // region HELPERS
     private static void registerTileBlocks() {
 
-        registerBlock(ID_ITEM_BUFFER, () -> new TileBlock6Way(create(Material.IRON).sound(SoundType.NETHERITE).hardnessAndResistance(2.0F).harvestTool(ToolType.PICKAXE), ItemBufferTile::new), ID_THERMAL_DYNAMICS);
+        registerBlock(ID_ITEM_BUFFER, () -> new TileBlock6Way(of(Material.METAL).sound(SoundType.NETHERITE_BLOCK).strength(2.0F).harvestTool(ToolType.PICKAXE), ItemBufferTile::new), ID_THERMAL_DYNAMICS);
 
-        registerBlock(ID_ENDER_TUNNEL, () -> new TileBlockEnderTunnel(create(Material.IRON).sound(SoundType.NETHERITE).hardnessAndResistance(10.0F).harvestTool(ToolType.PICKAXE), EnderTunnelTile::new), ID_THERMAL_DYNAMICS);
+        registerBlock(ID_ENDER_TUNNEL, () -> new TileBlockEnderTunnel(of(Material.METAL).sound(SoundType.NETHERITE_BLOCK).strength(10.0F).harvestTool(ToolType.PICKAXE), EnderTunnelTile::new), ID_THERMAL_DYNAMICS);
     }
 
     private static void registerTileEntities() {
 
-        TILE_ENTITIES.register(ID_ITEM_BUFFER, () -> TileEntityType.Builder.create(ItemBufferTile::new, ITEM_BUFFER_BLOCK).build(null));
+        TILE_ENTITIES.register(ID_ITEM_BUFFER, () -> TileEntityType.Builder.of(ItemBufferTile::new, ITEM_BUFFER_BLOCK).build(null));
 
-        TILE_ENTITIES.register(ID_ENDER_TUNNEL, () -> TileEntityType.Builder.create(EnderTunnelTile::new, ENDER_TUNNEL_BLOCK).build(null));
+        TILE_ENTITIES.register(ID_ENDER_TUNNEL, () -> TileEntityType.Builder.of(EnderTunnelTile::new, ENDER_TUNNEL_BLOCK).build(null));
     }
     // endregion
 }

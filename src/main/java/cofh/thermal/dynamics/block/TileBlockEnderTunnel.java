@@ -22,21 +22,21 @@ import static cofh.lib.util.constants.Constants.FACING_ALL;
 public class TileBlockEnderTunnel extends TileBlock6Way {
 
     private static final VoxelShape[] OPENING_SHAPE = new VoxelShape[]{
-            Block.makeCuboidShape(1, 0, 1, 15, 4, 15),
-            Block.makeCuboidShape(1, 12, 1, 15, 16, 15),
-            Block.makeCuboidShape(1, 1, 0, 15, 15, 4),
-            Block.makeCuboidShape(1, 1, 12, 15, 15, 16),
-            Block.makeCuboidShape(0, 1, 1, 4, 15, 15),
-            Block.makeCuboidShape(12, 1, 1, 16, 15, 15)
+            Block.box(1, 0, 1, 15, 4, 15),
+            Block.box(1, 12, 1, 15, 16, 15),
+            Block.box(1, 1, 0, 15, 15, 4),
+            Block.box(1, 1, 12, 15, 15, 16),
+            Block.box(0, 1, 1, 4, 15, 15),
+            Block.box(12, 1, 1, 16, 15, 15)
     };
 
     private static final VoxelShape[] CENTRAL_SHAPE = new VoxelShape[]{
-            Block.makeCuboidShape(4, 4, 4, 12, 8, 12),
-            Block.makeCuboidShape(4, 8, 4, 12, 12, 12),
-            Block.makeCuboidShape(4, 4, 4, 12, 12, 8),
-            Block.makeCuboidShape(4, 4, 8, 12, 12, 12),
-            Block.makeCuboidShape(4, 4, 4, 8, 12, 12),
-            Block.makeCuboidShape(8, 4, 4, 12, 12, 12)
+            Block.box(4, 4, 4, 12, 8, 12),
+            Block.box(4, 8, 4, 12, 12, 12),
+            Block.box(4, 4, 4, 12, 12, 8),
+            Block.box(4, 4, 8, 12, 12, 12),
+            Block.box(4, 4, 4, 8, 12, 12),
+            Block.box(8, 4, 4, 12, 12, 12)
     };
 
     private static final VoxelShape[] TUNNEL_SHAPE = new VoxelShape[]{
@@ -57,7 +57,7 @@ public class TileBlockEnderTunnel extends TileBlock6Way {
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
 
-        return this.getDefaultState().with(FACING_ALL, context.getNearestLookingDirection());
+        return this.defaultBlockState().setValue(FACING_ALL, context.getNearestLookingDirection());
     }
 
     @Override
@@ -70,7 +70,7 @@ public class TileBlockEnderTunnel extends TileBlock6Way {
     @Override
     public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
 
-        return TUNNEL_SHAPE[state.get(FACING_ALL).ordinal()];
+        return TUNNEL_SHAPE[state.getValue(FACING_ALL).ordinal()];
     }
 
 }
