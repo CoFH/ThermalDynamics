@@ -10,7 +10,6 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.common.ToolType;
 
 import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
-import static cofh.lib.util.constants.Constants.ID_THERMAL_LOCOMOTION;
 import static cofh.thermal.core.ThermalCore.TILE_ENTITIES;
 import static cofh.thermal.core.util.RegistrationHelper.registerBlock;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ENDER_TUNNEL;
