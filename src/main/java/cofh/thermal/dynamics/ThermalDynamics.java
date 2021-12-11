@@ -4,6 +4,7 @@ import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
 import cofh.thermal.dynamics.init.TDynBlocks;
 import cofh.thermal.dynamics.init.TDynContainers;
 import cofh.thermal.dynamics.init.TDynItems;
+import cofh.thermal.dynamics.tileentity.EnderTunnelTile;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
@@ -51,6 +52,7 @@ public class ThermalDynamics {
     // region INITIALIZATION
     private void commonSetup(final FMLCommonSetupEvent event) {
 
+        EnderTunnelTile.initializeValidCapabilities();
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {

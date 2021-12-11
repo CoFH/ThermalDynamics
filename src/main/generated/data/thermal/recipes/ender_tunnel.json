@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " I ",
+    "IEI",
+    " I "
+  ],
+  "key": {
+    "E": {
+      "item": "minecraft:ender_eye"
+    },
+    "I": {
+      "tag": "forge:ingots/enderium"
+    }
+  },
+  "result": {
+    "item": "thermal:ender_tunnel"
+  }
+}

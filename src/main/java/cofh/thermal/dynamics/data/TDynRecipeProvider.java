@@ -8,12 +8,14 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.IFinishedRecipe;
 import net.minecraft.data.ShapedRecipeBuilder;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraftforge.common.Tags;
 
 import java.util.function.Consumer;
 
 import static cofh.lib.util.constants.Constants.ID_THERMAL;
 import static cofh.thermal.core.ThermalCore.ITEMS;
+import static cofh.thermal.dynamics.init.TDynIDs.ID_ENDER_TUNNEL;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ITEM_BUFFER;
 
 public class TDynRecipeProvider extends RecipeProviderCoFH {
@@ -51,6 +53,15 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .pattern("RCR")
                 .pattern("IQI")
                 .unlockedBy("has_quartz", has(Tags.Items.GEMS_QUARTZ))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(reg.get(ID_ENDER_TUNNEL))
+                .define('E', Items.ENDER_EYE)
+                .define('I', ItemTagsCoFH.INGOTS_ENDERIUM)
+                .pattern(" I ")
+                .pattern("IEI")
+                .pattern(" I ")
+                .unlockedBy("has_ender_eye", has(Items.ENDER_EYE))
                 .save(consumer);
     }
 

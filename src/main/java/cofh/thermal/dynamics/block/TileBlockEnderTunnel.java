@@ -4,11 +4,8 @@ import cofh.core.block.TileBlock6Way;
 import cofh.core.tileentity.TileCoFH;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -58,13 +55,6 @@ public class TileBlockEnderTunnel extends TileBlock6Way {
     public BlockState getStateForPlacement(BlockItemUseContext context) {
 
         return this.defaultBlockState().setValue(FACING_ALL, context.getNearestLookingDirection());
-    }
-
-    @Override
-    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
-
-        // Ensures that creative mode doesn't copy UUID of the block!
-        return new ItemStack(this);
     }
 
     @Override

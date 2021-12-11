@@ -2,12 +2,14 @@ package cofh.thermal.dynamics.tileentity;
 
 import cofh.core.tileentity.TileCoFH;
 import cofh.core.util.helpers.ChatHelper;
+import cofh.lib.capability.CapabilityRedstoneFlux;
 import cofh.lib.util.Utils;
 import cofh.lib.util.helpers.BlockHelper;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -23,6 +25,9 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,7 +40,8 @@ import static cofh.thermal.dynamics.init.TDynReferences.ENDER_TUNNEL_TILE;
 
 public class EnderTunnelTile extends TileCoFH {
 
-    private static final Object2ObjectOpenHashMap<UUID, EnderTunnelTile> tunnelMap = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectOpenHashMap<UUID, EnderTunnelTile> TUNNEL_MAP = new Object2ObjectOpenHashMap<>();
+    private static final Set<Capability> VALID_CAPABILIIES = new ObjectOpenHashSet<>(4);
 
     protected Direction facing;
 
@@ -46,8 +52,20 @@ public class EnderTunnelTile extends TileCoFH {
 
     private static final char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p'};
 
-    public static long SEP_MASK_HIGH = 0x00000000_f000f000L;
-    public static long SEP_MASK_LOW = 0xf000f000_00000000L;
+    // These are actual UUID separations.
+    //    public static final long SEP_MASK_HIGH = 0x00000000_f000f000L;
+    //    public static final long SEP_MASK_LOW = 0xf000f000_00000000L;
+
+    public static final long SEP_MASK_HIGH = 0x00000000_f0000000L;
+    public static final long SEP_MASK_LOW = 0xf0000000_f0000000L;
+
+    public static void initializeValidCapabilities() {
+
+        VALID_CAPABILIIES.add(CapabilityEnergy.ENERGY);
+        VALID_CAPABILIIES.add(CapabilityRedstoneFlux.RF_ENERGY);
+        VALID_CAPABILIIES.add(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
+        VALID_CAPABILIIES.add(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
+    }
 
     public static String toCharMap(long value, long sepMask) {
 
@@ -72,11 +90,15 @@ public class EnderTunnelTile extends TileCoFH {
     @Override
     public boolean onActivatedDelegate(World world, BlockPos pos, BlockState state, PlayerEntity player, Hand hand, BlockRayTraceResult result) {
 
+        if (super.onActivatedDelegate(world, pos, state, player, hand, result)) {
+            return true;
+        }
         IFormattableTextComponent myAddress = new StringTextComponent("My address: ").append(new StringTextComponent(toCharMap(myId.getMostSignificantBits(), SEP_MASK_HIGH) + toCharMap(myId.getLeastSignificantBits(), SEP_MASK_LOW)).withStyle(ENDER_STYLE));
-        IFormattableTextComponent targetAddress = targetId.equals(EMPTY_UUID) ? new TranslationTextComponent("info.cofh.none") : new StringTextComponent("Target address: ").append(new StringTextComponent(toCharMap(targetId.getMostSignificantBits(), SEP_MASK_HIGH) + toCharMap(targetId.getLeastSignificantBits(), SEP_MASK_LOW)).withStyle(ENDER_STYLE));
+        IFormattableTextComponent targetAddress = new StringTextComponent("Target address: ").append(targetId.equals(EMPTY_UUID) ? new TranslationTextComponent("info.cofh.none") : new StringTextComponent(toCharMap(targetId.getMostSignificantBits(), SEP_MASK_HIGH) + toCharMap(targetId.getLeastSignificantBits(), SEP_MASK_LOW)).withStyle(ENDER_STYLE));
 
         ChatHelper.sendIndexedChatMessagesToPlayer(player, Lists.newArrayList(myAddress, targetAddress));
-        return super.onActivatedDelegate(world, pos, state, player, hand, result);
+
+        return true;
     }
 
     @Override
@@ -91,7 +113,7 @@ public class EnderTunnelTile extends TileCoFH {
 
         super.onLoad();
         if (level != null && Utils.isServerWorld(level)) {
-            tunnelMap.put(myId, this);
+            TUNNEL_MAP.put(myId, this);
         }
     }
 
@@ -99,7 +121,7 @@ public class EnderTunnelTile extends TileCoFH {
     public void setRemoved() {
 
         super.setRemoved();
-        tunnelMap.remove(myId);
+        TUNNEL_MAP.remove(myId);
 
         for (LazyOptional<?> opt : adjCapabilities) {
             opt.invalidate();
@@ -174,12 +196,20 @@ public class EnderTunnelTile extends TileCoFH {
     }
     // endregion
 
+    private boolean retrievingCapability = false;
+
     protected <T> LazyOptional<T> getRemoteCapability(@Nonnull Capability<T> cap) {
 
+        // Whitelist + recursion check.
+        if (retrievingCapability || !VALID_CAPABILIIES.contains(cap)) {
+            return LazyOptional.empty();
+        }
         TileEntity adjTile = BlockHelper.getAdjacentTileEntity(this, getFacing());
         if (adjTile != null && !(adjTile instanceof EnderTunnelTile)) {
+            retrievingCapability = true;
             LazyOptional<T> adjCap = adjTile.getCapability(cap, getFacing().getOpposite());
             adjCapabilities.add(adjCap);
+            retrievingCapability = false;
             return adjCap;
         }
         return LazyOptional.empty();
@@ -189,14 +219,33 @@ public class EnderTunnelTile extends TileCoFH {
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
 
+        // Whitelist + recursion check.
+        if (retrievingCapability || !VALID_CAPABILIIES.contains(cap)) {
+            return LazyOptional.empty();
+        }
         if (side != null && side.equals(getFacing())) {
-            EnderTunnelTile targetTile = tunnelMap.get(targetId);
+            EnderTunnelTile targetTile = TUNNEL_MAP.get(targetId);
             if (targetTile != null && !targetTile.isRemoved()) {
+                retrievingCapability = true;
                 LazyOptional<T> remCap = targetTile.getRemoteCapability(cap);
+                retrievingCapability = false;
                 return remCap;
             }
         }
         return super.getCapability(cap, side);
+    }
+
+    @Override
+    public void onPlacedBy(World worldIn, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+
+        // This will only happen if pickBlock is used or an ItemStack is otherwise copied directly.
+        if (TUNNEL_MAP.containsKey(myId)) {
+            myId = UUID.randomUUID();
+            if (placer instanceof PlayerEntity) {
+                IFormattableTextComponent myAddress = new StringTextComponent("Causality violation detected, new local address established: ").append(new StringTextComponent(toCharMap(myId.getMostSignificantBits(), SEP_MASK_HIGH) + toCharMap(myId.getLeastSignificantBits(), SEP_MASK_LOW)).withStyle(ENDER_STYLE));
+                ChatHelper.sendIndexedChatMessagesToPlayer((PlayerEntity) placer, Lists.newArrayList(myAddress));
+            }
+        }
     }
 
     // region IConveyableData

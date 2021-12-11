@@ -35,6 +35,8 @@ public class TDynDataGen {
 
         DataGenerator gen = event.getGenerator();
         ExistingFileHelper exFileHelper = event.getExistingFileHelper();
+
+        gen.addProvider(new TDynItemModelProvider(gen, exFileHelper));
     }
 
 }
