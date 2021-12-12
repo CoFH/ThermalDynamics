@@ -88,8 +88,17 @@ minecraft {
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
 
+    compile 'net.covers1624:Quack:0.4.0.42' // Quack :D
+
     compile fg.deobf("com.teamcofh:cofh_core:${mc_version}-${cofh_core_version}")
     compile fg.deobf("com.teamcofh:thermal_foundation:${mc_version}-${thermal_foundation_version}")
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 signing {
