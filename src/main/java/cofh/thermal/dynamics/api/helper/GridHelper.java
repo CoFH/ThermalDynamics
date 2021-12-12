@@ -20,9 +20,12 @@ import java.util.*;
  */
 public class GridHelper {
 
-    private GridHelper() { }
+    private GridHelper() {
+
+    }
 
     public static Optional<GridHost> getGridHost(IBlockReader reader, BlockPos pos) {
+
         if (reader instanceof IWorldReader) {
             IWorldReader worldReader = (IWorldReader) reader;
             if (!worldReader.hasChunkAt(pos)) return Optional.empty();
@@ -31,6 +34,7 @@ public class GridHelper {
     }
 
     public static Optional<GridHost> getGridHost(@Nullable TileEntity tile) {
+
         if (tile == null) return Optional.empty();
 
         if (tile instanceof GridHost) {
@@ -40,6 +44,7 @@ public class GridHelper {
     }
 
     public static List<Pair<GridNode<?>, Integer>> locateAttachedNodes(World world, BlockPos start, BlockPos from) {
+
         Set<BlockPos> visited = new HashSet<>();
         LinkedList<Pair<GridHost, Integer>> candidates = new LinkedList<>();
         visited.add(start);
@@ -60,6 +65,7 @@ public class GridHelper {
     }
 
     private static void addCandidates(World world, BlockPos pos, int len, Set<BlockPos> visited, LinkedList<Pair<GridHost, Integer>> candidates) {
+
         for (Direction dir : Direction.values()) {
             BlockPos adj = pos.relative(dir);
             if (!visited.add(adj)) continue;
@@ -67,4 +73,5 @@ public class GridHelper {
                     .ifPresent(e -> candidates.add(Pair.of(e, len + 1)));
         }
     }
+
 }

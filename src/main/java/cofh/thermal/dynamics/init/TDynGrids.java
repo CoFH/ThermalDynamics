@@ -14,6 +14,7 @@ public class TDynGrids {
     }
 
     public static void register() {
+
         registerGridsTypes();
     }
 
@@ -22,11 +23,11 @@ public class TDynGrids {
 
         GRIDS.register(ID_GRID_ENERGY, () -> GridType.of(EnergyGrid.class, EnergyGridImpl::new));
 
-//        GRIDS.register(ID_GRID_FLUID, () -> GridType.of(FluidGrid.class, FluidGridImpl::new));
+        //        GRIDS.register(ID_GRID_FLUID, () -> GridType.of(FluidGrid.class, FluidGridImpl::new));
 
-//        GRIDS.register(ID_GRID_ITEM, () -> GridType.of(ItemGrid.class, ItemGridImpl::new));
+        //        GRIDS.register(ID_GRID_ITEM, () -> GridType.of(ItemGrid.class, ItemGridImpl::new));
 
-//        GRIDS.register(ID_GRID_MULTI, () -> GridType.of(MultiGrid.class, MultiGridImpl::new));
+        //        GRIDS.register(ID_GRID_MULTI, () -> GridType.of(MultiGrid.class, MultiGridImpl::new));
     }
     //endregion
 }

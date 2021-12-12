@@ -25,6 +25,7 @@ public abstract class AbstractGridNode<G extends Grid<?, ?>> implements GridNode
     private boolean loaded;
 
     protected AbstractGridNode(G grid) {
+
         this.grid = grid;
     }
 
@@ -33,14 +34,17 @@ public abstract class AbstractGridNode<G extends Grid<?, ?>> implements GridNode
 
     @Override
     public CompoundNBT serializeNBT() {
+
         return new CompoundNBT();
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
+
     }
 
     public void onGridChange(G oldGrid) {
+
     }
 
     //@formatter:off

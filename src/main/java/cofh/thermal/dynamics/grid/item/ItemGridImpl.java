@@ -21,28 +21,34 @@ import java.util.UUID;
 public class ItemGridImpl extends AbstractGrid<ItemGrid, ItemGridNode> implements ItemGrid {
 
     public ItemGridImpl(UUID id, World world) {
+
         super(TDynReferences.ITEM_GRID, id, world);
     }
 
     @Override
     public AbstractGridNode<ItemGrid> newNode() {
+
         return new ItemGridNodeImpl(this);
     }
 
     @Override
     public void onMerge(ItemGrid from) {
+
     }
 
     @Override
     public void onSplit(List<ItemGrid> others) {
+
     }
 
     @Override
     public boolean canConnectExternally(TileEntity tile, @Nullable Direction dir) {
+
         if (GridHelper.getGridHost(tile).isPresent()) return false; // We cannot externally connect to other grids.
         if (dir != null) {
             return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()).isPresent();
         }
         return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent();
     }
+
 }

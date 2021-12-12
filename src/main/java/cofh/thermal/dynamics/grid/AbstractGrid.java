@@ -28,6 +28,7 @@ import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 /**
  * Abstract base class for all {@link Grid} implementations.
  * <p>
+ *
  * @author covers1624
  */
 @SuppressWarnings ("UnstableApiUsage")
@@ -60,12 +61,14 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
     public boolean isLoaded;
 
     protected AbstractGrid(GridType<G> gridType, UUID id, World world) {
+
         this.gridType = gridType;
         this.id = id;
         this.world = world;
     }
 
     public void tick() {
+
         for (LongIterator iterator = loadedChunks.iterator(); iterator.hasNext(); ) {
             long loadedChunk = iterator.nextLong();
             List<AbstractGridNode<?>> nodes = nodesPerChunk.get(loadedChunk);
@@ -81,6 +84,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
 
     // returns true if this grid changes its loaded state to true.
     public boolean onChunkLoad(IChunk chunk) {
+
         long pos = chunk.getPos().toLong();
         List<AbstractGridNode<?>> nodes = nodesPerChunk.get(pos);
         if (nodes == null || nodes.isEmpty()) return false;
@@ -97,6 +101,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
 
     // returns true if this grid changes its loaded state to false.
     public boolean onChunkUnload(IChunk chunk) {
+
         long pos = chunk.getPos().toLong();
         List<AbstractGridNode<?>> nodes = nodesPerChunk.get(pos);
         if (nodes == null || nodes.isEmpty()) return false;
@@ -113,6 +118,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
 
     @Override
     public CompoundNBT serializeNBT() {
+
         CompoundNBT tag = new CompoundNBT();
         ListNBT nodes = new ListNBT();
         for (AbstractGridNode<?> node : nodeGraph.nodes()) {
@@ -138,6 +144,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
+
         ListNBT nodes = nbt.getList("nodes", 10);
 
         for (int i = 0; i < nodes.size(); i++) {
@@ -185,6 +192,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
     }
 
     public final void removeNode(AbstractGridNode<?> toRemove) {
+
         boolean ret;
 
         ret = nodeGraph.removeNode(toRemove);
@@ -198,6 +206,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
     }
 
     public final void insertExistingNode(AbstractGridNode<?> toAdd) {
+
         AbstractGridNode<?> existingNode = nodes.get(toAdd.getPos());
         if (existingNode == toAdd) return;
 
@@ -213,6 +222,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
     }
 
     public final void mergeFrom(AbstractGrid<?, ?> other) {
+
         assert gridType == other.gridType;
         if (DEBUG) {
             LOGGER.info("Merging {} nodes from grid {} into {}.", other.nodeGraph.nodes().size(), other.id, id);
@@ -250,6 +260,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
 
     // Called to split the current grid into the specified partitions.
     public final void splitInto(List<Set<AbstractGridNode<?>>> splitGraphs) {
+
         GridContainerImpl gridContainer = ((GridContainerImpl) GridContainer.getCapability(world)
                 .orElseThrow(notPossible()));
         List<AbstractGrid<?, ?>> otherGrids = new LinkedList<>();
@@ -292,6 +303,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
     }
 
     private static void updateGridHosts(World world, Long2ObjectMap<Set<BlockPos>> posMap, AbstractGrid<?, ?> grid) {
+
         for (Long2ObjectMap.Entry<Set<BlockPos>> entry : posMap.long2ObjectEntrySet()) {
             long chunkPos = entry.getLongKey();
             Chunk chunk = world.getChunk(ChunkPos.getX(chunkPos), ChunkPos.getZ(chunkPos));
@@ -338,15 +350,19 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
     //@formatter:on
 
     private List<AbstractGridNode<?>> getNodesForChunk(BlockPos pos) {
+
         return nodesPerChunk.computeIfAbsent(asChunkLong(pos), e -> new LinkedList<>());
     }
 
     private static long asChunkLong(BlockPos pos) {
+
         return ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
     }
 
     private static void collectPosition(Long2ObjectMap<Set<BlockPos>> chunkPositions, BlockPos toCollect) {
+
         chunkPositions.computeIfAbsent(asChunkLong(toCollect), e -> new HashSet<>())
                 .add(toCollect);
     }
+
 }

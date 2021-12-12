@@ -19,24 +19,30 @@ import java.util.UUID;
 public class MultiGridImpl extends AbstractGrid<MultiGrid, MultiGridNode> implements MultiGrid {
 
     public MultiGridImpl(UUID id, World world) {
+
         super(TDynReferences.MULTI_GRID, id, world);
     }
 
     @Override
     public AbstractGridNode<MultiGrid> newNode() {
+
         return new MultiGridNodeImpl(this);
     }
 
     @Override
     public void onMerge(MultiGrid from) {
+
     }
 
     @Override
     public void onSplit(List<MultiGrid> others) {
+
     }
 
     @Override
     public boolean canConnectExternally(TileEntity tile, @Nullable Direction dir) {
+
         return false;
     }
+
 }

@@ -18,16 +18,19 @@ public class GridDebugPacket extends PacketBase implements IPacketClient {
     private PacketBuffer data;
 
     public GridDebugPacket(PacketBuffer data) {
+
         this();
         this.data = data;
     }
 
     public GridDebugPacket() {
+
         super(PACKET_GRID_DEBUG, PACKET_HANDLER);
     }
 
     @Override
     public void handleClient() {
+
         Map<UUID, Map<BlockPos, List<BlockPos>>> grids = new HashMap<>();
         int numGrids = data.readVarInt();
         for (int g = 0; g < numGrids; g++) {
@@ -50,6 +53,7 @@ public class GridDebugPacket extends PacketBase implements IPacketClient {
 
     @Override
     public void write(PacketBuffer buf) {
+
         assert data != null;
         buf.writeVarInt(data.readableBytes());
         buf.writeBytes(data);
@@ -57,6 +61,8 @@ public class GridDebugPacket extends PacketBase implements IPacketClient {
 
     @Override
     public void read(PacketBuffer buf) {
+
         data = new PacketBuffer(buf.readBytes(buf.readVarInt()));
     }
+
 }

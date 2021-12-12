@@ -21,9 +21,11 @@ public interface GridContainer {
     void onGridHostDestroyed(GridHostInternal host);
 
     static Optional<GridContainer> getCapability(IWorld _world) {
+
         if (!(_world instanceof World)) return Optional.empty();
 
         World world = (World) _world;
         return world.getCapability(TDApi.GRID_CONTAINER_CAPABILITY).resolve();
     }
+
 }

@@ -9,4 +9,5 @@ import cofh.thermal.dynamics.api.grid.GridNode;
 public interface TickableGridNode<G extends Grid<?, ?>> extends GridNode<G> {
 
     void tick();
+
 }

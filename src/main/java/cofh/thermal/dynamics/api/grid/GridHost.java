@@ -30,6 +30,7 @@ public interface GridHost {
      * @return The {@link GridNode}.
      */
     default Optional<GridNode<?>> getNode() {
+
         Optional<Grid<?, ?>> gridOpt = getGrid();
         return gridOpt.map(grid -> grid.getNodes().get(getHostPos()));
     }
@@ -44,6 +45,7 @@ public interface GridHost {
      * @return The {@link GridNode}
      */
     default <G extends Grid<?, ?>> Optional<GridNode<G>> getNode(GridType<G> gridType) {
+
         Optional<GridNode<?>> nodeOpt = getNode();
         if (!nodeOpt.isPresent()) return Optional.empty();
         GridNode<?> node = nodeOpt.get();
@@ -56,4 +58,5 @@ public interface GridHost {
         //noinspection unchecked
         return Optional.of((GridNode<G>) node);
     }
+
 }

@@ -54,6 +54,7 @@ public class DebugRenderer {
     public static Map<UUID, Map<BlockPos, List<BlockPos>>> grids = new HashMap<>();
 
     public static void register() {
+
         MinecraftForge.EVENT_BUS.addListener(DebugRenderer::renderWorldLast);
     }
 

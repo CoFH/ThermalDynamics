@@ -20,6 +20,7 @@ public class GridContainerCapProvider implements ICapabilityProvider, INBTSerial
     private final LazyOptional<GridContainerImpl> instanceOpt;
 
     public GridContainerCapProvider(GridContainerImpl instance) {
+
         this.instance = instance;
         this.instanceOpt = LazyOptional.of(() -> instance);
     }
@@ -27,6 +28,7 @@ public class GridContainerCapProvider implements ICapabilityProvider, INBTSerial
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+
         if (cap == TDApi.GRID_CONTAINER_CAPABILITY) {
             return instanceOpt.cast();
         }
@@ -35,11 +37,14 @@ public class GridContainerCapProvider implements ICapabilityProvider, INBTSerial
 
     @Override
     public ListNBT serializeNBT() {
+
         return instance.serializeNBT();
     }
 
     @Override
     public void deserializeNBT(ListNBT nbt) {
+
         instance.deserializeNBT(nbt);
     }
+
 }

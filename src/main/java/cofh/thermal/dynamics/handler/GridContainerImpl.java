@@ -52,11 +52,13 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     private int tickCounter;
 
     public GridContainerImpl(World world) {
+
         this.world = world;
     }
 
     @Override
     public void onGridHostPlaced(GridHostInternal host) {
+
         EnumMap<Direction, GridHostInternal> adjacentGrids = getAdjacentGrids(host);
         // We aren't adjacent to anything else, new grid.
         if (adjacentGrids.isEmpty()) {
@@ -87,6 +89,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     private void constructNewGrid(GridHostInternal host) {
+
         if (DEBUG) {
             LOGGER.info("Constructing new grid for {}", host.getHostPos());
         }
@@ -97,6 +100,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     private void extendGrid(GridHostInternal host, GridHost adjacent, Direction adjacentDir) {
+
         Optional<GridNode<?>> adjacentNodeOpt = adjacent.getNode();
         Optional<Grid<?, ?>> adjacentGridOpt = adjacent.getGrid();
 
@@ -205,6 +209,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     private void mergeGridBranches(GridHostInternal host, List<GridHostInternal> branches, boolean wasMerge) {
+
         assert branches.size() != 1;
 
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) branches.get(0).getGrid().orElseThrow(notPossible());
@@ -236,6 +241,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     private void mergeGrids(List<GridHostInternal> branches) {
+
         Set<AbstractGrid<?, ?>> grids = new HashSet<>();
         for (GridHostInternal branch : branches) {
             AbstractGrid<?, ?> abstractGrid = (AbstractGrid<?, ?>) branch.getGrid().orElseThrow(notPossible());
@@ -254,6 +260,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
 
     @Override
     public void onGridHostDestroyed(GridHostInternal host) {
+
         EnumMap<Direction, GridHostInternal> adjacentHosts = getAdjacentGrids(host);
         if (adjacentHosts.isEmpty()) {
             // No adjacent grids, just remove the grid.
@@ -270,6 +277,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     private void removeSingleGrid(GridHostInternal host) {
+
         if (DEBUG) {
             LOGGER.info("Removing grid for {}", host.getHostPos());
         }
@@ -284,6 +292,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     private void shrinkGrid(GridHostInternal host, GridHost adjacent) {
+
         Optional<GridNode<?>> adjacentNodeOpt = adjacent.getNode();
         Optional<Grid<?, ?>> adjacentGridOpt = adjacent.getGrid();
 
@@ -379,6 +388,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     private void simplifyNode(AbstractGridNode<?> node) {
+
         AbstractGrid<?, ?> grid = unsafeCast(node.getGrid());
 
         // We can't simplify if we can connect to adjacent blocks.
@@ -411,6 +421,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     private void separateGrids(GridHostInternal host) {
+
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid()
                 .orElseThrow(notPossible());
 
@@ -494,6 +505,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     public void onChunkUnload(IChunk chunk) {
+
         Set<UUID> rem = new HashSet<>(2);
         for (AbstractGrid<?, ?> grid : loadedGrids.values()) {
             if (grid.onChunkUnload(chunk)) {
@@ -506,11 +518,13 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
 
     @Override
     public Optional<Grid<?, ?>> getGrid(UUID id) {
+
         return Optional.ofNullable(grids.get(id));
     }
 
     @Override
     public ListNBT serializeNBT() {
+
         ListNBT grids = new ListNBT();
         for (Map.Entry<UUID, AbstractGrid<?, ?>> entry : this.grids.entrySet()) {
             AbstractGrid<?, ?> grid = entry.getValue();
@@ -525,6 +539,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
 
     @Override
     public void deserializeNBT(ListNBT nbt) {
+
         assert grids.isEmpty();
         for (int i = 0; i < nbt.size(); i++) {
             CompoundNBT tag = nbt.getCompound(i);
@@ -547,6 +562,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
 
     //region helpers
     private EnumMap<Direction, GridHostInternal> getAdjacentGrids(GridHost host) {
+
         EnumMap<Direction, GridHostInternal> adjacentGrids = new EnumMap<>(Direction.class);
         for (Direction dir : Direction.values()) {
             GridHelper.getGridHost(world, host.getHostPos().relative(dir))
@@ -556,6 +572,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     public AbstractGrid<?, ?> createAndAddGrid(UUID uuid, GridType<?> gridType, boolean load) {
+
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) gridType.createGrid(uuid, world);
         grids.put(uuid, grid);
         if (load) {
@@ -565,6 +582,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     public UUID nextUUID() {
+
         while (true) {
             UUID uuid = UUID.randomUUID();
             if (USED_UUIDS.add(uuid) && !grids.containsKey(uuid)) {
@@ -574,6 +592,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     private static boolean isOnSameAxis(BlockPos a, BlockPos b) {
+
         boolean x = a.getX() == b.getX();
         boolean y = a.getY() == b.getY();
         boolean z = a.getZ() == b.getZ();

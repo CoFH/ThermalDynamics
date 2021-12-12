@@ -14,15 +14,19 @@ import net.minecraftforge.items.CapabilityItemHandler;
 public class ItemGridNodeImpl extends AbstractGridNode<ItemGrid> implements ItemGridNode {
 
     public ItemGridNodeImpl(ItemGridImpl grid) {
+
         super(grid);
     }
 
     @Override
     protected boolean isExternallyConnectable(Direction side) {
+
         TileEntity tile = getWorld().getBlockEntity(getPos().relative(side));
         if (GridHelper.getGridHost(tile).isPresent()) return false; // We cannot externally connect to other grids.
-        if (tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()) return true; // We can connect to the inner face
-        if (tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side.getOpposite()).isPresent()) return true; // We can connect to the face
+        if (tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent())
+            return true; // We can connect to the inner face
+        if (tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side.getOpposite()).isPresent())
+            return true; // We can connect to the face
         return false; // nope
     }
 

@@ -16,16 +16,20 @@ import java.util.Optional;
 public class MultiGridNodeImpl extends AbstractGridNode<MultiGrid> implements MultiGridNode {
 
     public MultiGridNodeImpl(MultiGridImpl grid) {
+
         super(grid);
     }
 
     @Override
     protected boolean isExternallyConnectable(Direction side) {
+
         return false;
     }
 
     @Override
     public <G extends Grid<?, ?>> Optional<GridNode<G>> getSubGrid(GridType<G> type) {
+
         return Optional.empty();
     }
+
 }

@@ -10,12 +10,15 @@ import javax.annotation.Nullable;
 public class TileBlockDuctEnergy extends TileBlockDuctBase {
 
     public TileBlockDuctEnergy(Properties properties) {
+
         super(properties);
     }
 
     @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+
         return new DuctTileEnergy();
     }
+
 }

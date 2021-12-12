@@ -20,11 +20,13 @@ public abstract class DuctTileBase extends TileEntity implements GridHostInterna
     private UUID lastGrid = null;
 
     public DuctTileBase() {
+
         super(TDynReferences.ENERGY_DUCT_TILE);
     }
 
     @Override
     public CompoundNBT save(CompoundNBT tag) {
+
         if (lastGrid != null) {
             tag.putUUID("last_grid", lastGrid);
         }
@@ -33,6 +35,7 @@ public abstract class DuctTileBase extends TileEntity implements GridHostInterna
 
     @Override
     public void load(BlockState state, CompoundNBT tag) {
+
         super.load(state, tag);
         if (tag.hasUUID("last_grid")) {
             lastGrid = tag.getUUID("last_grid");
@@ -41,21 +44,25 @@ public abstract class DuctTileBase extends TileEntity implements GridHostInterna
 
     @Override
     public World getHostWorld() {
+
         return getLevel();
     }
 
     @Override
     public BlockPos getHostPos() {
+
         return getBlockPos();
     }
 
     @Override
     public Optional<Grid<?, ?>> getGrid() {
+
         return grid;
     }
 
     @Override
     public void setGrid(Grid<?, ?> grid) {
+
         lastGrid = grid.getId();
         this.grid = Optional.of(grid);
     }
@@ -63,6 +70,8 @@ public abstract class DuctTileBase extends TileEntity implements GridHostInterna
     @Nullable
     @Override
     public UUID getLastGrid() {
+
         return lastGrid;
     }
+
 }

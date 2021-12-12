@@ -19,6 +19,7 @@ public class GraphHelperTest {
 
     @Test
     public void testHasConnectivity() {
+
         Object a = new Object();
         Object b = new Object();
         Object edge = new Object();
@@ -41,6 +42,7 @@ public class GraphHelperTest {
 
     @Test
     public void testSeparateGraphs() {
+
         Object a = new Object();
         Object b = new Object();
         Object edge = new Object();
@@ -76,4 +78,5 @@ public class GraphHelperTest {
             }
         }
     }
+
 }

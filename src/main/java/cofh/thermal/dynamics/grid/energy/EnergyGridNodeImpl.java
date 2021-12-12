@@ -19,20 +19,24 @@ import net.minecraftforge.energy.IEnergyStorage;
 public class EnergyGridNodeImpl extends AbstractGridNode<EnergyGrid> implements EnergyGridNode, TickableGridNode<EnergyGrid> {
 
     protected EnergyGridNodeImpl(EnergyGrid grid) {
+
         super(grid);
     }
 
     @Override
     protected boolean isExternallyConnectable(Direction side) {
+
         TileEntity tile = getWorld().getBlockEntity(getPos().relative(side));
         if (GridHelper.getGridHost(tile).isPresent()) return false; // We cannot externally connect to other grids.
         if (tile.getCapability(CapabilityEnergy.ENERGY).isPresent()) return true; // We can connect to the inner face
-        if (tile.getCapability(CapabilityEnergy.ENERGY, side.getOpposite()).isPresent()) return true; // We can connect to the face
+        if (tile.getCapability(CapabilityEnergy.ENERGY, side.getOpposite()).isPresent())
+            return true; // We can connect to the face
         return false; // nope
     }
 
     @Override
     public void tick() {
+
         World world = getWorld();
         BlockPos pos = getPos();
         for (Direction dir : getExternalConnections()) {
@@ -49,4 +53,5 @@ public class EnergyGridNodeImpl extends AbstractGridNode<EnergyGrid> implements 
 
         }
     }
+
 }

@@ -21,18 +21,23 @@ public class GridEvents {
     }
 
     private static void attachCapabilities(AttachCapabilitiesEvent<World> event) {
+
         event.addCapability(new ResourceLocation(ID_THERMAL, "grid_container"), new GridContainerCapProvider(new GridContainerImpl(event.getObject())));
     }
 
     private static void onWorldTick(TickEvent.WorldTickEvent event) {
+
         GridContainer.getCapability(event.world).ifPresent(e -> ((GridContainerImpl) e).onWorldTick(event.phase));
     }
 
     private static void onChunkLoad(ChunkEvent.Load event) {
+
         GridContainer.getCapability(event.getWorld()).ifPresent(e -> ((GridContainerImpl) e).onChunkLoad(event.getChunk()));
     }
 
     private static void onChunkUnload(ChunkEvent.Unload event) {
+
         GridContainer.getCapability(event.getWorld()).ifPresent(e -> ((GridContainerImpl) e).onChunkUnload(event.getChunk()));
     }
+
 }

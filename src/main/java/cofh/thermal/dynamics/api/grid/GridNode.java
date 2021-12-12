@@ -10,6 +10,7 @@ import java.util.EnumSet;
 /**
  * Represents a Node on a {@link Grid} at a given position.
  * <p>
+ *
  * @author covers1624
  */
 public interface GridNode<G extends Grid<?, ?>> {
@@ -50,4 +51,5 @@ public interface GridNode<G extends Grid<?, ?>> {
      * @return The attachments.
      */
     EnumMap<Direction, NodeAttachment> getAttachments();
+
 }

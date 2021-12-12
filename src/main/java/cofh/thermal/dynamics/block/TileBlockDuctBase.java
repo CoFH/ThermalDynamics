@@ -18,21 +18,25 @@ import java.util.Optional;
 public abstract class TileBlockDuctBase extends Block {
 
     public TileBlockDuctBase(Properties properties) {
+
         super(properties);
     }
 
     @Override
     public boolean hasTileEntity(BlockState state) {
+
         return true;
     }
 
     @Override
     public BlockRenderType getRenderShape(BlockState p_149645_1_) {
+
         return BlockRenderType.INVISIBLE;
     }
 
     @Override
     public void playerWillDestroy(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+
         if (world.isClientSide()) return;
 
         TileEntity tile = world.getBlockEntity(pos);
@@ -46,6 +50,7 @@ public abstract class TileBlockDuctBase extends Block {
 
     @Override
     public void setPlacedBy(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+
         if (world.isClientSide()) return;
 
         TileEntity tile = world.getBlockEntity(pos);
@@ -55,4 +60,5 @@ public abstract class TileBlockDuctBase extends Block {
             gridContainer.ifPresent(e -> e.onGridHostPlaced(host));
         }
     }
+
 }

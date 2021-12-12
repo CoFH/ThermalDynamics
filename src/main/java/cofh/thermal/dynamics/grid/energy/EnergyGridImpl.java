@@ -25,11 +25,13 @@ public class EnergyGridImpl extends AbstractGrid<EnergyGrid, EnergyGridNode> imp
     private final EnergyStorage storage = new EnergyStorage(10000); // TODO needs proper value, likely a function of the 'total distance' in the grid.
 
     public EnergyGridImpl(UUID id, World world) {
+
         super(TDynReferences.ENERGY_GRID, id, world);
     }
 
     @Override
     public AbstractGridNode<EnergyGrid> newNode() {
+
         return new EnergyGridNodeImpl(this);
     }
 
@@ -54,12 +56,14 @@ public class EnergyGridImpl extends AbstractGrid<EnergyGrid, EnergyGridNode> imp
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
+
         super.deserializeNBT(nbt);
         // TODO load storage
     }
 
     @Override
     public boolean canConnectExternally(TileEntity tile, @Nullable Direction dir) {
+
         if (GridHelper.getGridHost(tile).isPresent()) return false; // We cannot externally connect to other grids.
         if (dir != null) {
             return tile.getCapability(CapabilityEnergy.ENERGY, dir.getOpposite()).isPresent();

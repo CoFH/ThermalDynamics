@@ -10,6 +10,8 @@ public class DuctTileEnergy extends DuctTileBase {
 
     @Override
     public Set<GridType<?>> getExposedTypes() {
+
         return Collections.singleton(TDynReferences.ENERGY_GRID);
     }
+
 }

@@ -23,6 +23,7 @@ import java.util.UUID;
  * outside well-defined methods on this interface are forbidden. Any such modifications may
  * cause the Grid to explode.
  * <p>
+ *
  * @author covers1624
  */
 public interface Grid<G extends Grid<?, ?>, N extends GridNode<?>> {
@@ -66,6 +67,7 @@ public interface Grid<G extends Grid<?, ?>, N extends GridNode<?>> {
     Map<BlockPos, N> getNodes();
 
     default boolean canConnectToAdjacent(BlockPos pos) {
+
         for (Direction dir : Direction.values()) {
             if (canConnectExternally(pos.relative(dir), dir)) {
                 return true;
@@ -78,6 +80,7 @@ public interface Grid<G extends Grid<?, ?>, N extends GridNode<?>> {
     }
 
     default boolean canConnectExternally(BlockPos pos, @Nullable Direction dir) {
+
         TileEntity tile = getWorld().getBlockEntity(pos);
         if (tile == null) return false;
 
@@ -85,4 +88,5 @@ public interface Grid<G extends Grid<?, ?>, N extends GridNode<?>> {
     }
 
     boolean canConnectExternally(TileEntity tile, @Nullable Direction dir);
+
 }

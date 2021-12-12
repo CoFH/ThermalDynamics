@@ -24,6 +24,7 @@ public class GraphHelper {
      * @return If <code>a</code> and <code>b</code> are connected indirectly.
      */
     public static <T> boolean hasConnectivity(Graph<T> graph, T a, T b) {
+
         HashSet<T> seen = new HashSet<>();
         LinkedList<T> queue = new LinkedList<>();
         for (T adj : graph.adjacentNodes(a)) {
@@ -54,6 +55,7 @@ public class GraphHelper {
      * @return A list of isolated sub graphs.
      */
     public static <T> List<Set<T>> separateGraphs(Graph<T> graph) {
+
         Set<T> seen = new HashSet<>();
         LinkedList<T> stack = new LinkedList<>();
         List<Set<T>> separated = new LinkedList<>();
@@ -85,4 +87,5 @@ public class GraphHelper {
 
         return separated;
     }
+
 }

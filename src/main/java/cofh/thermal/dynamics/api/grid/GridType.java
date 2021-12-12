@@ -18,6 +18,7 @@ import java.util.function.BiFunction;
  * of data/usages a grid may have. They are also used to detect what
  * blocks a grid is composed of when being built.
  * <p>
+ *
  * @author covers1624
  */
 public interface GridType<G extends Grid<?, ?>> extends IForgeRegistryEntry<GridType<?>> {
@@ -50,7 +51,8 @@ public interface GridType<G extends Grid<?, ?>> extends IForgeRegistryEntry<Grid
      * @return The new {@link GridType}.
      */
     static <G extends Grid<?, ?>> GridType<G> of(Class<G> clazz, BiFunction<UUID, World, G> gridFactory) {
-        abstract class GridTypeImpl<G2 extends Grid<?, ?>> extends ForgeRegistryEntry<GridType<?>> implements GridType<G2> { }
+
+        abstract class GridTypeImpl<G2 extends Grid<?, ?>> extends ForgeRegistryEntry<GridType<?>> implements GridType<G2> {}
         return new GridTypeImpl<G>() {
             //@formatter:off
             @Override public Class<G> getGridType() { return clazz; }
@@ -58,4 +60,5 @@ public interface GridType<G extends Grid<?, ?>> extends IForgeRegistryEntry<Grid
             //@formatter:on
         };
     }
+
 }
