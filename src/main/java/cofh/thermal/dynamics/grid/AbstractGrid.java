@@ -82,6 +82,47 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         }
     }
 
+    public void checkInvariant() {
+
+        // Save some CPU when assertions are disabled.
+        if (!DEBUG) return;
+
+        // Check all blocks on edges.
+        for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
+            AbstractGridNode<?> u = edge.nodeU();
+            AbstractGridNode<?> v = edge.nodeV();
+            Set<BlockPos> between = GridHelper.getPositionsBetween(u.getPos(), v.getPos());
+            Set<BlockPos> value = nodeGraph.edgeValue(u, v);
+            assert value.size() == between.size();
+            assert value.containsAll(between);
+            for (BlockPos pos : between) {
+                checkPos(pos);
+            }
+        }
+
+        // Check nodes.
+        for (AbstractGridNode<?> node : nodeGraph.nodes()) {
+
+            long chunkPos = asChunkLong(node.getPos());
+            checkPos(node.getPos());
+            assert node.grid == this;
+            assert nodes.get(node.getPos()) == node;
+            assert nodesPerChunk.get(chunkPos) != null;
+            assert nodesPerChunk.get(chunkPos).contains(node);
+            assert node.isLoaded() == loadedChunks.contains(chunkPos);
+        }
+    }
+
+    private void checkPos(BlockPos pos) {
+
+        if (!world.isLoaded(pos)) return;
+
+        Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(world, pos);
+        assert gridHostOpt.isPresent();
+        assert gridHostOpt.get().getGrid().isPresent();
+        assert gridHostOpt.get().getGrid().get() == this;
+    }
+
     // returns true if this grid changes its loaded state to true.
     public boolean onChunkLoad(IChunk chunk) {
 
@@ -154,7 +195,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         for (int i = 0; i < nodes.size(); i++) {
             CompoundNBT nodeTag = nodes.getCompound(i);
             BlockPos pos = NBTUtil.readBlockPos(nodeTag.getCompound("pos"));
-            AbstractGridNode<?> node = newNode(pos);
+            AbstractGridNode<?> node = newNode(pos, false);
             node.deserializeNBT(nodeTag);
         }
 
@@ -178,6 +219,10 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     public abstract AbstractGridNode<G> newNode();
 
     public final AbstractGridNode<?> newNode(BlockPos pos) {
+        return newNode(pos, true);
+    }
+
+    public final AbstractGridNode<?> newNode(BlockPos pos, boolean load) {
         // We should never be adding a node for a position that already exists.
         assert !nodes.containsKey(pos);
 
@@ -191,9 +236,11 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         nodeGraph.addNode(node);
         getNodesForChunk(pos).add(node);
 
-        // Set node as loaded, add chunk to loaded chunks.
-        node.setLoaded(true);
-        loadedChunks.add(asChunkLong(pos));
+        if (load) {
+            // Set node as loaded, add chunk to loaded chunks.
+            node.setLoaded(true);
+            loadedChunks.add(asChunkLong(pos));
+        }
         return node;
     }
 
@@ -241,9 +288,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             AbstractGridNode<?> a = edge.nodeU();
             AbstractGridNode<?> b = edge.nodeV();
 
-            // Collect all positions between node edges.
-            collectPosition(posMap, a.getPos());
-            collectPosition(posMap, b.getPos());
+            // Collect all positions between node edges. 'betweenClosed' returns a and b.
             for (BlockPos pos : BlockPos.betweenClosed(a.getPos(), b.getPos())) {
                 collectPosition(posMap, pos.immutable());
             }
@@ -284,7 +329,6 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                 for (AbstractGridNode<?> adj : nodeGraph.adjacentNodes(node)) {
                     newGrid.insertExistingNode(adj);
 
-                    collectPosition(posMap, adj.getPos());
                     for (BlockPos pos : BlockPos.betweenClosed(node.getPos(), adj.getPos())) {
                         collectPosition(posMap, pos.immutable());
                     }
@@ -302,6 +346,8 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             }
 
             otherGrids.add(newGrid);
+            newGrid.checkInvariant();
+            newGrid.onModified();
         }
 
         // Notify the current grid it has been split.
@@ -323,6 +369,15 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                 gridHost.setGrid(grid);
             }
         }
+    }
+
+    /**
+     * Called when the internal grid structure is modified such
+     * as nodes being added/removed, or edges being rewritten.
+     */
+    public void onModified() {
+
+        checkInvariant();
     }
 
     /**

@@ -5,7 +5,6 @@ import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.grid.IGridNode;
 import com.google.common.collect.ImmutableList;
-import net.covers1624.quack.collection.StreamableIterable;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -100,10 +99,24 @@ public class GridHelper {
         }
     }
 
-    private static Set<BlockPos> getPositionsBetween(BlockPos a, BlockPos b) {
+    /**
+     * Gets all BlockPositions between <code>a</code> and <code>b</code>
+     * excluding <code>a</code> and <code>b</code>.
+     *
+     * @param a The first position.
+     * @param b The second position.
+     * @return The contained blocks.
+     */
+    // TODO More to Core, somewhere.
+    public static Set<BlockPos> getPositionsBetween(BlockPos a, BlockPos b) {
 
-        return StreamableIterable.of(BlockPos.betweenClosed(a, b))
-                .map(BlockPos::immutable)
-                .toSet();
+        Set<BlockPos> positions = new HashSet<>();
+        for (BlockPos pos : BlockPos.betweenClosed(a, b)) {
+            positions.add(pos.immutable());
+        }
+        positions.remove(a);
+        positions.remove(b);
+
+        return positions;
     }
 }
