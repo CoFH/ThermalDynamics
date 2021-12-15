@@ -14,12 +14,10 @@ import net.covers1624.quack.collection.StreamableIterable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent;
@@ -124,7 +122,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             // - Generate a new node at the adjacent position.
             // - Unlink the 'a/b' nodes from each other and re-link with the adjacent node.
             // - Add link to the node we just placed.
-            AbstractGridNode<?> abMiddle = generateIntersection(grid, adjacent.getHostPos(), host.getHostPos());
+            AbstractGridNode<?> abMiddle = insertNode(grid, adjacent.getHostPos(), host.getHostPos());
             grid.nodeGraph.putEdgeValue(abMiddle, newNode, new HashSet<>());
             grid.checkInvariant();
 
@@ -173,17 +171,18 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     }
 
     /**
-     * Generates an intersection node at the specified position in the grid.
+     * Inserts a node in the middle of an edge.
      * <p>
      * This method assumes there is not already a node at <code>pos</code>.
      *
      * @param grid The grid to add the node to.
-     * @param pos  The position in the grid to add the intersection node.
-     * @param from The position next to the intersection node which triggered
-     *             the intersection generation (to be ignored when locating attached nodes).
+     * @param pos  The position in the grid to generate the node.
+     * @param from The position next to <code>pos</code> which triggered this insertion.
+     *             May be <code>pos</code> if no adjacent position exist. This position will
+     *             be ignored when searching for adjacent grid hosts to build the new node.
      * @return The new node at the position.
      */
-    private AbstractGridNode<?> generateIntersection(AbstractGrid<?, ?> grid, BlockPos pos, BlockPos from) {
+    private AbstractGridNode<?> insertNode(AbstractGrid<?, ?> grid, BlockPos pos, BlockPos from) {
         // We are adding a duct, next to an existing duct that does not have a node.
         // There is only one valid case for this, where there are 2 nodes directly attached.
 
@@ -210,7 +209,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         Set<BlockPos> abValue = grid.nodeGraph.removeEdge(attachedA, attachedB);
         grid.checkInvariant();
         if (DEBUG) {
-            LOGGER.info("Intersection creation. Node A: {}, Node B: {}, AB dist: {}, Middle: {}, NewA dist: {}, NewB dist: {}",
+            LOGGER.info("Node insertion. Node A: {}, Node B: {}, AB dist: {}, Middle: {}, NewA dist: {}, NewB dist: {}",
                     attachedA.getPos(),
                     attachedB.getPos(),
                     abValue.size(),
@@ -235,7 +234,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             Optional<IGridNode<?>> adjOpt = branch.getNode();
             if (!adjOpt.isPresent()) {
                 // Adjacent isn't present, just generate node.
-                AbstractGridNode<?> abMiddle = generateIntersection(grid, branch.getHostPos(), node.getPos());
+                AbstractGridNode<?> abMiddle = insertNode(grid, branch.getHostPos(), node.getPos());
                 if (DEBUG) {
                     LOGGER.info(" T intersection creation. New Node: {}, Adjacent: {}",
                             node.getPos(),
@@ -296,6 +295,24 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         } else {
             removeNode(host, adjacentHosts);
             separateGrids(host);
+        }
+    }
+
+    @Override
+    public void onGridHostNeighborChanged(IGridHostInternal host) {
+
+        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid()
+                .orElseThrow(notPossible());
+        Optional<IGridNode<?>> nodeOpt = host.getNode();
+        boolean canConnect = grid.canConnectToAdjacent(host.getHostPos());
+        if (nodeOpt.isPresent()) {
+            if (!canConnect) {
+                simplifyNode((AbstractGridNode<?>) nodeOpt.get());
+            }
+        } else {
+            if (canConnect) {
+                insertNode(grid, host.getHostPos(), host.getHostPos());
+            }
         }
     }
 

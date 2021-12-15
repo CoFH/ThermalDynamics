@@ -10,6 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -61,4 +62,16 @@ public abstract class TileBlockDuctBase extends Block {
         }
     }
 
+    @Override
+    public void neighborChanged(BlockState state, World level, BlockPos pos, Block block, BlockPos adj, boolean isMoving) {
+
+        if (level.isClientSide()) return;
+
+        TileEntity tile = level.getBlockEntity(pos);
+        if (tile instanceof IGridHostInternal) {
+            IGridHostInternal host = (IGridHostInternal) tile;
+            Optional<IGridContainer> gridContainer = IGridContainer.getCapability(level);
+            gridContainer.ifPresent(e -> e.onGridHostNeighborChanged(host));
+        }
+    }
 }

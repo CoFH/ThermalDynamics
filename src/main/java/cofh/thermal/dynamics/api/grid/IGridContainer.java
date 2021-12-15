@@ -4,6 +4,7 @@ import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -25,6 +26,8 @@ public interface IGridContainer {
     void onGridHostPlaced(IGridHostInternal host);
 
     void onGridHostDestroyed(IGridHostInternal host);
+
+    void onGridHostNeighborChanged(IGridHostInternal host);
 
     static Optional<IGridContainer> getCapability(IWorld _world) {
 
