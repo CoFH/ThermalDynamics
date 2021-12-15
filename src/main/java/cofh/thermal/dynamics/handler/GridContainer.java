@@ -7,6 +7,7 @@ import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
+import com.google.common.graph.EndpointPair;
 import io.netty.buffer.Unpooled;
 import net.covers1624.quack.collection.ColUtils;
 import net.covers1624.quack.collection.StreamableIterable;
@@ -26,6 +27,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,6 +46,8 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Set<UUID> USED_UUIDS = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+    private final Map<BlockPos, AbstractGrid<?, ?>> gridPosLookup = new HashMap<>();
 
     private final Map<UUID, AbstractGrid<?, ?>> grids = new HashMap<>();
     private final Map<UUID, AbstractGrid<?, ?>> loadedGrids = new HashMap<>();
@@ -96,6 +100,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         AbstractGrid<?, ?> grid = createAndAddGrid(nextUUID(), host.getExposedTypes().iterator().next(), true);
         host.setGrid(grid);
         grid.newNode(host.getHostPos());
+        addGridLookup(grid, host.getHostPos());
         grid.checkInvariant();
         grid.onModified();
     }
@@ -112,6 +117,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         host.setGrid(grid);
 
         AbstractGridNode<?> newNode = grid.newNode(host.getHostPos());
+        addGridLookup(grid, newNode.getPos());
         if (!adjacentNodeOpt.isPresent()) {
             // We are adding a duct next to another duct which does not have a node associated, we need to:
             // - Identify the 2 nodes at either end of this adjacent duct (a/b).
@@ -224,6 +230,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         host.setGrid(grid);
         // More than 2 branches, or the 2 adjacent branches aren't on the same axis as us. We must generate a node.
         AbstractGridNode<?> node = grid.newNode(host.getHostPos());
+        addGridLookup(grid, node.getPos());
         for (IGridHost branch : branches) {
             Optional<IGridNode<?>> adjOpt = branch.getNode();
             if (!adjOpt.isPresent()) {
@@ -264,7 +271,9 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         AbstractGrid<?, ?> main = ColUtils.maxBy(grids, e -> e.nodeGraph.nodes().size());
         grids.remove(main);
         for (AbstractGrid<?, ?> other : grids) {
+            Set<AbstractGridNode<?>> toBeMoved = new HashSet<>(other.nodeGraph.nodes());
             main.mergeFrom(other);
+            replaceGridLookup(main, other, toBeMoved);
             main.checkInvariant();
             this.grids.remove(other.getId());
             this.loadedGrids.remove(other.getId());
@@ -303,6 +312,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         assert grid.getNodes().containsKey(host.getHostPos());
         grids.remove(grid.getId());
         loadedGrids.remove(grid.getId());
+        removeGridLookup(grid, host.getHostPos());
     }
 
     private void shrinkGrid(IGridHostInternal host, IGridHost adjacent) {
@@ -318,6 +328,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         AbstractGridNode<?> currNode = (AbstractGridNode<?>) host.getNode()
                 .orElseThrow(notPossible());
 
+        removeGridLookup(grid, currNode.getPos());
         if (!adjacentNodeOpt.isPresent()) {
             // We are removing a node which is not adjacent to another node.
             // We must do the following:
@@ -366,6 +377,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid()
                 .orElseThrow(notPossible());
 
+        removeGridLookup(grid, host.getHostPos());
         if (host.getNode().isPresent()) {
             // All we need to do is remove the node.
             AbstractGridNode<?> removing = (AbstractGridNode<?>) host.getNode().get();
@@ -460,7 +472,12 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             LOGGER.info("Splitting grid into {} segments.", splitGraphs.size());
         }
 
-        grid.splitInto(splitGraphs);
+        List<AbstractGrid<?, ?>> newGrids = grid.splitInto(splitGraphs);
+        for (AbstractGrid<?, ?> newGrid : newGrids) {
+            replaceGridLookup(newGrid, grid, newGrid.nodeGraph.nodes());
+            newGrid.checkInvariant();
+            newGrid.onModified();
+        }
         grids.remove(grid.getId());
         loadedGrids.remove(grid.getId());
     }
@@ -543,10 +560,18 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     }
     // endregion
 
+    @Nullable
     @Override
-    public Optional<IGrid<?, ?>> getGrid(UUID id) {
+    public IGrid<?, ?> getGrid(UUID id) {
 
-        return Optional.ofNullable(grids.get(id));
+        return grids.get(id);
+    }
+
+    @Nullable
+    @Override
+    public IGrid<?, ?> getGrid(BlockPos pos) {
+
+        return gridPosLookup.get(pos);
     }
 
     @Override
@@ -581,6 +606,13 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
             AbstractGrid<?, ?> grid = createAndAddGrid(id, gridType, false);
             grid.deserializeNBT(tag);
+
+            for (AbstractGridNode<?> node : grid.nodeGraph.nodes()) {
+                addGridLookup(grid, node.getPos());
+            }
+            for (EndpointPair<AbstractGridNode<?>> edge : grid.nodeGraph.edges()) {
+                addGridLookupEdge(grid, grid.nodeGraph.edgeValue(edge.nodeU(), edge.nodeV()));
+            }
         }
         if (DEBUG) {
             LOGGER.info("Loaded {} grids for {}.", grids.size(), world.dimension().location());
@@ -588,6 +620,63 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     }
 
     // region HELPERS
+    private void removeGridLookupEdge(AbstractGrid<?, ?> grid, Set<BlockPos> edge) {
+        for (BlockPos pos : edge) {
+            removeGridLookup(grid, pos);
+        }
+    }
+
+    private void removeGridLookup(AbstractGrid<?, ?> grid, BlockPos node) {
+
+        AbstractGrid<?, ?> removed = gridPosLookup.remove(node);
+        assert removed == grid;
+    }
+
+    private void addGridLookupEdge(AbstractGrid<?, ?> grid, Set<BlockPos> edge) {
+
+        for (BlockPos pos : edge) {
+            addGridLookup(grid, pos);
+        }
+    }
+
+    private void addGridLookup(AbstractGrid<?, ?> grid, BlockPos node) {
+
+        AbstractGrid<?, ?> removed = gridPosLookup.put(node, grid);
+        assert removed == null;
+    }
+
+    private void replaceGridLookupEdge(AbstractGrid<?, ?> newGrid, AbstractGrid<?, ?> oldGrid, Set<BlockPos> edge) {
+
+        for (BlockPos pos : edge) {
+            replaceGridLookup(newGrid, oldGrid, pos);
+        }
+    }
+
+    private void replaceGridLookup(AbstractGrid<?, ?> newGrid, AbstractGrid<?, ?> oldGrid, BlockPos pos) {
+
+        AbstractGrid<?, ?> removed = gridPosLookup.put(pos, newGrid);
+        assert removed == oldGrid;
+    }
+
+    private void replaceGridLookup(AbstractGrid<?, ?> newGrid, AbstractGrid<?, ?> oldGrid, Set<AbstractGridNode<?>> nodes) {
+
+        for (AbstractGridNode<?> node : nodes) {
+            replaceGridLookup(newGrid, oldGrid, node.getPos());
+        }
+        for (EndpointPair<AbstractGridNode<?>> edge : newGrid.nodeGraph.edges()) {
+            AbstractGridNode<?> u = edge.nodeU();
+            AbstractGridNode<?> v = edge.nodeV();
+            boolean containsU = nodes.contains(u);
+            boolean containsV = nodes.contains(v);
+
+            assert containsU == containsV; // Wat? Should be impossible. Don't update edges whilst merging/splitting.
+            if (!containsU) {
+                continue; // Skip.
+            }
+            replaceGridLookupEdge(newGrid, oldGrid, newGrid.nodeGraph.edgeValue(u, v));
+        }
+    }
+
     private EnumMap<Direction, IGridHostInternal> getAdjacentGrids(IGridHost host) {
 
         EnumMap<Direction, IGridHostInternal> adjacentGrids = new EnumMap<>(Direction.class);

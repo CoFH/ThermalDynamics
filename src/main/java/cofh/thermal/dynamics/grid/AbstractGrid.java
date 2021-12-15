@@ -87,6 +87,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         // Save some CPU when assertions are disabled.
         if (!DEBUG) return;
 
+        GridContainer gridContainer = ((GridContainer) IGridContainer.getCapability(world)
+                .orElseThrow(notPossible()));
+
         // Check all blocks on edges.
         for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
             AbstractGridNode<?> u = edge.nodeU();
@@ -96,7 +99,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             assert value.size() == between.size();
             assert value.containsAll(between);
             for (BlockPos pos : between) {
-                checkPos(pos);
+                checkPos(pos, gridContainer);
             }
         }
 
@@ -104,7 +107,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         for (AbstractGridNode<?> node : nodeGraph.nodes()) {
 
             long chunkPos = asChunkLong(node.getPos());
-            checkPos(node.getPos());
+            checkPos(node.getPos(), gridContainer);
             assert node.grid == this;
             assert nodes.get(node.getPos()) == node;
             assert nodesPerChunk.get(chunkPos) != null;
@@ -113,7 +116,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         }
     }
 
-    private void checkPos(BlockPos pos) {
+    private void checkPos(BlockPos pos, GridContainer gridContainer) {
 
         if (!world.isLoaded(pos)) return;
 
@@ -121,6 +124,8 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         assert gridHostOpt.isPresent();
         assert gridHostOpt.get().getGrid().isPresent();
         assert gridHostOpt.get().getGrid().get() == this;
+
+        assert gridContainer.getGrid(pos) == this;
     }
 
     // returns true if this grid changes its loaded state to true.
@@ -310,11 +315,11 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     }
 
     // Called to split the current grid into the specified partitions.
-    public final void splitInto(List<Set<AbstractGridNode<?>>> splitGraphs) {
+    public final List<AbstractGrid<?, ?>> splitInto(List<Set<AbstractGridNode<?>>> splitGraphs) {
 
         GridContainer gridContainer = ((GridContainer) IGridContainer.getCapability(world)
                 .orElseThrow(notPossible()));
-        List<AbstractGrid<?, ?>> otherGrids = new LinkedList<>();
+        List<AbstractGrid<?, ?>> newGrids = new LinkedList<>();
 
         for (Set<AbstractGridNode<?>> splitGraph : splitGraphs) {
             Long2ObjectMap<Set<BlockPos>> posMap = new Long2ObjectArrayMap<>();
@@ -345,13 +350,12 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                 node.onGridChange(unsafeCast(this));
             }
 
-            otherGrids.add(newGrid);
-            newGrid.checkInvariant();
-            newGrid.onModified();
+            newGrids.add(newGrid);
         }
 
         // Notify the current grid it has been split.
-        onSplit(unsafeCast(otherGrids));
+        onSplit(unsafeCast(newGrids));
+        return newGrids;
     }
 
     private static void updateGridHosts(World world, Long2ObjectMap<Set<BlockPos>> posMap, AbstractGrid<?, ?> grid) {

@@ -2,9 +2,11 @@ package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.api.internal.IGridHostInternal;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,7 +16,11 @@ import java.util.UUID;
 //TODO, remove this from the public api.
 public interface IGridContainer {
 
-    Optional<IGrid<?, ?>> getGrid(UUID id);
+    @Nullable
+    IGrid<?, ?> getGrid(UUID id);
+
+    @Nullable
+    IGrid<?, ?> getGrid(BlockPos pos);
 
     void onGridHostPlaced(IGridHostInternal host);
 
