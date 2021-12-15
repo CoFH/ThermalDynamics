@@ -3,7 +3,7 @@ package cofh.thermal.dynamics.handler;
 import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.api.grid.*;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.api.internal.GridHostInternal;
+import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
@@ -38,9 +38,9 @@ import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
  * @author covers1624
  */
 @SuppressWarnings ("UnstableApiUsage")
-public class GridContainerImpl implements GridContainer, INBTSerializable<ListNBT> {
+public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> {
 
-    private static final boolean DEBUG = GridContainerImpl.class.desiredAssertionStatus();
+    private static final boolean DEBUG = GridContainer.class.desiredAssertionStatus();
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Set<UUID> USED_UUIDS = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -51,15 +51,15 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
 
     private int tickCounter;
 
-    public GridContainerImpl(World world) {
+    public GridContainer(World world) {
 
         this.world = world;
     }
 
     @Override
-    public void onGridHostPlaced(GridHostInternal host) {
+    public void onGridHostPlaced(IGridHostInternal host) {
 
-        EnumMap<Direction, GridHostInternal> adjacentGrids = getAdjacentGrids(host);
+        EnumMap<Direction, IGridHostInternal> adjacentGrids = getAdjacentGrids(host);
         // We aren't adjacent to anything else, new grid.
         if (adjacentGrids.isEmpty()) {
             constructNewGrid(host);
@@ -67,10 +67,10 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         }
 
         if (adjacentGrids.size() == 1) {
-            Map.Entry<Direction, GridHostInternal> adjacent = ColUtils.only(adjacentGrids.entrySet());
+            Map.Entry<Direction, IGridHostInternal> adjacent = ColUtils.only(adjacentGrids.entrySet());
             extendGrid(host, adjacent.getValue(), adjacent.getKey());
         } else {
-            List<GridHostInternal> branches = new ArrayList<>(adjacentGrids.values());
+            List<IGridHostInternal> branches = new ArrayList<>(adjacentGrids.values());
             // Merge grids!
 
             // Check if we would be merging 2 isolated grids.
@@ -88,7 +88,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         }
     }
 
-    private void constructNewGrid(GridHostInternal host) {
+    private void constructNewGrid(IGridHostInternal host) {
 
         if (DEBUG) {
             LOGGER.info("Constructing new grid for {}", host.getHostPos());
@@ -99,10 +99,10 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         grid.newNode(host.getHostPos());
     }
 
-    private void extendGrid(GridHostInternal host, GridHost adjacent, Direction adjacentDir) {
+    private void extendGrid(IGridHostInternal host, IGridHost adjacent, Direction adjacentDir) {
 
-        Optional<GridNode<?>> adjacentNodeOpt = adjacent.getNode();
-        Optional<Grid<?, ?>> adjacentGridOpt = adjacent.getGrid();
+        Optional<IGridNode<?>> adjacentNodeOpt = adjacent.getNode();
+        Optional<IGrid<?, ?>> adjacentGridOpt = adjacent.getGrid();
 
         assert adjacentGridOpt.isPresent(); // All adjacent nodes should have a Grid when this method is called.
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) adjacentGridOpt.get();
@@ -177,11 +177,11 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         assert grid.getNodes().get(pos) == null;
 
         // Find the 2 aforementioned existing nodes.
-        List<Pair<GridNode<?>, Integer>> attached = GridHelper.locateAttachedNodes(world, pos, from);
+        List<Pair<IGridNode<?>, Integer>> attached = GridHelper.locateAttachedNodes(world, pos, from);
         assert attached.size() == 2;
 
-        Pair<GridNode<?>, Integer> a = attached.get(0);
-        Pair<GridNode<?>, Integer> b = attached.get(1);
+        Pair<IGridNode<?>, Integer> a = attached.get(0);
+        Pair<IGridNode<?>, Integer> b = attached.get(1);
         AbstractGridNode<?> attachedA = (AbstractGridNode<?>) a.getLeft();
         int attachedALen = a.getRight() - 1;
         AbstractGridNode<?> attachedB = (AbstractGridNode<?>) b.getLeft();
@@ -208,7 +208,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         return abMiddle;
     }
 
-    private void mergeGridBranches(GridHostInternal host, List<GridHostInternal> branches, boolean wasMerge) {
+    private void mergeGridBranches(IGridHostInternal host, List<IGridHostInternal> branches, boolean wasMerge) {
 
         assert branches.size() != 1;
 
@@ -216,8 +216,8 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         host.setGrid(grid);
         // More than 2 branches, or the 2 adjacent branches aren't on the same axis as us. We must generate a node.
         AbstractGridNode<?> node = grid.newNode(host.getHostPos());
-        for (GridHost branch : branches) {
-            Optional<GridNode<?>> adjOpt = branch.getNode();
+        for (IGridHost branch : branches) {
+            Optional<IGridNode<?>> adjOpt = branch.getNode();
             if (!adjOpt.isPresent()) {
                 // Adjacent isn't present, just generate node.
                 AbstractGridNode<?> abMiddle = generateIntersection(grid, branch.getHostPos(), node.getPos());
@@ -240,10 +240,10 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         simplifyNode(node);
     }
 
-    private void mergeGrids(List<GridHostInternal> branches) {
+    private void mergeGrids(List<IGridHostInternal> branches) {
 
         Set<AbstractGrid<?, ?>> grids = new HashSet<>();
-        for (GridHostInternal branch : branches) {
+        for (IGridHostInternal branch : branches) {
             AbstractGrid<?, ?> abstractGrid = (AbstractGrid<?, ?>) branch.getGrid().orElseThrow(notPossible());
             grids.add(abstractGrid);
         }
@@ -259,9 +259,9 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
     }
 
     @Override
-    public void onGridHostDestroyed(GridHostInternal host) {
+    public void onGridHostDestroyed(IGridHostInternal host) {
 
-        EnumMap<Direction, GridHostInternal> adjacentHosts = getAdjacentGrids(host);
+        EnumMap<Direction, IGridHostInternal> adjacentHosts = getAdjacentGrids(host);
         if (adjacentHosts.isEmpty()) {
             // No adjacent grids, just remove the grid.
             removeSingleGrid(host);
@@ -276,7 +276,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         }
     }
 
-    private void removeSingleGrid(GridHostInternal host) {
+    private void removeSingleGrid(IGridHostInternal host) {
 
         if (DEBUG) {
             LOGGER.info("Removing grid for {}", host.getHostPos());
@@ -291,10 +291,10 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         loadedGrids.remove(grid.getId());
     }
 
-    private void shrinkGrid(GridHostInternal host, GridHost adjacent) {
+    private void shrinkGrid(IGridHostInternal host, IGridHost adjacent) {
 
-        Optional<GridNode<?>> adjacentNodeOpt = adjacent.getNode();
-        Optional<Grid<?, ?>> adjacentGridOpt = adjacent.getGrid();
+        Optional<IGridNode<?>> adjacentNodeOpt = adjacent.getNode();
+        Optional<IGrid<?, ?>> adjacentGridOpt = adjacent.getGrid();
 
         assert adjacentGridOpt.isPresent(); // All adjacent nodes should have a Grid when this method is called.
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) adjacentGridOpt.get();
@@ -336,7 +336,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
 
     }
 
-    private void removeNode(GridHostInternal host, EnumMap<Direction, GridHostInternal> adjacentHosts) {
+    private void removeNode(IGridHostInternal host, EnumMap<Direction, IGridHostInternal> adjacentHosts) {
         // We are removing a host which has a node, we need to:
         // - Disconnect all connected edges.
         // - Iterate all adjacent hosts
@@ -356,7 +356,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
             }
         } else {
             // We are a host without a node, between 2 nodes.
-            List<Pair<GridNode<?>, Integer>> attached = GridHelper.locateAttachedNodes(world, host.getHostPos(), host.getHostPos());
+            List<Pair<IGridNode<?>, Integer>> attached = GridHelper.locateAttachedNodes(world, host.getHostPos(), host.getHostPos());
             assert attached.size() == 2;
             AbstractGridNode<?> a = (AbstractGridNode<?>) attached.get(0).getLeft();
             AbstractGridNode<?> b = (AbstractGridNode<?>) attached.get(1).getLeft();
@@ -367,10 +367,10 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         }
 
         // Create/delete adjacent nodes if required
-        for (GridHostInternal adjHost : adjacentHosts.values()) {
+        for (IGridHostInternal adjHost : adjacentHosts.values()) {
             if (!adjHost.getNode().isPresent()) {
                 // We always need to create a new node here.
-                Pair<GridNode<?>, Integer> foundEdge = only(GridHelper.locateAttachedNodes(world, adjHost.getHostPos(), host.getHostPos()));
+                Pair<IGridNode<?>, Integer> foundEdge = only(GridHelper.locateAttachedNodes(world, adjHost.getHostPos(), host.getHostPos()));
                 assert foundEdge != null;
                 AbstractGridNode<?> newNode = grid.newNode(adjHost.getHostPos());
                 AbstractGridNode<?> foundNode = (AbstractGridNode<?>) foundEdge.getLeft();
@@ -420,7 +420,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         }
     }
 
-    private void separateGrids(GridHostInternal host) {
+    private void separateGrids(IGridHostInternal host) {
 
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid()
                 .orElseThrow(notPossible());
@@ -438,7 +438,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         loadedGrids.remove(grid.getId());
     }
 
-    //region Event callbacks.
+    // region EVENT CALLBACKS
     public void onWorldTick(TickEvent.Phase phase) {
         // TODO do we want to pass this through to grids?
         if (phase != TickEvent.Phase.END) return;
@@ -477,9 +477,9 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
             // TODO, we _may_ be able to use TileEntity.onLoad instead of this.
             // We need to attach each GridHost back to its grid when the chunk gets loaded.
             for (TileEntity tile : chonk.getBlockEntities().values()) {
-                Optional<GridHost> gridHostOpt = GridHelper.getGridHost(tile);
+                Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(tile);
                 gridHostOpt.ifPresent(e -> {
-                    GridHostInternal host = (GridHostInternal) e;
+                    IGridHostInternal host = (IGridHostInternal) e;
                     UUID lastGrid = host.getLastGrid();
                     if (lastGrid == null) return;
 
@@ -514,10 +514,10 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         }
         loadedGrids.keySet().removeAll(rem);
     }
-    //endregion
+    // endregion
 
     @Override
-    public Optional<Grid<?, ?>> getGrid(UUID id) {
+    public Optional<IGrid<?, ?>> getGrid(UUID id) {
 
         return Optional.ofNullable(grids.get(id));
     }
@@ -546,7 +546,7 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
             UUID id = tag.getUUID("id");
             assert !grids.containsKey(id) : "Duplicate grid found.";
             ResourceLocation gridTypeName = new ResourceLocation(tag.getString("type"));
-            GridType<?> gridType = ThermalDynamics.GRID_TYPE_REGISTRY.get().getValue(gridTypeName);
+            IGridType<?> gridType = ThermalDynamics.GRID_TYPE_REGISTRY.get().getValue(gridTypeName);
             if (gridType == null) {
                 LOGGER.error("Failed to load Grid {} with type {} in world {}. GridType is no longer registered, it will be removed from the world.", id, gridTypeName, world.dimension().location());
                 continue;
@@ -560,18 +560,18 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         }
     }
 
-    //region helpers
-    private EnumMap<Direction, GridHostInternal> getAdjacentGrids(GridHost host) {
+    // region HELPERS
+    private EnumMap<Direction, IGridHostInternal> getAdjacentGrids(IGridHost host) {
 
-        EnumMap<Direction, GridHostInternal> adjacentGrids = new EnumMap<>(Direction.class);
+        EnumMap<Direction, IGridHostInternal> adjacentGrids = new EnumMap<>(Direction.class);
         for (Direction dir : Direction.values()) {
             GridHelper.getGridHost(world, host.getHostPos().relative(dir))
-                    .ifPresent(gridHost -> adjacentGrids.put(dir, (GridHostInternal) gridHost));
+                    .ifPresent(gridHost -> adjacentGrids.put(dir, (IGridHostInternal) gridHost));
         }
         return adjacentGrids;
     }
 
-    public AbstractGrid<?, ?> createAndAddGrid(UUID uuid, GridType<?> gridType, boolean load) {
+    public AbstractGrid<?, ?> createAndAddGrid(UUID uuid, IGridType<?> gridType, boolean load) {
 
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) gridType.createGrid(uuid, world);
         grids.put(uuid, grid);
@@ -601,6 +601,6 @@ public class GridContainerImpl implements GridContainer, INBTSerializable<ListNB
         if (y && z) return true; // X axis
         return x && y && z; // Handle no match, or same block.
     }
-    //endregion
+    // endregion
 
 }

@@ -117,7 +117,7 @@ public class DebugRenderer {
         mStack.popPose();
     }
 
-    //region HELPERS
+    // region HELPERS
     private static void bufferCuboidSolid(IVertexBuilder builder, Matrix4f matrix, AxisAlignedBB c, float r, float g, float b, float a) {
 
         builder.vertex(matrix, (float) c.minX, (float) c.maxY, (float) c.minZ).color(r, g, b, a).endVertex();
@@ -182,5 +182,5 @@ public class DebugRenderer {
 
         return null;
     }
-    //endregion
+    // endregion
 }

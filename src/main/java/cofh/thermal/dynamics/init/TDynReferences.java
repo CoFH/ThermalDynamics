@@ -1,12 +1,11 @@
 package cofh.thermal.dynamics.init;
 
-import cofh.thermal.dynamics.api.grid.GridType;
-import cofh.thermal.dynamics.api.grid.energy.EnergyGrid;
-import cofh.thermal.dynamics.api.grid.item.ItemGrid;
-import cofh.thermal.dynamics.api.grid.multi.MultiGrid;
+import cofh.thermal.dynamics.api.grid.IGridType;
+import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
+import cofh.thermal.dynamics.api.grid.item.IItemGrid;
+import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import cofh.thermal.dynamics.tileentity.DuctTileEnergy;
-import cofh.thermal.dynamics.tileentity.EnderTunnelTile;
 import cofh.thermal.dynamics.tileentity.ItemBufferTile;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.container.ContainerType;
@@ -24,23 +23,18 @@ public class TDynReferences {
     }
 
     @ObjectHolder (ID_GRID_ENERGY)
-    public static final GridType<EnergyGrid> ENERGY_GRID = null;
+    public static final IGridType<IEnergyGrid> ENERGY_GRID = null;
     //    @ObjectHolder(ID_GRID_FLUID)
     //    public static final GridType<FluidGrid> FLUID_GRID = null;
     @ObjectHolder (ID_GRID_ITEM)
-    public static final GridType<ItemGrid> ITEM_GRID = null;
+    public static final IGridType<IItemGrid> ITEM_GRID = null;
     @ObjectHolder (ID_GRID_MULTI)
-    public static final GridType<MultiGrid> MULTI_GRID = null;
+    public static final IGridType<IMultiGrid> MULTI_GRID = null;
 
     @ObjectHolder (ID_DUCT_ENERGY)
     public static final Block ENERGY_DUCT_BLOCK = null;
     @ObjectHolder (ID_DUCT_ENERGY)
     public static final TileEntityType<DuctTileEnergy> ENERGY_DUCT_TILE = null;
-
-    @ObjectHolder (ID_ENDER_TUNNEL)
-    public static final Block ENDER_TUNNEL_BLOCK = null;
-    @ObjectHolder (ID_ENDER_TUNNEL)
-    public static final TileEntityType<EnderTunnelTile> ENDER_TUNNEL_TILE = null;
 
     //    @ObjectHolder(ID_DEVICE_FLUID_BUFFER)
     //    public static final Block DEVICE_FLUID_BUFFER_BLOCK = null;

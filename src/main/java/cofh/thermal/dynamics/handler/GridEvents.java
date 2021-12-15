@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.handler;
 
-import cofh.thermal.dynamics.api.grid.GridContainer;
+import cofh.thermal.dynamics.api.grid.IGridContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -8,7 +8,7 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 
-import static cofh.lib.util.constants.Constants.ID_THERMAL;
+import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
 
 public class GridEvents {
 
@@ -22,22 +22,22 @@ public class GridEvents {
 
     private static void attachCapabilities(AttachCapabilitiesEvent<World> event) {
 
-        event.addCapability(new ResourceLocation(ID_THERMAL, "grid_container"), new GridContainerCapProvider(new GridContainerImpl(event.getObject())));
+        event.addCapability(new ResourceLocation(ID_THERMAL_DYNAMICS, "grid_container"), new GridContainerCapProvider(new GridContainer(event.getObject())));
     }
 
     private static void onWorldTick(TickEvent.WorldTickEvent event) {
 
-        GridContainer.getCapability(event.world).ifPresent(e -> ((GridContainerImpl) e).onWorldTick(event.phase));
+        IGridContainer.getCapability(event.world).ifPresent(e -> ((GridContainer) e).onWorldTick(event.phase));
     }
 
     private static void onChunkLoad(ChunkEvent.Load event) {
 
-        GridContainer.getCapability(event.getWorld()).ifPresent(e -> ((GridContainerImpl) e).onChunkLoad(event.getChunk()));
+        IGridContainer.getCapability(event.getWorld()).ifPresent(e -> ((GridContainer) e).onChunkLoad(event.getChunk()));
     }
 
     private static void onChunkUnload(ChunkEvent.Unload event) {
 
-        GridContainer.getCapability(event.getWorld()).ifPresent(e -> ((GridContainerImpl) e).onChunkUnload(event.getChunk()));
+        IGridContainer.getCapability(event.getWorld()).ifPresent(e -> ((GridContainer) e).onChunkUnload(event.getChunk()));
     }
 
 }

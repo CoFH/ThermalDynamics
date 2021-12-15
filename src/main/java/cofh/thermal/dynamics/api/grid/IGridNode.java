@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.api.grid;
 
-import cofh.thermal.dynamics.api.grid.node.NodeAttachment;
+import cofh.thermal.dynamics.api.grid.node.INodeAttachment;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
@@ -8,12 +8,12 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 
 /**
- * Represents a Node on a {@link Grid} at a given position.
+ * Represents a Node on a {@link IGrid} at a given position.
  * <p>
  *
  * @author covers1624
  */
-public interface GridNode<G extends Grid<?, ?>> {
+public interface IGridNode<G extends IGrid<?, ?>> {
 
     /**
      * Gets the grid which this node belongs to.
@@ -23,7 +23,7 @@ public interface GridNode<G extends Grid<?, ?>> {
     G getGrid();
 
     /**
-     * Gets the position in world this {@link GridNode} exists in.
+     * Gets the position in world this {@link IGridNode} exists in.
      *
      * @return The node's position.
      */
@@ -50,6 +50,6 @@ public interface GridNode<G extends Grid<?, ?>> {
      *
      * @return The attachments.
      */
-    EnumMap<Direction, NodeAttachment> getAttachments();
+    EnumMap<Direction, INodeAttachment> getAttachments();
 
 }

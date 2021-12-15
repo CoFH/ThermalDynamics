@@ -1,7 +1,8 @@
 package cofh.thermal.dynamics.grid.energy;
 
-import cofh.thermal.dynamics.api.grid.energy.EnergyGrid;
-import cofh.thermal.dynamics.api.grid.energy.EnergyGridNode;
+import cofh.lib.energy.EnergyStorageCoFH;
+import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
+import cofh.thermal.dynamics.api.grid.energy.IEnergyGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
@@ -10,9 +11,11 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.EnergyStorage;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
@@ -20,23 +23,24 @@ import java.util.UUID;
 /**
  * @author covers1624
  */
-public class EnergyGridImpl extends AbstractGrid<EnergyGrid, EnergyGridNode> implements EnergyGrid {
+public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> implements IEnergyGrid {
 
-    private final EnergyStorage storage = new EnergyStorage(10000); // TODO needs proper value, likely a function of the 'total distance' in the grid.
+    protected final EnergyStorageCoFH storage = new EnergyStorageCoFH(100000); // TODO needs proper value, likely a function of the 'total distance' in the grid.
+    protected LazyOptional<?> energyCap = LazyOptional.empty();
 
-    public EnergyGridImpl(UUID id, World world) {
+    public EnergyGrid(UUID id, World world) {
 
         super(TDynReferences.ENERGY_GRID, id, world);
     }
 
     @Override
-    public AbstractGridNode<EnergyGrid> newNode() {
+    public AbstractGridNode<IEnergyGrid> newNode() {
 
-        return new EnergyGridNodeImpl(this);
+        return new EnergyGridNode(this);
     }
 
     @Override
-    public void onMerge(EnergyGrid from) {
+    public void onMerge(IEnergyGrid from) {
         // TODO resize storage.
 
         // TODO properly merge energy over.
@@ -44,7 +48,7 @@ public class EnergyGridImpl extends AbstractGrid<EnergyGrid, EnergyGridNode> imp
     }
 
     @Override
-    public void onSplit(List<EnergyGrid> others) {
+    public void onSplit(List<IEnergyGrid> others) {
         // TODO split energy evenly.
     }
 
@@ -69,6 +73,25 @@ public class EnergyGridImpl extends AbstractGrid<EnergyGrid, EnergyGridNode> imp
             return tile.getCapability(CapabilityEnergy.ENERGY, dir.getOpposite()).isPresent();
         }
         return tile.getCapability(CapabilityEnergy.ENERGY).isPresent();
+    }
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+
+        if (cap == CapabilityEnergy.ENERGY) {
+            if (!energyCap.isPresent()) {
+                energyCap = LazyOptional.of(() -> storage);
+            }
+            return energyCap.cast();
+        }
+        return LazyOptional.empty();
+    }
+
+    @Override
+    public void refreshCapabilities() {
+
+        energyCap.invalidate();
     }
 
     //@formatter:off

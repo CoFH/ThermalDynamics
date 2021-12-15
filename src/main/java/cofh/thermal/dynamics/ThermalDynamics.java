@@ -3,8 +3,8 @@ package cofh.thermal.dynamics;
 import cofh.lib.capability.NullCapabilityStorage;
 import cofh.lib.network.PacketHandler;
 import cofh.lib.util.DeferredRegisterCoFH;
-import cofh.thermal.dynamics.api.grid.GridContainer;
-import cofh.thermal.dynamics.api.grid.GridType;
+import cofh.thermal.dynamics.api.grid.IGridContainer;
+import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.client.DebugRenderer;
 import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
 import cofh.thermal.dynamics.handler.GridEvents;
@@ -13,11 +13,9 @@ import cofh.thermal.dynamics.init.TDynContainers;
 import cofh.thermal.dynamics.init.TDynGrids;
 import cofh.thermal.dynamics.init.TDynItems;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
-import cofh.thermal.dynamics.tileentity.EnderTunnelTile;
 import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -30,10 +28,7 @@ import net.minecraftforge.registries.RegistryBuilder;
 
 import java.util.function.Supplier;
 
-import static cofh.lib.util.constants.Constants.ID_THERMAL;
 import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
-import static cofh.thermal.core.ThermalCore.BLOCKS;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_ENDER_TUNNEL;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_GRID_TYPE;
 import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_CONTAINER;
 import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;
@@ -48,13 +43,13 @@ public class ThermalDynamics {
 
     public static final PacketHandler PACKET_HANDLER = new PacketHandler(new ResourceLocation(ID_THERMAL_DYNAMICS, "general"));
 
-    public static final DeferredRegisterCoFH<GridType<?>> GRIDS =
-            DeferredRegisterCoFH.create(SneakyUtils.<Class<GridType<?>>>unsafeCast(GridType.class), ID_THERMAL);
+    public static final DeferredRegisterCoFH<IGridType<?>> GRIDS =
+            DeferredRegisterCoFH.create(SneakyUtils.<Class<IGridType<?>>>unsafeCast(IGridType.class), ID_THERMAL_DYNAMICS);
 
-    public static final Supplier<IForgeRegistry<GridType<?>>> GRID_TYPE_REGISTRY =
-            GRIDS.makeRegistry(ID_GRID_TYPE, () -> new RegistryBuilder<GridType<?>>()
-                    .disableOverrides() // GridType's can't be overriden.
-                    .disableSaving()    // GridType's don't need id's saved to disk.
+    public static final Supplier<IForgeRegistry<IGridType<?>>> GRID_TYPE_REGISTRY =
+            GRIDS.makeRegistry(ID_GRID_TYPE, () -> new RegistryBuilder<IGridType<?>>()
+                    .disableOverrides() // GridTypes can't be overriden.
+                    .disableSaving()    // GridTypes don't need id's saved to disk.
             );
 
     public ThermalDynamics() {
@@ -95,8 +90,7 @@ public class ThermalDynamics {
     // region INITIALIZATION
     private void commonSetup(final FMLCommonSetupEvent event) {
 
-        EnderTunnelTile.initializeValidCapabilities();
-        CapabilityManager.INSTANCE.register(GridContainer.class, NullCapabilityStorage.instance(), nullC());
+        CapabilityManager.INSTANCE.register(IGridContainer.class, NullCapabilityStorage.instance(), nullC());
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
@@ -118,7 +112,6 @@ public class ThermalDynamics {
         RenderType cutout = RenderType.cutout();
         RenderType translucent = RenderType.translucent();
 
-        RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_ENDER_TUNNEL), cutout);
         // RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_ENDER_TUNNEL), translucent);
 
         //        RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_FLUID_BUFFER), cutout);

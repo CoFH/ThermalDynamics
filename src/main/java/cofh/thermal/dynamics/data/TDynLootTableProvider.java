@@ -8,7 +8,6 @@ import net.minecraft.item.Item;
 
 import static cofh.thermal.core.ThermalCore.BLOCKS;
 import static cofh.thermal.core.ThermalCore.ITEMS;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_ENDER_TUNNEL;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ITEM_BUFFER;
 
 public class TDynLootTableProvider extends LootTableProviderCoFH {
@@ -31,7 +30,6 @@ public class TDynLootTableProvider extends LootTableProviderCoFH {
         DeferredRegisterCoFH<Item> regItems = ITEMS;
 
         createSyncDropTable(regBlocks.get(ID_ITEM_BUFFER));
-        createSyncDropTable(regBlocks.get(ID_ENDER_TUNNEL));
     }
 
 }

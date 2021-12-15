@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.grid.item;
 
-import cofh.thermal.dynamics.api.grid.item.ItemGrid;
-import cofh.thermal.dynamics.api.grid.item.ItemGridNode;
+import cofh.thermal.dynamics.api.grid.item.IItemGrid;
+import cofh.thermal.dynamics.api.grid.item.IItemGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
@@ -18,26 +18,26 @@ import java.util.UUID;
 /**
  * @author covers1624
  */
-public class ItemGridImpl extends AbstractGrid<ItemGrid, ItemGridNode> implements ItemGrid {
+public class ItemGrid extends AbstractGrid<IItemGrid, IItemGridNode> implements IItemGrid {
 
-    public ItemGridImpl(UUID id, World world) {
+    public ItemGrid(UUID id, World world) {
 
         super(TDynReferences.ITEM_GRID, id, world);
     }
 
     @Override
-    public AbstractGridNode<ItemGrid> newNode() {
+    public AbstractGridNode<IItemGrid> newNode() {
 
-        return new ItemGridNodeImpl(this);
+        return new ItemGridNode(this);
     }
 
     @Override
-    public void onMerge(ItemGrid from) {
+    public void onMerge(IItemGrid from) {
 
     }
 
     @Override
-    public void onSplit(List<ItemGrid> others) {
+    public void onSplit(List<IItemGrid> others) {
 
     }
 

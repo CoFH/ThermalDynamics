@@ -1,8 +1,8 @@
 package cofh.thermal.dynamics.grid;
 
-import cofh.thermal.dynamics.api.grid.Grid;
-import cofh.thermal.dynamics.api.grid.GridNode;
-import cofh.thermal.dynamics.api.grid.node.NodeAttachment;
+import cofh.thermal.dynamics.api.grid.IGrid;
+import cofh.thermal.dynamics.api.grid.IGridNode;
+import cofh.thermal.dynamics.api.grid.node.INodeAttachment;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -15,14 +15,14 @@ import java.util.EnumSet;
 /**
  * @author covers1624
  */
-public abstract class AbstractGridNode<G extends Grid<?, ?>> implements GridNode<G>, INBTSerializable<CompoundNBT> {
+public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNode<G>, INBTSerializable<CompoundNBT> {
 
-    private final EnumMap<Direction, NodeAttachment> attachments = new EnumMap<>(Direction.class);
-    private final EnumSet<Direction> internalConnections = EnumSet.noneOf(Direction.class);
-    private final EnumSet<Direction> externalConnections = EnumSet.noneOf(Direction.class);
-    private G grid;
-    private BlockPos pos = BlockPos.ZERO;
-    private boolean loaded;
+    protected final EnumMap<Direction, INodeAttachment> attachments = new EnumMap<>(Direction.class);
+    protected final EnumSet<Direction> internalConnections = EnumSet.noneOf(Direction.class);
+    protected final EnumSet<Direction> externalConnections = EnumSet.noneOf(Direction.class);
+    protected G grid;
+    protected BlockPos pos = BlockPos.ZERO;
+    protected boolean loaded;
 
     protected AbstractGridNode(G grid) {
 
@@ -54,7 +54,7 @@ public abstract class AbstractGridNode<G extends Grid<?, ?>> implements GridNode
     public boolean isLoaded() { return loaded; }
     @Override public EnumSet<Direction> getInternalConnections() { return internalConnections; }
     @Override public EnumSet<Direction> getExternalConnections() { return externalConnections; }
-    @Override public EnumMap<Direction, NodeAttachment> getAttachments() { return attachments; }
+    @Override public EnumMap<Direction, INodeAttachment> getAttachments() { return attachments; }
     public void setPos(BlockPos pos) { this.pos = pos; }
     public void setGrid(G grid) { this.grid = grid; }
     public void setLoaded(boolean loaded) { this.loaded = loaded; }

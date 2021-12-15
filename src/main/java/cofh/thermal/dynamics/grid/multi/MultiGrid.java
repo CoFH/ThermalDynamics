@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.grid.multi;
 
-import cofh.thermal.dynamics.api.grid.multi.MultiGrid;
-import cofh.thermal.dynamics.api.grid.multi.MultiGridNode;
+import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
+import cofh.thermal.dynamics.api.grid.multi.IMultiGridNode;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
@@ -16,26 +16,26 @@ import java.util.UUID;
 /**
  * @author covers1624
  */
-public class MultiGridImpl extends AbstractGrid<MultiGrid, MultiGridNode> implements MultiGrid {
+public class MultiGrid extends AbstractGrid<IMultiGrid, IMultiGridNode> implements IMultiGrid {
 
-    public MultiGridImpl(UUID id, World world) {
+    public MultiGrid(UUID id, World world) {
 
         super(TDynReferences.MULTI_GRID, id, world);
     }
 
     @Override
-    public AbstractGridNode<MultiGrid> newNode() {
+    public AbstractGridNode<IMultiGrid> newNode() {
 
-        return new MultiGridNodeImpl(this);
+        return new MultiGridNode(this);
     }
 
     @Override
-    public void onMerge(MultiGrid from) {
+    public void onMerge(IMultiGrid from) {
 
     }
 
     @Override
-    public void onSplit(List<MultiGrid> others) {
+    public void onSplit(List<IMultiGrid> others) {
 
     }
 

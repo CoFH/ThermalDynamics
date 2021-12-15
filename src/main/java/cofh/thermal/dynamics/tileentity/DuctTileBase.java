@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.tileentity;
 
-import cofh.thermal.dynamics.api.grid.Grid;
-import cofh.thermal.dynamics.api.internal.GridHostInternal;
+import cofh.thermal.dynamics.api.grid.IGrid;
+import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
@@ -13,9 +13,9 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-public abstract class DuctTileBase extends TileEntity implements GridHostInternal {
+public abstract class DuctTileBase extends TileEntity implements IGridHostInternal {
 
-    private Optional<Grid<?, ?>> grid = Optional.empty();
+    private Optional<IGrid<?, ?>> grid = Optional.empty();
     @Nullable
     private UUID lastGrid = null;
 
@@ -55,13 +55,13 @@ public abstract class DuctTileBase extends TileEntity implements GridHostInterna
     }
 
     @Override
-    public Optional<Grid<?, ?>> getGrid() {
+    public Optional<IGrid<?, ?>> getGrid() {
 
         return grid;
     }
 
     @Override
-    public void setGrid(Grid<?, ?> grid) {
+    public void setGrid(IGrid<?, ?> grid) {
 
         lastGrid = grid.getId();
         this.grid = Optional.of(grid);

@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.block;
 
-import cofh.thermal.dynamics.api.grid.GridContainer;
-import cofh.thermal.dynamics.api.internal.GridHostInternal;
+import cofh.thermal.dynamics.api.grid.IGridContainer;
+import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -40,9 +40,9 @@ public abstract class TileBlockDuctBase extends Block {
         if (world.isClientSide()) return;
 
         TileEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof GridHostInternal) {
-            GridHostInternal host = (GridHostInternal) tile;
-            Optional<GridContainer> gridContainer = GridContainer.getCapability(world);
+        if (tile instanceof IGridHostInternal) {
+            IGridHostInternal host = (IGridHostInternal) tile;
+            Optional<IGridContainer> gridContainer = IGridContainer.getCapability(world);
             gridContainer.ifPresent(e -> e.onGridHostDestroyed(host));
         }
         super.playerWillDestroy(world, pos, state, player);
@@ -54,9 +54,9 @@ public abstract class TileBlockDuctBase extends Block {
         if (world.isClientSide()) return;
 
         TileEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof GridHostInternal) {
-            GridHostInternal host = (GridHostInternal) tile;
-            Optional<GridContainer> gridContainer = GridContainer.getCapability(world);
+        if (tile instanceof IGridHostInternal) {
+            IGridHostInternal host = (IGridHostInternal) tile;
+            Optional<IGridContainer> gridContainer = IGridContainer.getCapability(world);
             gridContainer.ifPresent(e -> e.onGridHostPlaced(host));
         }
     }

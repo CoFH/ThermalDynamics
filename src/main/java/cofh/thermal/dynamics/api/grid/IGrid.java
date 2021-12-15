@@ -6,7 +6,10 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
@@ -26,7 +29,7 @@ import java.util.UUID;
  *
  * @author covers1624
  */
-public interface Grid<G extends Grid<?, ?>, N extends GridNode<?>> {
+public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
 
     /**
      * Gets the UUID that represents this Grid.
@@ -51,13 +54,13 @@ public interface Grid<G extends Grid<?, ?>, N extends GridNode<?>> {
     /**
      * Gets the type of this grid.
      * <p>
-     * {@link GridType} can be considered similar to {@link TileEntityType} where
+     * {@link IGridType} can be considered similar to {@link TileEntityType} where
      * it is a unique key and Factory.
      *
      * @return The type of this grid.
-     * @see GridType
+     * @see IGridType
      */
-    GridType<G> getGridType();
+    IGridType<G> getGridType();
 
     /**
      * Returns a Map of all nodes in the Grid.
@@ -88,5 +91,14 @@ public interface Grid<G extends Grid<?, ?>, N extends GridNode<?>> {
     }
 
     boolean canConnectExternally(TileEntity tile, @Nullable Direction dir);
+
+    default <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+
+        return LazyOptional.empty();
+    }
+
+    default void refreshCapabilities() {
+
+    }
 
 }

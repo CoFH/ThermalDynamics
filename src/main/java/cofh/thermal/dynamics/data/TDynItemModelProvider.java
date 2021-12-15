@@ -30,10 +30,6 @@ public class TDynItemModelProvider extends ItemModelProviderCoFH {
         registerBlockItemModels();
 
         DeferredRegisterCoFH<Item> reg = ITEMS;
-
-        // generated(reg.getSup(ID_ENDER_TUNER));
-
-        // generated(reg.getSup(ID_ENDER_TUNNEL));
     }
 
     private void registerBlockItemModels() {

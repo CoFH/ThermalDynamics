@@ -2,9 +2,9 @@ package cofh.thermal.dynamics.grid;
 
 import cofh.thermal.dynamics.api.grid.*;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.api.internal.GridHostInternal;
-import cofh.thermal.dynamics.api.internal.TickableGridNode;
-import cofh.thermal.dynamics.handler.GridContainerImpl;
+import cofh.thermal.dynamics.api.internal.IGridHostInternal;
+import cofh.thermal.dynamics.api.internal.ITickableGridNode;
+import cofh.thermal.dynamics.handler.GridContainer;
 import com.google.common.graph.*;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
@@ -26,13 +26,13 @@ import static net.covers1624.quack.util.SneakyUtils.notPossible;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
 /**
- * Abstract base class for all {@link Grid} implementations.
+ * Abstract base class for all {@link IGrid} implementations.
  * <p>
  *
  * @author covers1624
  */
 @SuppressWarnings ("UnstableApiUsage")
-public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> implements Grid<G, N>, INBTSerializable<CompoundNBT> {
+public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> implements IGrid<G, N>, INBTSerializable<CompoundNBT> {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final boolean DEBUG = AbstractGrid.class.desiredAssertionStatus();
@@ -55,12 +55,12 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
      */
     private final Long2ObjectMap<List<AbstractGridNode<?>>> nodesPerChunk = new Long2ObjectRBTreeMap<>();
     private final LongSet loadedChunks = new LongOpenHashSet();
-    private final GridType<G> gridType;
+    private final IGridType<G> gridType;
     private final UUID id;
     private final World world;
     public boolean isLoaded;
 
-    protected AbstractGrid(GridType<G> gridType, UUID id, World world) {
+    protected AbstractGrid(IGridType<G> gridType, UUID id, World world) {
 
         this.gridType = gridType;
         this.id = id;
@@ -75,8 +75,8 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
             if (nodes == null) continue;
             for (AbstractGridNode<?> node : nodes) {
                 assert node.isLoaded();
-                if (node instanceof TickableGridNode) {
-                    ((TickableGridNode<?>) node).tick();
+                if (node instanceof ITickableGridNode) {
+                    ((ITickableGridNode<?>) node).tick();
                 }
             }
         }
@@ -261,7 +261,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
     // Called to split the current grid into the specified partitions.
     public final void splitInto(List<Set<AbstractGridNode<?>>> splitGraphs) {
 
-        GridContainerImpl gridContainer = ((GridContainerImpl) GridContainer.getCapability(world)
+        GridContainer gridContainer = ((GridContainer) IGridContainer.getCapability(world)
                 .orElseThrow(notPossible()));
         List<AbstractGrid<?, ?>> otherGrids = new LinkedList<>();
 
@@ -308,12 +308,12 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
             long chunkPos = entry.getLongKey();
             Chunk chunk = world.getChunk(ChunkPos.getX(chunkPos), ChunkPos.getZ(chunkPos));
             for (BlockPos pos : entry.getValue()) {
-                Optional<GridHost> gridHostOpt = GridHelper.getGridHost(chunk.getBlockEntity(pos));
+                Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(chunk.getBlockEntity(pos));
                 if (!gridHostOpt.isPresent()) {
                     LOGGER.error("Node not connected to grid! Chunk modified externally. {}", pos);
                     continue;
                 }
-                GridHostInternal gridHost = (GridHostInternal) gridHostOpt.get();
+                IGridHostInternal gridHost = (IGridHostInternal) gridHostOpt.get();
                 gridHost.setGrid(grid);
             }
         }
@@ -345,7 +345,7 @@ public abstract class AbstractGrid<G extends Grid<?, ?>, N extends GridNode<?>> 
     //@formatter:off
     @Override public final UUID getId() { return id; }
     @Override public final World getWorld() { return world; }
-    @Override public GridType<G> getGridType() { return gridType; }
+    @Override public IGridType<G> getGridType() { return gridType; }
     @Override public final Map<BlockPos, N> getNodes() { return unsafeCast(nodes); }
     //@formatter:on
 

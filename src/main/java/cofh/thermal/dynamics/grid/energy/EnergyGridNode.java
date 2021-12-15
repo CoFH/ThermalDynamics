@@ -1,9 +1,9 @@
 package cofh.thermal.dynamics.grid.energy;
 
-import cofh.thermal.dynamics.api.grid.energy.EnergyGrid;
-import cofh.thermal.dynamics.api.grid.energy.EnergyGridNode;
+import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
+import cofh.thermal.dynamics.api.grid.energy.IEnergyGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.api.internal.TickableGridNode;
+import cofh.thermal.dynamics.api.internal.ITickableGridNode;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -16,9 +16,9 @@ import net.minecraftforge.energy.IEnergyStorage;
 /**
  * @author covers1624
  */
-public class EnergyGridNodeImpl extends AbstractGridNode<EnergyGrid> implements EnergyGridNode, TickableGridNode<EnergyGrid> {
+public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEnergyGridNode, ITickableGridNode<IEnergyGrid> {
 
-    protected EnergyGridNodeImpl(EnergyGrid grid) {
+    protected EnergyGridNode(IEnergyGrid grid) {
 
         super(grid);
     }
@@ -27,8 +27,10 @@ public class EnergyGridNodeImpl extends AbstractGridNode<EnergyGrid> implements 
     protected boolean isExternallyConnectable(Direction side) {
 
         TileEntity tile = getWorld().getBlockEntity(getPos().relative(side));
+        if (tile == null) return false;
         if (GridHelper.getGridHost(tile).isPresent()) return false; // We cannot externally connect to other grids.
-        if (tile.getCapability(CapabilityEnergy.ENERGY).isPresent()) return true; // We can connect to the inner face
+        if (tile.getCapability(CapabilityEnergy.ENERGY).isPresent())
+            return true; // We can(not) connect to the inner face
         if (tile.getCapability(CapabilityEnergy.ENERGY, side.getOpposite()).isPresent())
             return true; // We can connect to the face
         return false; // nope
@@ -46,11 +48,8 @@ public class EnergyGridNodeImpl extends AbstractGridNode<EnergyGrid> implements 
             LazyOptional<IEnergyStorage> innerCap = tile.getCapability(CapabilityEnergy.ENERGY);
             LazyOptional<IEnergyStorage> faceCap = tile.getCapability(CapabilityEnergy.ENERGY, dir.getOpposite());
             if (!innerCap.isPresent() && !faceCap.isPresent()) continue;
-
             if (GridHelper.getGridHost(tile).isPresent()) continue; // Ignore other grids.
-
-            // TODO transfer energy.
-
+            // TODO subtract from grid storage, determine proper amount to send
         }
     }
 
