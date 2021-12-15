@@ -515,30 +515,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     }
 
     public void onChunkLoad(IChunk chunk) {
-        // This should always be the cause, but whatever.
-        if (chunk instanceof Chunk) {
-            Chunk chonk = (Chunk) chunk;
-            // TODO, we _may_ be able to use TileEntity.onLoad instead of this.
-            // We need to attach each GridHost back to its grid when the chunk gets loaded.
-            for (TileEntity tile : chonk.getBlockEntities().values()) {
-                Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(tile);
-                gridHostOpt.ifPresent(e -> {
-                    IGridHostInternal host = (IGridHostInternal) e;
-                    UUID lastGrid = host.getLastGrid();
-                    if (lastGrid == null) return;
-
-                    AbstractGrid<?, ?> grid = grids.get(lastGrid);
-                    if (grid != null) {
-                        if (DEBUG) {
-                            LOGGER.info("Reattaching host {} to grid.", host.getHostPos());
-                        }
-                        host.setGrid(grid);
-                    } else {
-                        LOGGER.warn("Unable to re-attach grid to {}. Not found.", host.getHostPos());
-                    }
-                });
-            }
-        }
 
         for (AbstractGrid<?, ?> grid : grids.values()) {
             if (grid.onChunkLoad(chunk)) {

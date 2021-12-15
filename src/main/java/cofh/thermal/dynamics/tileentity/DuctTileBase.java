@@ -1,6 +1,7 @@
 package cofh.thermal.dynamics.tileentity;
 
 import cofh.thermal.dynamics.api.grid.IGrid;
+import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.block.BlockState;
@@ -13,11 +14,12 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNull;
+import static net.covers1624.quack.util.SneakyUtils.notPossible;
+
 public abstract class DuctTileBase extends TileEntity implements IGridHostInternal {
 
     private Optional<IGrid<?, ?>> grid = Optional.empty();
-    @Nullable
-    private UUID lastGrid = null;
 
     public DuctTileBase() {
 
@@ -27,9 +29,6 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
     @Override
     public CompoundNBT save(CompoundNBT tag) {
 
-        if (lastGrid != null) {
-            tag.putUUID("last_grid", lastGrid);
-        }
         return super.save(tag);
     }
 
@@ -37,9 +36,6 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
     public void load(BlockState state, CompoundNBT tag) {
 
         super.load(state, tag);
-        if (tag.hasUUID("last_grid")) {
-            lastGrid = tag.getUUID("last_grid");
-        }
     }
 
     @Override
@@ -57,21 +53,19 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
     @Override
     public Optional<IGrid<?, ?>> getGrid() {
 
+        if (!grid.isPresent()) {
+            IGridContainer gridContainer = IGridContainer.getCapability(level)
+                    .orElseThrow(notPossible());
+            grid = Optional.of(requireNonNull(gridContainer.getGrid(getBlockPos())));
+        }
+
         return grid;
     }
 
     @Override
     public void setGrid(IGrid<?, ?> grid) {
 
-        lastGrid = grid.getId();
         this.grid = Optional.of(grid);
-    }
-
-    @Nullable
-    @Override
-    public UUID getLastGrid() {
-
-        return lastGrid;
     }
 
 }

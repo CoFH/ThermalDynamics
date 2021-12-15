@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.function.LongFunction;
 
 import static net.covers1624.quack.util.SneakyUtils.notPossible;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
@@ -288,22 +289,22 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         onMerge(unsafeCast(other));
 
         // Loop all edges in other grid.
-        Long2ObjectMap<Set<BlockPos>> posMap = new Long2ObjectArrayMap<>();
+        PositionCollector positionCollector = new PositionCollector(world);
         for (EndpointPair<AbstractGridNode<?>> edge : other.nodeGraph.edges()) {
             AbstractGridNode<?> a = edge.nodeU();
             AbstractGridNode<?> b = edge.nodeV();
 
             // Collect all positions between node edges. 'betweenClosed' returns a and b.
             for (BlockPos pos : BlockPos.betweenClosed(a.getPos(), b.getPos())) {
-                collectPosition(posMap, pos.immutable());
+                positionCollector.collectPosition(pos.immutable());
             }
             // Insert edge and value.
             nodeGraph.putEdgeValue(a, b, other.nodeGraph.edgeValue(a, b));
         }
-        other.nodeGraph.nodes().forEach(e -> collectPosition(posMap, e.getPos()));
+        other.nodeGraph.nodes().forEach(e -> positionCollector.collectPosition(e.getPos()));
 
         // Iterate all in-world nodes and update the tracked grid.
-        updateGridHosts(world, posMap, this);
+        updateGridHosts(world, positionCollector.getChunkPositions(), this);
 
         // Insert all nodes into the Grid's lookup maps and update the node about the grid change.
         for (AbstractGridNode<?> node : other.nodeGraph.nodes()) {
@@ -322,12 +323,12 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         List<AbstractGrid<?, ?>> newGrids = new LinkedList<>();
 
         for (Set<AbstractGridNode<?>> splitGraph : splitGraphs) {
-            Long2ObjectMap<Set<BlockPos>> posMap = new Long2ObjectArrayMap<>();
+            PositionCollector positionCollector = new PositionCollector(world);
 
             // Create new grid.
             AbstractGrid<?, ?> newGrid = gridContainer.createAndAddGrid(gridContainer.nextUUID(), gridType, true);
             for (AbstractGridNode<?> node : splitGraph) {
-                collectPosition(posMap, node.getPos());
+                positionCollector.collectPosition(node.getPos());
                 newGrid.insertExistingNode(node);
 
                 // Iterate all edges connected to this node.
@@ -335,14 +336,14 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                     newGrid.insertExistingNode(adj);
 
                     for (BlockPos pos : BlockPos.betweenClosed(node.getPos(), adj.getPos())) {
-                        collectPosition(posMap, pos.immutable());
+                        positionCollector.collectPosition(pos.immutable());
                     }
                     // Put edge value in new grid.
                     newGrid.nodeGraph.putEdgeValue(node, adj, nodeGraph.edgeValue(node, adj));
                 }
             }
             // Update all hosts within the new grid of the change.
-            updateGridHosts(world, posMap, newGrid);
+            updateGridHosts(world, positionCollector.getChunkPositions(), newGrid);
 
             // Insert all nodes into the Grid's lookup maps and update the node about the grid change.
             for (AbstractGridNode<?> node : splitGraph) {
@@ -424,10 +425,42 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         return ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
     }
 
-    private static void collectPosition(Long2ObjectMap<Set<BlockPos>> chunkPositions, BlockPos toCollect) {
+    private static class PositionCollector {
 
-        chunkPositions.computeIfAbsent(asChunkLong(toCollect), e -> new HashSet<>())
-                .add(toCollect);
+        private static final LongFunction<Set<BlockPos>> FACTORY = e -> new HashSet<>();
+
+        private final World world;
+        private final Long2ObjectMap<Set<BlockPos>> chunkPositions = new Long2ObjectOpenHashMap<>();
+
+        private final LongSet loadedChunks = new LongOpenHashSet();
+        private final LongSet unloadedChunks = new LongOpenHashSet();
+
+        private PositionCollector(World world) {
+
+            this.world = world;
+        }
+
+        public void collectPosition(BlockPos pos) {
+
+            long chunkLong = asChunkLong(pos);
+
+            if (unloadedChunks.contains(chunkLong)) {
+                return; // Skip
+            }
+
+            if (!loadedChunks.contains(chunkLong)) {
+                if (!world.isLoaded(pos)) {
+                    unloadedChunks.add(chunkLong);
+                    return; // Skip.
+                }
+                loadedChunks.add(chunkLong);
+            }
+            chunkPositions.computeIfAbsent(chunkLong, FACTORY).add(pos);
+        }
+
+        public Long2ObjectMap<Set<BlockPos>> getChunkPositions() {
+
+            return chunkPositions;
+        }
     }
-
 }

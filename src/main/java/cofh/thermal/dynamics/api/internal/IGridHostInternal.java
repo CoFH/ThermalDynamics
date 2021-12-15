@@ -18,7 +18,4 @@ public interface IGridHostInternal extends IGridHost {
     void setGrid(IGrid<?, ?> grid);
 
     Set<IGridType<?>> getExposedTypes();
-
-    @Nullable
-    UUID getLastGrid();
 }
