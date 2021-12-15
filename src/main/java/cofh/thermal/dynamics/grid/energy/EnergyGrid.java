@@ -70,7 +70,7 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
 
         if (GridHelper.getGridHost(tile).isPresent()) return false; // We cannot externally connect to other grids.
         if (dir != null) {
-            return tile.getCapability(CapabilityEnergy.ENERGY, dir.getOpposite()).isPresent();
+            return tile.getCapability(CapabilityEnergy.ENERGY, dir).isPresent();
         }
         return tile.getCapability(CapabilityEnergy.ENERGY).isPresent();
     }

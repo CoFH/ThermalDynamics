@@ -13,6 +13,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.registries.ObjectHolder;
 
 import static cofh.lib.util.constants.Constants.ID_THERMAL;
+import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.dynamics.init.TDynIDs.*;
 
 @ObjectHolder (ID_THERMAL)
@@ -22,13 +23,13 @@ public class TDynReferences {
 
     }
 
-    @ObjectHolder (ID_GRID_ENERGY)
+    @ObjectHolder (ID_THERMAL_DYNAMICS + ":" + ID_GRID_ENERGY)
     public static final IGridType<IEnergyGrid> ENERGY_GRID = null;
-    //    @ObjectHolder(ID_GRID_FLUID)
+    //    @ObjectHolder(ID_THERMAL_DYNAMICS + ":" + ID_GRID_FLUID)
     //    public static final GridType<FluidGrid> FLUID_GRID = null;
-    @ObjectHolder (ID_GRID_ITEM)
+    @ObjectHolder (ID_THERMAL_DYNAMICS + ":" + ID_GRID_ITEM)
     public static final IGridType<IItemGrid> ITEM_GRID = null;
-    @ObjectHolder (ID_GRID_MULTI)
+    @ObjectHolder (ID_THERMAL_DYNAMICS + ":" + ID_GRID_MULTI)
     public static final IGridType<IMultiGrid> MULTI_GRID = null;
 
     @ObjectHolder (ID_DUCT_ENERGY)

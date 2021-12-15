@@ -118,7 +118,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             // - Unlink the 'a/b' nodes from each other and re-link with the adjacent node.
             // - Add link to the node we just placed.
             AbstractGridNode<?> abMiddle = generateIntersection(grid, adjacent.getHostPos(), host.getHostPos());
-            grid.nodeGraph.putEdgeValue(abMiddle, newNode, 0);
+            grid.nodeGraph.putEdgeValue(abMiddle, newNode, new HashSet<>());
 
             if (DEBUG) {
                 LOGGER.info(" T intersection creation. New Node: {}, Adjacent: {}",
@@ -137,24 +137,26 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
             AbstractGridNode<?> edge = onlyOrDefault(edgeNodes, null);
             if (edge != null && isOnSameAxis(newNode.getPos(), edge.getPos()) && !grid.canConnectToAdjacent(adjacentNode.getPos())) {
-                Integer distance = grid.nodeGraph.edgeValue(adjacentNode, edge);
+                Set<BlockPos> values = grid.nodeGraph.edgeValue(adjacentNode, edge);
+                int oldLen = values.size();
+                values.add(adjacentNode.getPos());
                 if (DEBUG) {
                     LOGGER.info(
                             "Extending branch edge from {} to {} dist {}, new {}, newDist {}",
                             adjacentNode.getPos(),
                             edge.getPos(),
-                            distance,
+                            oldLen,
                             newNode.getPos(),
-                            distance + 1
+                            values.size()
                     );
                 }
                 grid.removeNode(adjacentNode);
-                grid.nodeGraph.putEdgeValue(newNode, edge, distance + 1);
+                grid.nodeGraph.putEdgeValue(newNode, edge, values);
             } else {
                 if (DEBUG) {
                     LOGGER.info("Adding new single node. adjacent {}, new {}", adjacentNode.getPos(), newNode.getPos());
                 }
-                grid.nodeGraph.putEdgeValue(newNode, adjacentNode, 0);
+                grid.nodeGraph.putEdgeValue(newNode, adjacentNode, new HashSet<>());
             }
         }
     }
@@ -177,32 +179,32 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         assert grid.getNodes().get(pos) == null;
 
         // Find the 2 aforementioned existing nodes.
-        List<Pair<IGridNode<?>, Integer>> attached = GridHelper.locateAttachedNodes(world, pos, from);
+        List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, pos, from);
         assert attached.size() == 2;
 
-        Pair<IGridNode<?>, Integer> a = attached.get(0);
-        Pair<IGridNode<?>, Integer> b = attached.get(1);
+        Pair<IGridNode<?>, Set<BlockPos>> a = attached.get(0);
+        Pair<IGridNode<?>, Set<BlockPos>> b = attached.get(1);
         AbstractGridNode<?> attachedA = (AbstractGridNode<?>) a.getLeft();
-        int attachedALen = a.getRight() - 1;
+        Set<BlockPos> attachedAValue = a.getRight();
         AbstractGridNode<?> attachedB = (AbstractGridNode<?>) b.getLeft();
-        int attachedBLen = b.getRight() - 1;
+        Set<BlockPos> attachedBValue = b.getRight();
 
         // Make sure these 2 nodes are actually connected.
         assert grid.nodeGraph.edgeValueOrDefault(attachedA, attachedB, null) != null;
 
         // Link new node to 2 existing nodes, remove edge between existing nodes.
         AbstractGridNode<?> abMiddle = grid.newNode(pos);
-        grid.nodeGraph.putEdgeValue(abMiddle, attachedA, attachedALen);
-        grid.nodeGraph.putEdgeValue(abMiddle, attachedB, attachedBLen);
-        Integer abLen = grid.nodeGraph.removeEdge(attachedA, attachedB);
+        grid.nodeGraph.putEdgeValue(abMiddle, attachedA, attachedAValue);
+        grid.nodeGraph.putEdgeValue(abMiddle, attachedB, attachedBValue);
+        Set<BlockPos> abValue = grid.nodeGraph.removeEdge(attachedA, attachedB);
         if (DEBUG) {
             LOGGER.info("Intersection creation. Node A: {}, Node B: {}, AB dist: {}, Middle: {}, NewA dist: {}, NewB dist: {}",
                     attachedA.getPos(),
                     attachedB.getPos(),
-                    abLen,
+                    abValue.size(),
                     abMiddle.getPos(),
-                    attachedALen,
-                    attachedBLen
+                    attachedAValue.size(),
+                    attachedBValue.size()
             );
         }
         return abMiddle;
@@ -227,10 +229,10 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
                             abMiddle.getPos()
                     );
                 }
-                grid.nodeGraph.putEdgeValue(abMiddle, node, 0);
+                grid.nodeGraph.putEdgeValue(abMiddle, node, new HashSet<>());
             } else {
                 AbstractGridNode<?> adj = (AbstractGridNode<?>) adjOpt.get();
-                grid.nodeGraph.putEdgeValue(adj, node, 0);
+                grid.nodeGraph.putEdgeValue(adj, node, new HashSet<>());
                 simplifyNode(adj);
                 if (DEBUG) {
                     LOGGER.info("Adding edge. {}, {}", adj.getPos(), node.getPos());
@@ -313,15 +315,17 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
             Set<AbstractGridNode<?>> edgeNodes = grid.nodeGraph.adjacentNodes(currNode);
             AbstractGridNode<?> edge = only(edgeNodes);
-            int edgeLen = grid.nodeGraph.edgeValue(edge, currNode);
-            grid.nodeGraph.putEdgeValue(adjacentNode, edge, edgeLen - 1);
+            Set<BlockPos> edgeValue = grid.nodeGraph.edgeValue(edge, currNode);
+            int preLen = edgeValue.size();
+            edgeValue.remove(currNode.getPos());
+            grid.nodeGraph.putEdgeValue(adjacentNode, edge, edgeValue);
             if (DEBUG) {
                 LOGGER.info("Removing dead end: Curr node: {}, Adjacent: {}, Edge: {}, Len: {}, New len: {}",
                         currNode.getPos(),
                         adjacentNode.getPos(),
                         edge.getPos(),
-                        edgeLen,
-                        edgeLen - 1
+                        preLen,
+                        edgeValue.size()
                 );
             }
             grid.removeNode(currNode);
@@ -356,7 +360,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             }
         } else {
             // We are a host without a node, between 2 nodes.
-            List<Pair<IGridNode<?>, Integer>> attached = GridHelper.locateAttachedNodes(world, host.getHostPos(), host.getHostPos());
+            List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, host.getHostPos(), host.getHostPos());
             assert attached.size() == 2;
             AbstractGridNode<?> a = (AbstractGridNode<?>) attached.get(0).getLeft();
             AbstractGridNode<?> b = (AbstractGridNode<?>) attached.get(1).getLeft();
@@ -370,14 +374,14 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         for (IGridHostInternal adjHost : adjacentHosts.values()) {
             if (!adjHost.getNode().isPresent()) {
                 // We always need to create a new node here.
-                Pair<IGridNode<?>, Integer> foundEdge = only(GridHelper.locateAttachedNodes(world, adjHost.getHostPos(), host.getHostPos()));
+                Pair<IGridNode<?>, Set<BlockPos>> foundEdge = only(GridHelper.locateAttachedNodes(world, adjHost.getHostPos(), host.getHostPos()));
                 assert foundEdge != null;
                 AbstractGridNode<?> newNode = grid.newNode(adjHost.getHostPos());
                 AbstractGridNode<?> foundNode = (AbstractGridNode<?>) foundEdge.getLeft();
-                int foundNodeLen = foundEdge.getRight();
-                grid.nodeGraph.putEdgeValue(newNode, foundNode, foundNodeLen);
+                Set<BlockPos> foundNodeValue = foundEdge.getRight();
+                grid.nodeGraph.putEdgeValue(newNode, foundNode, foundNodeValue);
                 if (DEBUG) {
-                    LOGGER.info("Generating new node at {} with edge {} len {}", newNode.getPos(), foundNode.getPos(), foundNodeLen);
+                    LOGGER.info("Generating new node at {} with edge {} len {}", newNode.getPos(), foundNode.getPos(), foundNodeValue);
                 }
             } else {
                 // Attempt to simplify the node.
@@ -404,18 +408,20 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         // If both edges aren't on the same axis, then we can't simplify.
         if (!isOnSameAxis(edges[0].getPos(), edges[1].getPos())) return;
 
-        int aLen = grid.nodeGraph.edgeValue(node, edges[0]);
-        int bLen = grid.nodeGraph.edgeValue(node, edges[1]);
+        HashSet<BlockPos> value = new HashSet<>();
+        value.addAll(grid.nodeGraph.edgeValue(node, edges[0]));
+        value.addAll(grid.nodeGraph.edgeValue(node, edges[1]));
+        value.add(node.getPos());
 
         grid.removeNode(node);
-        grid.nodeGraph.putEdgeValue(edges[0], edges[1], aLen + bLen + 1);
+        grid.nodeGraph.putEdgeValue(edges[0], edges[1], value);
         if (DEBUG) {
             LOGGER.info(
                     "Simplifying grid node '{}' A {}, B {}, Len {}",
                     node.getPos(),
                     edges[0].getPos(),
                     edges[1].getPos(),
-                    aLen + bLen + 1
+                    value.size()
             );
         }
     }

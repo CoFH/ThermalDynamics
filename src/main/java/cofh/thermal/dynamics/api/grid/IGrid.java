@@ -29,6 +29,7 @@ import java.util.UUID;
  *
  * @author covers1624
  */
+// TODO sealed classes in Java 17.
 public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
 
     /**
@@ -69,10 +70,17 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
      */
     Map<BlockPos, N> getNodes();
 
+    /**
+     * Checks if this {@link IGrid} can externally connect to
+     * any adjacent blocks at the given position.
+     *
+     * @param pos The position.
+     * @return If the grid can connect to any adjacent blocks.
+     */
     default boolean canConnectToAdjacent(BlockPos pos) {
 
         for (Direction dir : Direction.values()) {
-            if (canConnectExternally(pos.relative(dir), dir)) {
+            if (canConnectExternally(pos.relative(dir), dir.getOpposite())) {
                 return true;
             }
             if (canConnectExternally(pos.relative(dir), null)) {
@@ -82,6 +90,14 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
         return false;
     }
 
+    /**
+     * Checks if this {@link IGrid} can externally connect to the given {@link TileEntity}
+     * at the given {@link BlockPos} on the given face of the {@link TileEntity}.
+     *
+     * @param pos The {@link BlockPos}.
+     * @param dir The face, <code>null</code> for the 'center' face.
+     * @return If the {@link IGrid} can externally connect.
+     */
     default boolean canConnectExternally(BlockPos pos, @Nullable Direction dir) {
 
         TileEntity tile = getWorld().getBlockEntity(pos);
@@ -90,6 +106,14 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
         return canConnectExternally(tile, dir);
     }
 
+    /**
+     * Checks if this {@link IGrid} can externally connect to the given {@link TileEntity}
+     * on the given face of the {@link TileEntity}.
+     *
+     * @param tile The {@link TileEntity}.
+     * @param dir  The face, <code>null</code> for the 'center' face.
+     * @return If the {@link IGrid} can externally connect.
+     */
     boolean canConnectExternally(TileEntity tile, @Nullable Direction dir);
 
     default <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {

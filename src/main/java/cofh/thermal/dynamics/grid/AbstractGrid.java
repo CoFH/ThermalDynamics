@@ -42,7 +42,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
      * <p>
      * The value object being the path length.
      */
-    public final MutableValueGraph<AbstractGridNode<?>, Integer> nodeGraph = ValueGraphBuilder
+    public final MutableValueGraph<AbstractGridNode<?>, Set<BlockPos>> nodeGraph = ValueGraphBuilder
             .undirected()
             .nodeOrder(ElementOrder.unordered())
             .build();
@@ -124,21 +124,25 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         for (AbstractGridNode<?> node : nodeGraph.nodes()) {
             CompoundNBT nodeTag = new CompoundNBT();
             nodeTag.put("pos", NBTUtil.writeBlockPos(node.getPos()));
-            ListNBT edges = new ListNBT();
-
-            for (AbstractGridNode<?> edge : nodeGraph.adjacentNodes(node)) {
-                CompoundNBT edgeTag = new CompoundNBT();
-                edgeTag.put("pos", NBTUtil.writeBlockPos(edge.getPos()));
-                edgeTag.putInt("distance", nodeGraph.edgeValue(node, edge));
-                edges.add(edgeTag);
-            }
-
-            nodeTag.put("edges", edges);
             nodeTag.merge(node.serializeNBT());
             nodes.add(nodeTag);
         }
-
         tag.put("nodes", nodes);
+
+        ListNBT edges = new ListNBT();
+        for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
+            CompoundNBT edgeTag = new CompoundNBT();
+            edgeTag.put("U", NBTUtil.writeBlockPos(edge.nodeU().getPos()));
+            edgeTag.put("V", NBTUtil.writeBlockPos(edge.nodeV().getPos()));
+            ListNBT valueTag = new ListNBT();
+            for (BlockPos pos : nodeGraph.edgeValue(edge.nodeU(), edge.nodeV())) {
+                valueTag.add(NBTUtil.writeBlockPos(pos));
+            }
+            edgeTag.put("value", valueTag);
+            edges.add(edgeTag);
+        }
+
+        tag.put("edges", edges);
         return tag;
     }
 
@@ -150,19 +154,21 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         for (int i = 0; i < nodes.size(); i++) {
             CompoundNBT nodeTag = nodes.getCompound(i);
             BlockPos pos = NBTUtil.readBlockPos(nodeTag.getCompound("pos"));
-            AbstractGridNode<?> node = this.nodes.computeIfAbsent(pos, e -> newNode());
-            node.setPos(pos);
-            nodeGraph.addNode(node);
-            getNodesForChunk(pos).add(node);
-
-            ListNBT edges = nodeTag.getList("edges", 10);
-            for (int i1 = 0; i1 < edges.size(); i1++) {
-                CompoundNBT edgeTag = edges.getCompound(i1);
-                BlockPos edgePos = NBTUtil.readBlockPos(edgeTag.getCompound("pos"));
-                AbstractGridNode<?> edgeNode = this.nodes.computeIfAbsent(edgePos, e -> newNode());
-                nodeGraph.putEdgeValue(node, edgeNode, edgeTag.getInt("distance"));
-            }
+            AbstractGridNode<?> node = newNode(pos);
             node.deserializeNBT(nodeTag);
+        }
+
+        ListNBT edges = nbt.getList("edges", 10);
+        for (int i = 0; i < edges.size(); i++) {
+            CompoundNBT edgeTag = edges.getCompound(i);
+            BlockPos uPos = NBTUtil.readBlockPos(edgeTag.getCompound("U"));
+            BlockPos vPos = NBTUtil.readBlockPos(edgeTag.getCompound("V"));
+            Set<BlockPos> value = new HashSet<>();
+            ListNBT valueTag = edgeTag.getList("value", 10);
+            for (int j = 0; j < valueTag.size(); j++) {
+                value.add(NBTUtil.readBlockPos(valueTag.getCompound(j)));
+            }
+            nodeGraph.putEdgeValue(this.nodes.get(uPos), this.nodes.get(vPos), value);
         }
 
         // Make sure no Node positions are identity match to BlockPos.ZERO

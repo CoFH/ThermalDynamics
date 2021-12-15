@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
+ * Represents internal, unsupported methods on a {@link IGridHost}.
+ *
  * @author covers1624
  */
 public interface IGridHostInternal extends IGridHost {
@@ -19,5 +21,4 @@ public interface IGridHostInternal extends IGridHost {
 
     @Nullable
     UUID getLastGrid();
-
 }

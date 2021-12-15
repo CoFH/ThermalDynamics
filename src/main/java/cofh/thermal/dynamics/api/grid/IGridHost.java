@@ -1,15 +1,26 @@
 package cofh.thermal.dynamics.api.grid;
 
+import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
 
 import java.util.Optional;
 
 /**
+ * Represents an object capable of hosting a {@link IGrid}.
+ * <p>
+ * These are usually {@link TileEntity} instances.
+ * <p>
+ * This interface may be implemented directly on the {@link TileEntity},
+ * or exposed via a {@link Capability}.
+ *
  * @author covers1624
+ * @see TDynApi#GRID_HOST_CAPABILITY
  */
 public interface IGridHost {
 

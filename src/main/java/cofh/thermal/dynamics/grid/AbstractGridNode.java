@@ -13,6 +13,10 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 
 /**
+ * Represents the base implementation of a {@link IGridNode}.
+ * <p>
+ * All {@link IGridNode} instances must extend from this.
+ *
  * @author covers1624
  */
 public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNode<G>, INBTSerializable<CompoundNBT> {

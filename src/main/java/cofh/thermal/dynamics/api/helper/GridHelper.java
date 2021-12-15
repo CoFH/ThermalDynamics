@@ -1,9 +1,11 @@
 package cofh.thermal.dynamics.api.helper;
 
 import cofh.thermal.dynamics.api.TDynApi;
+import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.grid.IGridNode;
 import com.google.common.collect.ImmutableList;
+import net.covers1624.quack.collection.StreamableIterable;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -16,6 +18,8 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 /**
+ * Contains helper methods for interacting with {@link IGrid Grids} in world.
+ *
  * @author covers1624
  */
 public class GridHelper {
@@ -24,6 +28,14 @@ public class GridHelper {
 
     }
 
+    /**
+     * Optionally get a {@link IGridHost} at the given {@link BlockPos} within the
+     * given {@link IBlockReader}.
+     *
+     * @param reader The level.
+     * @param pos    The {@link BlockPos}.
+     * @return Optionally the {@link IGridHost}.
+     */
     public static Optional<IGridHost> getGridHost(IBlockReader reader, BlockPos pos) {
 
         if (reader instanceof IWorldReader) {
@@ -33,6 +45,12 @@ public class GridHelper {
         return getGridHost(reader.getBlockEntity(pos));
     }
 
+    /**
+     * Optionally get a {@link IGridHost} from the given {@link TileEntity}.
+     *
+     * @param tile The {@link TileEntity}.
+     * @return Optionally the {@link IGridHost}.
+     */
     public static Optional<IGridHost> getGridHost(@Nullable TileEntity tile) {
 
         if (tile == null) return Optional.empty();
@@ -43,35 +61,49 @@ public class GridHelper {
         return tile.getCapability(TDynApi.GRID_HOST_CAPABILITY).resolve();
     }
 
-    public static List<Pair<IGridNode<?>, Integer>> locateAttachedNodes(World world, BlockPos start, BlockPos from) {
+    /**
+     * Locate all {@link IGridNode GridNodes} attached to the given {@link BlockPos}.
+     *
+     * @param world The {@link World} to search in.
+     * @param start The {@link BlockPos} to start scanning from.
+     * @param from  The {@link BlockPos} to ignore. Usually the adjacent block which is performing this check.
+     * @return The attached {@link IGridNode GridNodes} and the {@link BlockPos positions} between <code>start</code>
+     * and the found {@link IGridNode}.
+     */
+    public static List<Pair<IGridNode<?>, Set<BlockPos>>> locateAttachedNodes(World world, BlockPos start, BlockPos from) {
 
         Set<BlockPos> visited = new HashSet<>();
-        LinkedList<Pair<IGridHost, Integer>> candidates = new LinkedList<>();
+        LinkedList<IGridHost> candidates = new LinkedList<>();
         visited.add(start);
         visited.add(from);
-        addCandidates(world, start, 0, visited, candidates);
-        ImmutableList.Builder<Pair<IGridNode<?>, Integer>> builder = ImmutableList.builder();
+        addCandidates(world, start, visited, candidates);
+        ImmutableList.Builder<Pair<IGridNode<?>, Set<BlockPos>>> builder = ImmutableList.builder();
         while (!candidates.isEmpty()) {
-            Pair<IGridHost, Integer> candidate = candidates.pop();
-            IGridHost host = candidate.getLeft();
+            IGridHost host = candidates.pop();
             Optional<IGridNode<?>> nodeOpt = host.getNode();
             if (nodeOpt.isPresent()) {
-                builder.add(Pair.of(nodeOpt.get(), candidate.getRight()));
+                builder.add(Pair.of(nodeOpt.get(), getPositionsBetween(start, host.getHostPos())));
             } else {
-                addCandidates(world, host.getHostPos(), candidate.getRight(), visited, candidates);
+                addCandidates(world, host.getHostPos(), visited, candidates);
             }
         }
         return builder.build();
     }
 
-    private static void addCandidates(World world, BlockPos pos, int len, Set<BlockPos> visited, LinkedList<Pair<IGridHost, Integer>> candidates) {
+    private static void addCandidates(World world, BlockPos pos, Set<BlockPos> visited, LinkedList<IGridHost> candidates) {
 
         for (Direction dir : Direction.values()) {
             BlockPos adj = pos.relative(dir);
             if (!visited.add(adj)) continue;
             GridHelper.getGridHost(world, adj)
-                    .ifPresent(e -> candidates.add(Pair.of(e, len + 1)));
+                    .ifPresent(candidates::add);
         }
     }
 
+    private static Set<BlockPos> getPositionsBetween(BlockPos a, BlockPos b) {
+
+        return StreamableIterable.of(BlockPos.betweenClosed(a, b))
+                .map(BlockPos::immutable)
+                .toSet();
+    }
 }

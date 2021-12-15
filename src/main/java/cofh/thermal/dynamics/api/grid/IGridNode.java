@@ -13,6 +13,7 @@ import java.util.EnumSet;
  *
  * @author covers1624
  */
+// TODO sealed classes in Java 17.
 public interface IGridNode<G extends IGrid<?, ?>> {
 
     /**
