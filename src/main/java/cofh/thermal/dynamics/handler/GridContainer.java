@@ -614,6 +614,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
     // region HELPERS
     private void removeGridLookupEdge(AbstractGrid<?, ?> grid, Set<BlockPos> edge) {
+
         for (BlockPos pos : edge) {
             removeGridLookup(grid, pos);
         }

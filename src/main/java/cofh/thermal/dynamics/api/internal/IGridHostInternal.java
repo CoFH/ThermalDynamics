@@ -4,9 +4,7 @@ import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.grid.IGridType;
 
-import javax.annotation.Nullable;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Represents internal, unsupported methods on a {@link IGridHost}.
@@ -18,4 +16,5 @@ public interface IGridHostInternal extends IGridHost {
     void setGrid(IGrid<?, ?> grid);
 
     Set<IGridType<?>> getExposedTypes();
+
 }

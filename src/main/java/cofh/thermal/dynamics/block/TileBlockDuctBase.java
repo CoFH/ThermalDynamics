@@ -10,7 +10,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -74,4 +73,5 @@ public abstract class TileBlockDuctBase extends Block {
             gridContainer.ifPresent(e -> e.onGridHostNeighborChanged(host));
         }
     }
+
 }

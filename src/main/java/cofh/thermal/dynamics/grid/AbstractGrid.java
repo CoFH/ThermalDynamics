@@ -225,6 +225,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     public abstract AbstractGridNode<G> newNode();
 
     public final AbstractGridNode<?> newNode(BlockPos pos) {
+
         return newNode(pos, true);
     }
 
@@ -462,5 +463,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
             return chunkPositions;
         }
+
     }
+
 }

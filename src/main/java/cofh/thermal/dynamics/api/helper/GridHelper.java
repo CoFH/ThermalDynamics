@@ -119,4 +119,5 @@ public class GridHelper {
 
         return positions;
     }
+
 }
