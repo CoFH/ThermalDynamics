@@ -1,0 +1,10 @@
+{
+    "parent": "thermal:block/duct",
+    "textures": {
+        "duct": "thermal:block/ducts/fluxduct",
+        "duct_connector": "thermal:block/ducts/fluxduct_connector"
+    },
+    "visibility": {
+        "inv": true
+    }
+}

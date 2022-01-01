@@ -8,14 +8,12 @@ import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.client.DebugRenderer;
 import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
 import cofh.thermal.dynamics.handler.GridEvents;
-import cofh.thermal.dynamics.init.TDynBlocks;
-import cofh.thermal.dynamics.init.TDynContainers;
-import cofh.thermal.dynamics.init.TDynGrids;
-import cofh.thermal.dynamics.init.TDynItems;
+import cofh.thermal.dynamics.init.*;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
 import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -110,12 +108,15 @@ public class ThermalDynamics {
     private void registerRenderLayers() {
 
         RenderType cutout = RenderType.cutout();
+        RenderType cutoutMipped = RenderType.cutoutMipped();
         RenderType translucent = RenderType.translucent();
 
         // RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_ENDER_TUNNEL), translucent);
 
         //        RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_FLUID_BUFFER), cutout);
         //        RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_ITEM_BUFFER), cutout);
+
+        RenderTypeLookup.setRenderLayer(TDynReferences.ENERGY_DUCT_BLOCK, cutoutMipped);
     }
     // endregion
 }
