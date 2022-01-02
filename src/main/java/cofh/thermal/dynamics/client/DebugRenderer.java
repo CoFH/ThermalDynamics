@@ -1,14 +1,17 @@
 package cofh.thermal.dynamics.client;
 
+import cofh.lib.util.helpers.BlockHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -31,25 +34,27 @@ import static cofh.lib.util.constants.Constants.ID_THERMAL;
 @Mod.EventBusSubscriber (value = Dist.CLIENT, modid = ID_THERMAL)
 public class DebugRenderer {
 
-    public static final AxisAlignedBB smolBox = new AxisAlignedBB(0.25, 0.25, 0.25, 0.75, 0.75, 0.75);
-    public static final RenderType laserBox = RenderType.create("td:laser", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, false, true, RenderType.State.builder()
+    private static final AxisAlignedBB smolBox = new AxisAlignedBB(0.25, 0.25, 0.25, 0.75, 0.75, 0.75);
+    private static final RenderType laserBox = RenderType.create("td:laser", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, false, true, RenderType.State.builder()
             .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
             .setTextureState(RenderType.NO_TEXTURE)
-            .setDepthTestState(RenderType.NO_DEPTH_TEST)
             .setCullState(RenderType.NO_CULL)
             .setLightmapState(RenderType.NO_LIGHTMAP)
             .createCompositeState(false)
     );
-    public static final RenderType laserLine = RenderType.create("td:laser", DefaultVertexFormats.POSITION_COLOR, GL11.GL_LINES, 256, false, true, RenderType.State.builder()
+    private static final RenderType laserLine = RenderType.create("td:laser", DefaultVertexFormats.POSITION_COLOR, GL11.GL_LINES, 256, false, true, RenderType.State.builder()
             .setLineState(new RenderState.LineState(OptionalDouble.of(2.5D)))
             .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
             .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
             .setTextureState(RenderType.NO_TEXTURE)
-            .setDepthTestState(RenderType.NO_DEPTH_TEST)
             .setCullState(RenderType.NO_CULL)
             .setLightmapState(RenderType.NO_LIGHTMAP)
             .createCompositeState(false)
     );
+    private static final IRenderTypeBuffer.Impl BUFFERS = IRenderTypeBuffer.immediateWithBuffers(Util.make(new HashMap<>(), map -> {
+        map.put(laserBox, new BufferBuilder(laserBox.bufferSize()));
+        map.put(laserLine, new BufferBuilder(laserLine.bufferSize()));
+    }), new BufferBuilder(256));
 
     public static Map<UUID, Map<BlockPos, List<BlockPos>>> grids = new HashMap<>();
 
@@ -59,8 +64,6 @@ public class DebugRenderer {
     }
 
     private static void renderWorldLast(RenderWorldLastEvent event) {
-
-        IRenderTypeBuffer.Impl buffers = Minecraft.getInstance().renderBuffers().bufferSource();
         MatrixStack mStack = event.getMatrixStack();
         mStack.pushPose();
 
@@ -77,7 +80,7 @@ public class DebugRenderer {
             for (Map.Entry<BlockPos, List<BlockPos>> entry : gridEntry.getValue().entrySet()) {
                 BlockPos pos = entry.getKey();
 
-                IVertexBuilder builder = buffers.getBuffer(laserBox);
+                IVertexBuilder builder = BUFFERS.getBuffer(laserBox);
 
                 mStack.pushPose();
                 mStack.translate(pos.getX(), pos.getY(), pos.getZ());
@@ -85,13 +88,12 @@ public class DebugRenderer {
                 mStack.popPose();
 
                 RenderSystem.disableDepthTest();
-                buffers.endBatch(laserBox);
 
-                IVertexBuilder vb = buffers.getBuffer(laserLine);
+                IVertexBuilder vb = BUFFERS.getBuffer(laserLine);
 
                 for (BlockPos edge : entry.getValue()) {
                     BlockPos offset = edge.subtract(pos);
-                    Direction side = getSide(offset);
+                    Direction side = BlockHelper.getSide(offset);
                     Vector3f sub = new Vector3f();
                     if (side != null) {
                         Vector3i norm = side.getNormal();
@@ -107,13 +109,11 @@ public class DebugRenderer {
                     vb.vertex(mStack.last().pose(), start.x(), start.y(), start.z()).color(1F, 0F, 0F, 0.25F).endVertex();
                     vb.vertex(mStack.last().pose(), end.x(), end.y(), end.z()).color(1F, 0F, 0F, 0.25F).endVertex();
                 }
-
-                RenderSystem.disableDepthTest();
-                buffers.endBatch(laserLine);
-
             }
         }
 
+        BUFFERS.endBatch(laserLine);
+        BUFFERS.endBatch(laserBox);
         mStack.popPose();
     }
 
@@ -149,38 +149,6 @@ public class DebugRenderer {
         builder.vertex(matrix, (float) c.maxX, (float) c.maxY, (float) c.minZ).color(r, g, b, a).endVertex();
         builder.vertex(matrix, (float) c.maxX, (float) c.maxY, (float) c.maxZ).color(r, g, b, a).endVertex();
         builder.vertex(matrix, (float) c.maxX, (float) c.minY, (float) c.maxZ).color(r, g, b, a).endVertex();
-    }
-
-    private static boolean isAxial(BlockPos pos) {
-
-        return pos.getX() == 0 ? (pos.getY() == 0 || pos.getZ() == 0) : (pos.getY() == 0 && pos.getZ() == 0);
-    }
-
-    private static Direction getSide(BlockPos pos) {
-
-        if (!isAxial(pos)) {
-            return null;
-        }
-        if (pos.getY() < 0) {
-            return Direction.DOWN;
-        }
-        if (pos.getY() > 0) {
-            return Direction.UP;
-        }
-        if (pos.getZ() < 0) {
-            return Direction.NORTH;
-        }
-        if (pos.getZ() > 0) {
-            return Direction.SOUTH;
-        }
-        if (pos.getX() < 0) {
-            return Direction.WEST;
-        }
-        if (pos.getX() > 0) {
-            return Direction.EAST;
-        }
-
-        return null;
     }
     // endregion
 }
