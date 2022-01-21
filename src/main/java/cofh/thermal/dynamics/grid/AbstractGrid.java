@@ -73,7 +73,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         for (LongIterator iterator = loadedChunks.iterator(); iterator.hasNext(); ) {
             long loadedChunk = iterator.nextLong();
             List<AbstractGridNode<?>> nodes = nodesPerChunk.get(loadedChunk);
-            if (nodes == null) continue;
+            if (nodes == null) {
+                continue;
+            }
             for (AbstractGridNode<?> node : nodes) {
                 assert node.isLoaded();
                 if (node instanceof ITickableGridNode) {
@@ -86,8 +88,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     public void checkInvariant() {
 
         // Save some CPU when assertions are disabled.
-        if (!DEBUG) return;
-
+        if (!DEBUG) {
+            return;
+        }
         GridContainer gridContainer = ((GridContainer) IGridContainer.getCapability(world)
                 .orElseThrow(notPossible()));
 
@@ -119,8 +122,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
     private void checkPos(BlockPos pos, GridContainer gridContainer) {
 
-        if (!world.isLoaded(pos)) return;
-
+        if (!world.isLoaded(pos)) {
+            return;
+        }
         Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(world, pos);
         assert gridHostOpt.isPresent();
         assert gridHostOpt.get().getGrid().isPresent();
@@ -134,7 +138,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
         long pos = chunk.getPos().toLong();
         List<AbstractGridNode<?>> nodes = nodesPerChunk.get(pos);
-        if (nodes == null || nodes.isEmpty()) return false;
+        if (nodes == null || nodes.isEmpty()) {
+            return false;
+        }
         assert !loadedChunks.contains(pos);
         loadedChunks.add(pos);
 
@@ -151,7 +157,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
         long pos = chunk.getPos().toLong();
         List<AbstractGridNode<?>> nodes = nodesPerChunk.get(pos);
-        if (nodes == null || nodes.isEmpty()) return false;
+        if (nodes == null || nodes.isEmpty()) {
+            return false;
+        }
         assert loadedChunks.contains(pos);
         boolean wasLoaded = loadedChunks.size() == 1;
         loadedChunks.remove(pos);

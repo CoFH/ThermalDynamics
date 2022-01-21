@@ -1,9 +1,9 @@
 {
-    "variants": {
-        "": [
-            {
-                "model": "thermal:block/duct_energy"
-            }
-        ]
-    }
+  "variants": {
+    "": [
+      {
+        "model": "thermal:block/duct_energy"
+      }
+    ]
+  }
 }

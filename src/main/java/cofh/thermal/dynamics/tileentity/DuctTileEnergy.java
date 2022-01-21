@@ -37,4 +37,5 @@ public class DuctTileEnergy extends DuctTileBase {
 
         return tile.getCapability(CapabilityEnergy.ENERGY, dir.getOpposite()).isPresent();
     }
+
 }

@@ -64,6 +64,7 @@ public class DebugRenderer {
     }
 
     private static void renderWorldLast(RenderWorldLastEvent event) {
+
         MatrixStack mStack = event.getMatrixStack();
         mStack.pushPose();
 

@@ -27,12 +27,18 @@ public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEn
     protected boolean isExternallyConnectable(Direction side) {
 
         TileEntity tile = getWorld().getBlockEntity(getPos().relative(side));
-        if (tile == null) return false;
-        if (GridHelper.getGridHost(tile).isPresent()) return false; // We cannot externally connect to other grids.
-        if (tile.getCapability(CapabilityEnergy.ENERGY).isPresent())
+        if (tile == null) {
+            return false;
+        }
+        if (GridHelper.getGridHost(tile).isPresent()) {
+            return false; // We cannot externally connect to other grids.
+        }
+        if (tile.getCapability(CapabilityEnergy.ENERGY).isPresent()) {
             return true; // We can(not) connect to the inner face
-        if (tile.getCapability(CapabilityEnergy.ENERGY, side.getOpposite()).isPresent())
+        }
+        if (tile.getCapability(CapabilityEnergy.ENERGY, side.getOpposite()).isPresent()) {
             return true; // We can connect to the face
+        }
         return false; // nope
     }
 
@@ -41,14 +47,24 @@ public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEn
 
         World world = getWorld();
         BlockPos pos = getPos();
+
+        //System.out.println("tick!");
+
         for (Direction dir : getExternalConnections()) {
             TileEntity tile = world.getBlockEntity(pos.relative(dir));
-            if (tile == null) continue; // Ignore non-tiles.
+            if (tile == null) {
+                continue; // Ignore non-tiles.
+            }
+            //System.out.println("tile!");
 
             LazyOptional<IEnergyStorage> innerCap = tile.getCapability(CapabilityEnergy.ENERGY);
             LazyOptional<IEnergyStorage> faceCap = tile.getCapability(CapabilityEnergy.ENERGY, dir.getOpposite());
-            if (!innerCap.isPresent() && !faceCap.isPresent()) continue;
-            if (GridHelper.getGridHost(tile).isPresent()) continue; // Ignore other grids.
+            if (!innerCap.isPresent() && !faceCap.isPresent()) {
+                continue;
+            }
+            if (GridHelper.getGridHost(tile).isPresent()) {
+                continue; // Ignore other grids.
+            }
             // TODO subtract from grid storage, determine proper amount to send
         }
     }

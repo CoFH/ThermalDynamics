@@ -4,7 +4,9 @@ import cofh.thermal.dynamics.client.DuctModelData;
 import cofh.thermal.dynamics.client.model.DuctModelLoader.DuctGeometry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.*;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.*;
@@ -36,6 +38,7 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
 
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager) {
+
     }
 
     @Override
@@ -72,6 +75,7 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
         private final Map<String, Map<String, BlockPart>> parts;
 
         public DuctGeometry(Map<String, Map<String, BlockPart>> parts) {
+
             this.parts = parts;
         }
 
@@ -202,6 +206,7 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
             map.put(Direction.SOUTH, map.put(Direction.NORTH, map.get(Direction.SOUTH)));
             map.put(Direction.EAST, map.put(Direction.WEST, map.get(Direction.EAST)));
         }
+
     }
 
     public static class DuctModel implements IBakedModel {
@@ -283,4 +288,5 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
         @Override public ItemOverrideList getOverrides() { return ItemOverrideList.EMPTY; }
         //@formatter:on
     }
+
 }

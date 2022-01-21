@@ -101,8 +101,9 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
     default boolean canConnectExternally(BlockPos pos, @Nullable Direction dir) {
 
         TileEntity tile = getWorld().getBlockEntity(pos);
-        if (tile == null) return false;
-
+        if (tile == null) {
+            return false;
+        }
         return canConnectExternally(tile, dir);
     }
 

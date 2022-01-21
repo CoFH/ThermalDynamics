@@ -68,7 +68,9 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     @Override
     public boolean canConnectExternally(TileEntity tile, @Nullable Direction dir) {
 
-        if (GridHelper.getGridHost(tile).isPresent()) return false; // We cannot externally connect to other grids.
+        if (GridHelper.getGridHost(tile).isPresent()) {
+            return false; // We cannot externally connect to other grids.
+        }
         if (dir != null) {
             return tile.getCapability(CapabilityEnergy.ENERGY, dir).isPresent();
         }

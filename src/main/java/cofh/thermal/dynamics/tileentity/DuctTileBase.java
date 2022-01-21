@@ -96,4 +96,5 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
     }
 
     protected abstract boolean canConnectExternally(Direction dir);
+
 }

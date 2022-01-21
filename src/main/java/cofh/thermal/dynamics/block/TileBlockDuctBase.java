@@ -33,8 +33,9 @@ public abstract class TileBlockDuctBase extends Block {
     @Override
     public void playerWillDestroy(World world, BlockPos pos, BlockState state, PlayerEntity player) {
 
-        if (world.isClientSide()) return;
-
+        if (world.isClientSide()) {
+            return;
+        }
         TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof IGridHostInternal) {
             IGridHostInternal host = (IGridHostInternal) tile;
@@ -47,8 +48,9 @@ public abstract class TileBlockDuctBase extends Block {
     @Override
     public void setPlacedBy(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
 
-        if (world.isClientSide()) return;
-
+        if (world.isClientSide()) {
+            return;
+        }
         TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof IGridHostInternal) {
             IGridHostInternal host = (IGridHostInternal) tile;
@@ -58,26 +60,29 @@ public abstract class TileBlockDuctBase extends Block {
     }
 
     @Override
-    public void neighborChanged(BlockState state, World level, BlockPos pos, Block block, BlockPos adj, boolean isMoving) {
+    public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos adj, boolean isMoving) {
 
-        if (level.isClientSide()) return;
-
-        TileEntity tile = level.getBlockEntity(pos);
+        if (world.isClientSide()) {
+            return;
+        }
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof IGridHostInternal) {
             IGridHostInternal host = (IGridHostInternal) tile;
-            Optional<IGridContainer> gridContainer = IGridContainer.getCapability(level);
+            Optional<IGridContainer> gridContainer = IGridContainer.getCapability(world);
             gridContainer.ifPresent(e -> e.onGridHostNeighborChanged(host));
         }
     }
 
     @Override
-    public BlockState updateShape(BlockState p_196271_1_, Direction p_196271_2_, BlockState p_196271_3_, IWorld p_196271_4_, BlockPos p_196271_5_, BlockPos p_196271_6_) {
-        if (p_196271_4_.isClientSide()) {
-            TileEntity tile = p_196271_4_.getBlockEntity(p_196271_5_);
+    public BlockState updateShape(BlockState stateIn, Direction facing, BlockState facingState, IWorld worldIn, BlockPos currentPos, BlockPos facingPos) {
+
+        if (worldIn.isClientSide()) {
+            TileEntity tile = worldIn.getBlockEntity(currentPos);
             if (tile instanceof DuctTileBase) {
                 tile.requestModelDataUpdate();
             }
         }
-        return super.updateShape(p_196271_1_, p_196271_2_, p_196271_3_, p_196271_4_, p_196271_5_, p_196271_6_);
+        return super.updateShape(stateIn, facing, facingState, worldIn, currentPos, facingPos);
     }
+
 }

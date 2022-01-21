@@ -15,6 +15,8 @@ public class TDynClientSetupEvents {
 
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
+
         ModelLoaderRegistry.registerLoader(new ResourceLocation(ID_THERMAL_DYNAMICS, "duct"), new DuctModelLoader());
     }
+
 }

@@ -18,6 +18,7 @@ public class DuctModelData implements IModelData {
     private int state;
 
     public DuctModelData() {
+
     }
 
     public DuctModelData(DuctModelData other) {
@@ -89,4 +90,5 @@ public class DuctModelData implements IModelData {
 
         return state;
     }
+
 }

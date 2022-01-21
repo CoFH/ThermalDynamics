@@ -502,12 +502,12 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     // region EVENT CALLBACKS
     public void onWorldTick(TickEvent.Phase phase) {
         // TODO do we want to pass this through to grids?
-        if (phase != TickEvent.Phase.END) return;
-
+        if (phase != TickEvent.Phase.END) {
+            return;
+        }
         for (AbstractGrid<?, ?> value : loadedGrids.values()) {
             value.tick();
         }
-
         if (DEBUG && tickCounter % 10 == 0 && !loadedGrids.isEmpty()) {
             PacketBuffer buffer = new PacketBuffer(Unpooled.buffer());
             buffer.writeVarInt(loadedGrids.size());
@@ -596,7 +596,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
                 LOGGER.error("Failed to load Grid {} with type {} in world {}. GridType is no longer registered, it will be removed from the world.", id, gridTypeName, world.dimension().location());
                 continue;
             }
-
             AbstractGrid<?, ?> grid = createAndAddGrid(id, gridType, false);
             grid.deserializeNBT(tag);
 
