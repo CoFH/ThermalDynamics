@@ -4,8 +4,10 @@ import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
 import cofh.thermal.dynamics.api.grid.item.IItemGrid;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
+import cofh.thermal.dynamics.inventory.container.EnergyDistributorContainer;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import cofh.thermal.dynamics.tileentity.DuctTileEnergy;
+import cofh.thermal.dynamics.tileentity.EnergyDistributorTile;
 import cofh.thermal.dynamics.tileentity.ItemBufferTile;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.container.ContainerType;
@@ -43,6 +45,13 @@ public class TDynReferences {
     //    public static final TileEntityType<DeviceFluidBufferTile> DEVICE_FLUID_BUFFER_TILE = null;
     //    @ObjectHolder(ID_DEVICE_FLUID_BUFFER)
     //    public static final ContainerType<DeviceFluidBufferContainer> DEVICE_FLUID_BUFFER_CONTAINER = null;
+
+    @ObjectHolder (ID_ENERGY_DISTRIBUTOR)
+    public static final Block ENERGY_DISTRIBUTOR_BLOCK = null;
+    @ObjectHolder (ID_ENERGY_DISTRIBUTOR)
+    public static final TileEntityType<EnergyDistributorTile> ENERGY_DISTRIBUTOR_TILE = null;
+    @ObjectHolder (ID_ENERGY_DISTRIBUTOR)
+    public static final ContainerType<EnergyDistributorContainer> ENERGY_DISTRIBUTOR_CONTAINER = null;
 
     @ObjectHolder (ID_ITEM_BUFFER)
     public static final Block ITEM_BUFFER_BLOCK = null;

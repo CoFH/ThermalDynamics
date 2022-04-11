@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "thermal:block/energy_distributor",
+      "x": 90
+    },
+    "facing=east": {
+      "model": "thermal:block/energy_distributor",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "thermal:block/energy_distributor"
+    },
+    "facing=south": {
+      "model": "thermal:block/energy_distributor",
+      "y": 180
+    },
+    "facing=up": {
+      "model": "thermal:block/energy_distributor",
+      "x": 270
+    },
+    "facing=west": {
+      "model": "thermal:block/energy_distributor",
+      "y": 270
+    }
+  }
+}
