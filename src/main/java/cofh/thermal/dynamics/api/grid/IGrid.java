@@ -80,12 +80,12 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
     default boolean canConnectToAdjacent(BlockPos pos) {
 
         for (Direction dir : Direction.values()) {
-            if (canConnectExternally(pos.relative(dir), dir.getOpposite())) {
+            if (canConnect(pos.relative(dir), dir.getOpposite())) {
                 return true;
             }
-            if (canConnectExternally(pos.relative(dir), null)) {
-                return true;
-            }
+            //            if (canConnectExternally(pos.relative(dir), null)) {
+            //                return true;
+            //            }
         }
         return false;
     }
@@ -98,13 +98,13 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
      * @param dir The face, <code>null</code> for the 'center' face.
      * @return If the {@link IGrid} can externally connect.
      */
-    default boolean canConnectExternally(BlockPos pos, @Nullable Direction dir) {
+    default boolean canConnect(BlockPos pos, @Nullable Direction dir) {
 
         TileEntity tile = getWorld().getBlockEntity(pos);
         if (tile == null) {
             return false;
         }
-        return canConnectExternally(tile, dir);
+        return canConnect(tile, dir);
     }
 
     /**
@@ -115,7 +115,7 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
      * @param dir  The face, <code>null</code> for the 'center' face.
      * @return If the {@link IGrid} can externally connect.
      */
-    boolean canConnectExternally(TileEntity tile, @Nullable Direction dir);
+    boolean canConnect(TileEntity tile, @Nullable Direction dir);
 
     default <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
 

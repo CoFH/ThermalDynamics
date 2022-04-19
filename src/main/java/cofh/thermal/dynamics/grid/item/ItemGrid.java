@@ -42,7 +42,7 @@ public class ItemGrid extends AbstractGrid<IItemGrid, IItemGridNode> implements 
     }
 
     @Override
-    public boolean canConnectExternally(TileEntity tile, @Nullable Direction dir) {
+    public boolean canConnect(TileEntity tile, @Nullable Direction dir) {
 
         if (GridHelper.getGridHost(tile).isPresent()) return false; // We cannot externally connect to other grids.
         if (dir != null) {

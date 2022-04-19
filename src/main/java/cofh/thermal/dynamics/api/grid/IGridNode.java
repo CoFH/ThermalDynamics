@@ -31,20 +31,11 @@ public interface IGridNode<G extends IGrid<?, ?>> {
     BlockPos getPos();
 
     /**
-     * The connections this node has to other blocks within the grid.
-     * <p>
-     * These may not be grid nodes.
-     *
-     * @return The directions this node has internal connections to.
-     */
-    EnumSet<Direction> getInternalConnections();
-
-    /**
      * The external connections this Node has.
      *
      * @return The directions this node has external connections to.
      */
-    EnumSet<Direction> getExternalConnections();
+    EnumSet<Direction> getConnections();
 
     /**
      * The attachments this node provides for each face.

@@ -19,7 +19,7 @@ public class ItemGridNode extends AbstractGridNode<IItemGrid> implements IItemGr
     }
 
     @Override
-    protected boolean isExternallyConnectable(Direction side) {
+    protected boolean isConnectable(Direction side) {
 
         TileEntity tile = getWorld().getBlockEntity(getPos().relative(side));
         if (tile == null) return false;

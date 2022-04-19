@@ -21,7 +21,7 @@ public class MultiGridNode extends AbstractGridNode<IMultiGrid> implements IMult
     }
 
     @Override
-    protected boolean isExternallyConnectable(Direction side) {
+    protected boolean isConnectable(Direction side) {
 
         return false;
     }

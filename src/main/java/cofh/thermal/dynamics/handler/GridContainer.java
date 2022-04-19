@@ -309,6 +309,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             if (!canConnect) {
                 simplifyNode((AbstractGridNode<?>) nodeOpt.get());
             }
+            ((AbstractGridNode<?>) nodeOpt.get()).clearConnections();
         } else {
             if (canConnect) {
                 insertNode(grid, host.getHostPos(), host.getHostPos());
@@ -445,18 +446,21 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         AbstractGrid<?, ?> grid = unsafeCast(node.getGrid());
 
         // We can't simplify if we can connect to adjacent blocks.
-        if (grid.canConnectToAdjacent(node.getPos())) return;
-
+        if (grid.canConnectToAdjacent(node.getPos())) {
+            return;
+        }
         Set<AbstractGridNode<?>> edgesSet = grid.nodeGraph.adjacentNodes(node);
 
         // We can't simplify a node if there aren't exactly 2 edges.
-        if (edgesSet.size() != 2) return;
-
+        if (edgesSet.size() != 2) {
+            return;
+        }
         AbstractGridNode<?>[] edges = edgesSet.toArray(new AbstractGridNode[0]);
 
         // If both edges aren't on the same axis, then we can't simplify.
-        if (!isOnSameAxis(edges[0].getPos(), edges[1].getPos())) return;
-
+        if (!isOnSameAxis(edges[0].getPos(), edges[1].getPos())) {
+            return;
+        }
         HashSet<BlockPos> value = new HashSet<>();
         value.addAll(grid.nodeGraph.edgeValue(node, edges[0]));
         value.addAll(grid.nodeGraph.edgeValue(node, edges[1]));

@@ -7,13 +7,13 @@ import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
+import cofh.thermal.lib.util.ThermalEnergyHelper;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -66,22 +66,23 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     }
 
     @Override
-    public boolean canConnectExternally(TileEntity tile, @Nullable Direction dir) {
+    public boolean canConnect(TileEntity tile, @Nullable Direction dir) {
 
         if (GridHelper.getGridHost(tile).isPresent()) {
             return false; // We cannot externally connect to other grids.
         }
         if (dir != null) {
-            return tile.getCapability(CapabilityEnergy.ENERGY, dir).isPresent();
+            return tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), dir).isPresent();
         }
-        return tile.getCapability(CapabilityEnergy.ENERGY).isPresent();
+        return false;
+        // return tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem()).isPresent();
     }
 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
 
-        if (cap == CapabilityEnergy.ENERGY) {
+        if (cap == ThermalEnergyHelper.getBaseEnergySystem()) {
             if (!energyCap.isPresent()) {
                 energyCap = LazyOptional.of(() -> storage);
             }

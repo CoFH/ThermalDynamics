@@ -82,7 +82,7 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
             } else {
                 modelData.setInternalConnection(dir, false);
             }
-            modelData.setExternalConnection(dir, canConnectExternally(dir));
+            modelData.setExternalConnection(dir, canConnect(dir));
         }
 
         return modelData;
@@ -95,6 +95,6 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
         this.grid = Optional.of(grid);
     }
 
-    protected abstract boolean canConnectExternally(Direction dir);
+    protected abstract boolean canConnect(Direction dir);
 
 }

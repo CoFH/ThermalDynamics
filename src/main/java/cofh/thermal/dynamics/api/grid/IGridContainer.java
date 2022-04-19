@@ -30,8 +30,9 @@ public interface IGridContainer {
 
     static Optional<IGridContainer> getCapability(IWorld _world) {
 
-        if (!(_world instanceof World)) return Optional.empty();
-
+        if (!(_world instanceof World)) {
+            return Optional.empty();
+        }
         World world = (World) _world;
         return world.getCapability(TDynApi.GRID_CONTAINER_CAPABILITY).resolve();
     }

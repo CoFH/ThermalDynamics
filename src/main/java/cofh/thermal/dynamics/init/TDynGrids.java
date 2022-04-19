@@ -5,7 +5,7 @@ import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
 import cofh.thermal.dynamics.grid.energy.EnergyGrid;
 
 import static cofh.thermal.dynamics.ThermalDynamics.GRIDS;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_GRID_ENERGY;
+import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_GRID;
 
 public class TDynGrids {
 
@@ -21,7 +21,7 @@ public class TDynGrids {
     // region HELPERS
     private static void registerGridsTypes() {
 
-        GRIDS.register(ID_GRID_ENERGY, () -> IGridType.of(IEnergyGrid.class, EnergyGrid::new));
+        GRIDS.register(ID_ENERGY_GRID, () -> IGridType.of(IEnergyGrid.class, EnergyGrid::new));
 
         //        GRIDS.register(ID_GRID_FLUID, () -> GridType.of(FluidGrid.class, FluidGridImpl::new));
 

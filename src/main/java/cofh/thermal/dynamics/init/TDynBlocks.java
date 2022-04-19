@@ -38,7 +38,7 @@ public class TDynBlocks {
     // region HELPERS
     private static void registerTileBlocks() {
 
-        registerBlock(ID_DUCT_ENERGY, () -> new TileBlockDuctEnergy(of(Material.METAL).noCollission().instabreak())); // TODO proper properties.
+        registerBlock(ID_ENERGY_DUCT, () -> new TileBlockDuctEnergy(of(Material.METAL).noCollission().instabreak())); // TODO proper properties.
 
         IntSupplier storageAugs = () -> ThermalConfig.storageAugments;
 
@@ -49,7 +49,7 @@ public class TDynBlocks {
 
     private static void registerTileEntities() {
 
-        TILE_ENTITIES.register(ID_DUCT_ENERGY, () -> TileEntityType.Builder.of(DuctTileEnergy::new, ENERGY_DUCT_BLOCK).build(null));
+        TILE_ENTITIES.register(ID_ENERGY_DUCT, () -> TileEntityType.Builder.of(DuctTileEnergy::new, ENERGY_DUCT_BLOCK).build(null));
 
         TILE_ENTITIES.register(ID_ENERGY_DISTRIBUTOR, () -> TileEntityType.Builder.of(EnergyDistributorTile::new, ENERGY_DISTRIBUTOR_BLOCK).build(null));
 

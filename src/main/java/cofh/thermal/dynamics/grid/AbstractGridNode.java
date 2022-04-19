@@ -22,11 +22,11 @@ import java.util.EnumSet;
 public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNode<G>, INBTSerializable<CompoundNBT> {
 
     protected final EnumMap<Direction, INodeAttachment> attachments = new EnumMap<>(Direction.class);
-    protected final EnumSet<Direction> internalConnections = EnumSet.noneOf(Direction.class);
-    protected final EnumSet<Direction> externalConnections = EnumSet.noneOf(Direction.class);
+    protected final EnumSet<Direction> connections = EnumSet.noneOf(Direction.class);
     protected G grid;
     protected BlockPos pos = BlockPos.ZERO;
     protected boolean loaded;
+    protected boolean cached;
 
     protected AbstractGridNode(G grid) {
 
@@ -34,7 +34,7 @@ public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNo
     }
 
     @Deprecated
-    protected abstract boolean isExternallyConnectable(Direction side);
+    protected abstract boolean isConnectable(Direction side);
 
     @Override
     public CompoundNBT serializeNBT() {
@@ -51,13 +51,18 @@ public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNo
 
     }
 
+    public final void clearConnections() {
+
+        connections.clear();
+        cached = false;
+    }
+
     //@formatter:off
     @Override public final G getGrid() { return grid; }
     public final World getWorld() { return grid.getWorld(); }
     @Override public final BlockPos getPos() { return pos; }
     public boolean isLoaded() { return loaded; }
-    @Override public EnumSet<Direction> getInternalConnections() { return internalConnections; }
-    @Override public EnumSet<Direction> getExternalConnections() { return externalConnections; }
+    @Override public EnumSet<Direction> getConnections() { return connections; }
     @Override public EnumMap<Direction, INodeAttachment> getAttachments() { return attachments; }
     public void setPos(BlockPos pos) { this.pos = pos; }
     public void setGrid(G grid) { this.grid = grid; }
