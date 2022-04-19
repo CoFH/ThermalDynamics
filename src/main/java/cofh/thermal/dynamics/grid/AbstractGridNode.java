@@ -33,9 +33,6 @@ public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNo
         this.grid = grid;
     }
 
-    @Deprecated
-    protected abstract boolean isConnectable(Direction side);
-
     @Override
     public CompoundNBT serializeNBT() {
 

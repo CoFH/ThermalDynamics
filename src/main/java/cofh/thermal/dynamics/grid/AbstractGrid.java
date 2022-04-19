@@ -295,8 +295,6 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         if (DEBUG) {
             LOGGER.info("Merging {} nodes from grid {} into {}.", other.nodeGraph.nodes().size(), other.id, id);
         }
-        onMerge(unsafeCast(other));
-
         // Loop all edges in other grid.
         PositionCollector positionCollector = new PositionCollector(world);
         for (EndpointPair<AbstractGridNode<?>> edge : other.nodeGraph.edges()) {
@@ -322,6 +320,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             node.setGrid(unsafeCast(this));
             node.onGridChange(unsafeCast(other));
         }
+        onMerge(unsafeCast(other));
     }
 
     // Called to split the current grid into the specified partitions.
@@ -359,7 +358,6 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                 node.setGrid(unsafeCast(newGrid));
                 node.onGridChange(unsafeCast(this));
             }
-
             newGrids.add(newGrid);
         }
 

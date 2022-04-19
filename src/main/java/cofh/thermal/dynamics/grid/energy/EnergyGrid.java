@@ -1,6 +1,5 @@
 package cofh.thermal.dynamics.grid.energy;
 
-import cofh.lib.energy.EnergyStorageCoFH;
 import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
 import cofh.thermal.dynamics.api.grid.energy.IEnergyGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
@@ -25,7 +24,9 @@ import java.util.UUID;
  */
 public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> implements IEnergyGrid {
 
-    protected final EnergyStorageCoFH storage = new EnergyStorageCoFH(100000); // TODO needs proper value, likely a function of the 'total distance' in the grid.
+    protected final long NODE_CAPACITY = 500000;
+
+    protected final GridEnergyStorage storage = new GridEnergyStorage(NODE_CAPACITY);
     protected LazyOptional<?> energyCap = LazyOptional.empty();
 
     public EnergyGrid(UUID id, World world) {
@@ -41,20 +42,37 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
 
     @Override
     public void onMerge(IEnergyGrid from) {
-        // TODO resize storage.
 
-        // TODO properly merge energy over.
-        storage.receiveEnergy(from.getEnergyStored(), false);
+        //        storage.setCapacity(NODE_CAPACITY * getNodes().size());
+        //        storage.setEnergy(storage.getEnergy() + from.getEnergy());
     }
 
     @Override
     public void onSplit(List<IEnergyGrid> others) {
-        // TODO split energy evenly.
+
+        //        int totalNodes = 0;
+        //        for (IEnergyGrid grid : others) {
+        //            int gridNodes = grid.getNodes().size();
+        //            totalNodes += grid.getNodes().size();
+        //            grid.setCapacity(NODE_CAPACITY * gridNodes);
+        //        }
+        //        for (int i = others.size() - 1; i > 0; --i) {
+        //            int gridNodes = others.get(i).getNodes().size();
+        //            setCapacity((gridNodes * getCapacity()) / totalNodes);
+        //            setEnergy((gridNodes * getEnergy()) / totalNodes);
+        //        }
+
+        //        for (IEnergyGrid grid : others) {
+        //            int gridNodes = grid.getNodes().size();
+        //            setCapacity((gridNodes * getCapacity()) / totalNodes);
+        //            setEnergy((gridNodes * getEnergy()) / totalNodes);
+        //        }
     }
 
     @Override
     public CompoundNBT serializeNBT() {
-        // TODO save storage
+
+        storage.serializeNBT();
         return super.serializeNBT();
     }
 
@@ -62,11 +80,11 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     public void deserializeNBT(CompoundNBT nbt) {
 
         super.deserializeNBT(nbt);
-        // TODO load storage
+        storage.deserializeNBT(nbt);
     }
 
     @Override
-    public boolean canConnect(TileEntity tile, @Nullable Direction dir) {
+    public boolean canConnectOnSide(TileEntity tile, @Nullable Direction dir) {
 
         if (GridHelper.getGridHost(tile).isPresent()) {
             return false; // We cannot externally connect to other grids.
@@ -77,6 +95,21 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
         return false;
         // return tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem()).isPresent();
     }
+
+    //    int i = index;
+    //    loops: {
+    //        for (int c = index, e = size(); c < e; ++c) {
+    //            output(i);
+    //            ++i; // don't 'stick' to a sink, increment before break
+    //            if (stored <= 0) break loops;
+    //        }
+    //        i = 0;
+    //        for (int c = 0, e = index; (stored > 0) & (c < e); ++c) {
+    //            output(i);
+    //            ++i;
+    //        }
+    //    }
+    //    index = i;
 
     @Nonnull
     @Override
@@ -96,6 +129,28 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
 
         energyCap.invalidate();
     }
+
+    // region IEnergyGrid
+    public long getCapacity() {
+
+        return storage.getCapacity();
+    }
+
+    public long getEnergy() {
+
+        return storage.getEnergy();
+    }
+
+    public void setCapacity(long capacity) {
+
+        storage.setCapacity(capacity);
+    }
+
+    public void setEnergy(long energy) {
+
+        storage.setEnergy(energy);
+    }
+    // endregion
 
     //@formatter:off
     @Override public int receiveEnergy(int maxReceive, boolean simulate) { return storage.receiveEnergy(maxReceive, simulate); }

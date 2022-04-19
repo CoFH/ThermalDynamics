@@ -2,7 +2,6 @@ package cofh.thermal.dynamics.grid.energy;
 
 import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
 import cofh.thermal.dynamics.api.grid.energy.IEnergyGridNode;
-import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.api.internal.ITickableGridNode;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
@@ -24,29 +23,10 @@ public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEn
     protected void cacheConnections() {
 
         for (Direction dir : Direction.values()) {
-            if (isConnectable(dir)) {
+            if (grid.canConnectOnSide(pos.relative(dir), dir.getOpposite())) {
                 connections.add(dir);
             }
         }
-    }
-
-    @Override
-    protected boolean isConnectable(Direction side) {
-
-        TileEntity tile = getWorld().getBlockEntity(getPos().relative(side));
-        if (tile == null) {
-            return false;
-        }
-        if (GridHelper.getGridHost(tile).isPresent()) {
-            return false; // We cannot externally connect to other grids.
-        }
-        //        if (tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem()).isPresent()) {
-        //            return true; // We can(not) connect to the inner face
-        //        }
-        if (tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), side.getOpposite()).isPresent()) {
-            return true; // We can connect to the face
-        }
-        return false; // nope
     }
 
     @Override
@@ -63,9 +43,8 @@ public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEn
             if (tile == null) {
                 continue; // Ignore non-tiles.
             }
-            Direction opposite = dir.getOpposite();
             int maxTransfer = grid.getEnergyStored();
-            tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), opposite)
+            tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), dir.getOpposite())
                     .ifPresent(e -> grid.extractEnergy(e.receiveEnergy(maxTransfer, false), false));
         }
     }

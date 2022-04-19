@@ -8,4 +8,12 @@ import cofh.thermal.dynamics.api.grid.IGrid;
  */
 public interface IEnergyGrid extends IGrid<IEnergyGrid, IEnergyGridNode>, IRedstoneFluxStorage {
 
+    long getCapacity();
+
+    long getEnergy();
+
+    void setCapacity(long capacity);
+
+    void setEnergy(long energy);
+
 }

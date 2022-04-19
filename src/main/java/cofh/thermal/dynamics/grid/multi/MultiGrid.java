@@ -40,7 +40,7 @@ public class MultiGrid extends AbstractGrid<IMultiGrid, IMultiGridNode> implemen
     }
 
     @Override
-    public boolean canConnect(TileEntity tile, @Nullable Direction dir) {
+    public boolean canConnectOnSide(TileEntity tile, @Nullable Direction dir) {
 
         return false;
     }

@@ -6,7 +6,6 @@ import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGridNode;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
-import net.minecraft.util.Direction;
 
 import java.util.Optional;
 
@@ -18,12 +17,6 @@ public class MultiGridNode extends AbstractGridNode<IMultiGrid> implements IMult
     public MultiGridNode(MultiGrid grid) {
 
         super(grid);
-    }
-
-    @Override
-    protected boolean isConnectable(Direction side) {
-
-        return false;
     }
 
     @Override
