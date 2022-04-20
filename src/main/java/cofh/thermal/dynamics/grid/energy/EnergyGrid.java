@@ -29,6 +29,9 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     protected final GridEnergyStorage storage = new GridEnergyStorage(NODE_CAPACITY);
     protected LazyOptional<?> energyCap = LazyOptional.empty();
 
+    protected IEnergyGridNode[] distArray = new IEnergyGridNode[0];
+    protected int distIndex = 0;
+
     public EnergyGrid(UUID id, World world) {
 
         super(TDynReferences.ENERGY_GRID, id, world);
@@ -38,6 +41,34 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     public AbstractGridNode<IEnergyGrid> newNode() {
 
         return new EnergyGridNode(this);
+    }
+
+    @Override
+    public void tick() {
+
+        if (distArray.length != getNodes().size()) {
+            distArray = getNodes().values().toArray(new IEnergyGridNode[0]);
+            if (distIndex >= distArray.length) {
+                distIndex = 0;
+            }
+        }
+        int i = distIndex;
+        loops:
+        {
+            for (int c = distIndex, e = distArray.length; c < e; ++c) {
+                distArray[i].tick();
+                ++i; // don't 'stick' to a sink, increment before break
+                if (getEnergy() <= 0) {
+                    break loops;
+                }
+            }
+            i = 0;
+            for (int c = 0, e = distIndex; (getEnergy() > 0) & (c < e); ++c) {
+                distArray[i].tick();
+                ++i;
+            }
+        }
+        distIndex = i;
     }
 
     @Override
@@ -95,21 +126,6 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
         return false;
         // return tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem()).isPresent();
     }
-
-    //    int i = index;
-    //    loops: {
-    //        for (int c = index, e = size(); c < e; ++c) {
-    //            output(i);
-    //            ++i; // don't 'stick' to a sink, increment before break
-    //            if (stored <= 0) break loops;
-    //        }
-    //        i = 0;
-    //        for (int c = 0, e = index; (stored > 0) & (c < e); ++c) {
-    //            output(i);
-    //            ++i;
-    //        }
-    //    }
-    //    index = i;
 
     @Nonnull
     @Override

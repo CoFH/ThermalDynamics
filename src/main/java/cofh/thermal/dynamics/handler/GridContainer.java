@@ -1,5 +1,6 @@
 package cofh.thermal.dynamics.handler;
 
+import cofh.core.network.packet.client.ModelUpdatePacket;
 import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.api.grid.*;
 import cofh.thermal.dynamics.api.helper.GridHelper;
@@ -310,9 +311,11 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
                 simplifyNode((AbstractGridNode<?>) nodeOpt.get());
             }
             ((AbstractGridNode<?>) nodeOpt.get()).clearConnections();
+            ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
         } else {
             if (canConnect) {
                 insertNode(grid, host.getHostPos(), host.getHostPos());
+                ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
             }
         }
     }

@@ -1,7 +1,4 @@
-package cofh.thermal.dynamics.api.internal;
-
-import cofh.thermal.dynamics.api.grid.IGrid;
-import cofh.thermal.dynamics.api.grid.IGridNode;
+package cofh.thermal.dynamics.api.grid;
 
 /**
  * Represents a {@link IGridNode} capable of receiving world ticks.
