@@ -124,6 +124,7 @@ public class ThermalDynamics {
         //        RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_ITEM_BUFFER), cutout);
 
         RenderTypeLookup.setRenderLayer(ENERGY_DUCT_BLOCK, cutoutMipped);
+        RenderTypeLookup.setRenderLayer(FLUID_DUCT_BLOCK, cutoutMipped);
     }
     // endregion
 }

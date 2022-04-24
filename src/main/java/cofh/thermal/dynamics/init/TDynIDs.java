@@ -14,6 +14,7 @@ public class TDynIDs {
     public static final String ID_MULTI_GRID = "grid_multi";
 
     public static final String ID_ENERGY_DUCT = "energy_duct";
+    public static final String ID_FLUID_DUCT = "fluid_duct";
 
     public static final String ID_ENERGY_BUFFER = "energy_buffer";
     public static final String ID_FLUID_BUFFER = "fluid_buffer";

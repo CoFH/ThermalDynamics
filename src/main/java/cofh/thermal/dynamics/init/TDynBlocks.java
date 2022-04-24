@@ -3,7 +3,9 @@ package cofh.thermal.dynamics.init;
 import cofh.core.block.TileBlock6Way;
 import cofh.core.block.TileBlockActive6Way;
 import cofh.thermal.dynamics.block.TileBlockDuctEnergy;
+import cofh.thermal.dynamics.block.TileBlockDuctFluid;
 import cofh.thermal.dynamics.tileentity.DuctTileEnergy;
+import cofh.thermal.dynamics.tileentity.DuctTileFluid;
 import cofh.thermal.dynamics.tileentity.EnergyDistributorTile;
 import cofh.thermal.dynamics.tileentity.ItemBufferTile;
 import cofh.thermal.lib.common.ThermalConfig;
@@ -39,6 +41,7 @@ public class TDynBlocks {
     private static void registerTileBlocks() {
 
         registerBlock(ID_ENERGY_DUCT, () -> new TileBlockDuctEnergy(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).harvestTool(ToolType.PICKAXE).dynamicShape().noOcclusion()));
+        registerBlock(ID_FLUID_DUCT, () -> new TileBlockDuctFluid(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).harvestTool(ToolType.PICKAXE).dynamicShape().noOcclusion()));
 
         IntSupplier storageAugs = () -> ThermalConfig.storageAugments;
 
@@ -50,6 +53,7 @@ public class TDynBlocks {
     private static void registerTileEntities() {
 
         TILE_ENTITIES.register(ID_ENERGY_DUCT, () -> TileEntityType.Builder.of(DuctTileEnergy::new, ENERGY_DUCT_BLOCK).build(null));
+        TILE_ENTITIES.register(ID_FLUID_DUCT, () -> TileEntityType.Builder.of(DuctTileFluid::new, FLUID_DUCT_BLOCK).build(null));
 
         TILE_ENTITIES.register(ID_ENERGY_DISTRIBUTOR, () -> TileEntityType.Builder.of(EnergyDistributorTile::new, ENERGY_DISTRIBUTOR_BLOCK).build(null));
 

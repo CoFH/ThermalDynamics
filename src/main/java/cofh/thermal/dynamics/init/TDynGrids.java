@@ -3,9 +3,11 @@ package cofh.thermal.dynamics.init;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
 import cofh.thermal.dynamics.grid.energy.EnergyGrid;
+import cofh.thermal.dynamics.grid.fluid.FluidGrid;
 
 import static cofh.thermal.dynamics.ThermalDynamics.GRIDS;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_GRID;
+import static cofh.thermal.dynamics.init.TDynIDs.ID_FLUID_GRID;
 
 public class TDynGrids {
 
@@ -22,11 +24,8 @@ public class TDynGrids {
     private static void registerGridsTypes() {
 
         GRIDS.register(ID_ENERGY_GRID, () -> IGridType.of(IEnergyGrid.class, EnergyGrid::new));
-
-        //        GRIDS.register(ID_GRID_FLUID, () -> GridType.of(FluidGrid.class, FluidGridImpl::new));
-
+        GRIDS.register(ID_FLUID_GRID, () -> IGridType.of(FluidGrid.class, FluidGrid::new));
         //        GRIDS.register(ID_GRID_ITEM, () -> GridType.of(ItemGrid.class, ItemGridImpl::new));
-
         //        GRIDS.register(ID_GRID_MULTI, () -> GridType.of(MultiGrid.class, MultiGridImpl::new));
     }
     // endregion
