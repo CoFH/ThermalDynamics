@@ -61,15 +61,6 @@ public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEn
             ++distIndex;
             distIndex %= distArray.length;
         }
-
-        //        for (Direction dir : getConnections()) {
-        //            TileEntity tile = world.getBlockEntity(pos.relative(dir));
-        //            if (tile == null) {
-        //                continue; // Ignore non-tiles.
-        //            }
-        //            tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), dir.getOpposite())
-        //                    .ifPresent(e -> grid.extractEnergy(e.receiveEnergy(grid.getEnergyStored(), false), false));
-        //        }
     }
 
 }

@@ -24,7 +24,7 @@ import java.util.UUID;
  */
 public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> implements IEnergyGrid {
 
-    protected final long NODE_CAPACITY = 500000;
+    protected final long NODE_CAPACITY = 100000;
 
     protected final GridEnergyStorage storage = new GridEnergyStorage(NODE_CAPACITY);
     protected LazyOptional<?> energyCap = LazyOptional.empty();
@@ -46,65 +46,81 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     @Override
     public void tick() {
 
+        // storage.tick();
+
         if (distArray.length != getNodes().size()) {
             distArray = getNodes().values().toArray(new IEnergyGridNode[0]);
-            if (distIndex >= distArray.length) {
-                distIndex = 0;
-            }
         }
-        int i = distIndex;
-        loops:
-        {
-            for (int c = distIndex, e = distArray.length; c < e; ++c) {
-                distArray[i].tick();
-                ++i; // don't 'stick' to a sink, increment before break
-                if (getEnergy() <= 0) {
-                    break loops;
-                }
-            }
-            i = 0;
-            for (int c = 0, e = distIndex; (getEnergy() > 0) & (c < e); ++c) {
-                distArray[i].tick();
-                ++i;
-            }
+        int curIndex = distIndex;
+
+        if (distIndex >= distArray.length) {
+            distIndex = 0;
         }
-        distIndex = i;
+        for (int i = distIndex; i < distArray.length; ++i) {
+            if (rrNodeTick(curIndex, i)) return;
+        }
+        for (int i = 0; i < distIndex; ++i) {
+            if (rrNodeTick(curIndex, i)) return;
+        }
+        ++distIndex;
+    }
+
+    private boolean rrNodeTick(int curIndex, int i) {
+
+        if (!distArray[i].isLoaded()) {
+            return false;
+        }
+        distArray[i].tick();
+        if (getEnergy() <= 0) {
+            distIndex = i + 1;
+            if (curIndex == distIndex) {
+                --distIndex;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onModified() {
+
+        setCapacity(getNodes().size() * NODE_CAPACITY);
+        super.onModified();
     }
 
     @Override
     public void onMerge(IEnergyGrid from) {
 
-        //        storage.setCapacity(NODE_CAPACITY * getNodes().size());
-        //        storage.setEnergy(storage.getEnergy() + from.getEnergy());
+        storage.setCapacity(NODE_CAPACITY * getNodes().size());
+        storage.setEnergy(storage.getEnergy() + from.getEnergy());
     }
 
     @Override
     public void onSplit(List<IEnergyGrid> others) {
 
-        //        int totalNodes = 0;
-        //        for (IEnergyGrid grid : others) {
-        //            int gridNodes = grid.getNodes().size();
-        //            totalNodes += grid.getNodes().size();
-        //            grid.setCapacity(NODE_CAPACITY * gridNodes);
-        //        }
-        //        for (int i = others.size() - 1; i > 0; --i) {
-        //            int gridNodes = others.get(i).getNodes().size();
-        //            setCapacity((gridNodes * getCapacity()) / totalNodes);
-        //            setEnergy((gridNodes * getEnergy()) / totalNodes);
-        //        }
+        int totalNodes = 0;
+        for (IEnergyGrid grid : others) {
+            int gridNodes = grid.getNodes().size();
+            totalNodes += grid.getNodes().size();
+            grid.setCapacity(NODE_CAPACITY * gridNodes);
+        }
+        long energyPerNode = getEnergy() / totalNodes;
+        long remEnergy = getEnergy() % totalNodes;
 
-        //        for (IEnergyGrid grid : others) {
-        //            int gridNodes = grid.getNodes().size();
-        //            setCapacity((gridNodes * getCapacity()) / totalNodes);
-        //            setEnergy((gridNodes * getEnergy()) / totalNodes);
-        //        }
+        for (IEnergyGrid grid : others) {
+            int gridNodes = grid.getNodes().size();
+            grid.setEnergy(energyPerNode * gridNodes);
+        }
+        // First grid gets the extra. Why? Because there's always a first grid.
+        others.get(0).setEnergy(others.get(0).getEnergy() + remEnergy);
     }
 
     @Override
     public CompoundNBT serializeNBT() {
 
-        storage.serializeNBT();
-        return super.serializeNBT();
+        CompoundNBT tag = super.serializeNBT();
+        storage.write(tag);
+        return tag;
     }
 
     @Override

@@ -84,7 +84,6 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
             }
             modelData.setExternalConnection(dir, canConnect(dir));
         }
-
         return modelData;
     }
 

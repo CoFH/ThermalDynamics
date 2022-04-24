@@ -1,3 +1,4 @@
 742fed4cd8f44fe1abd535e841445e8af6dd6dfc data/thermal/loot_tables/blocks/energy_distributor.json
 f0546298e8857df67a1a8f09d65870dfdf267ee8 data/thermal/loot_tables/blocks/item_buffer.json
+729b37c8b361fca9d825b6b6ca712cc189ecbdc8 data/thermal/recipes/energy_duct.json
 395e545a824a4b8eb0180693302881c664282153 data/thermal/recipes/item_buffer.json

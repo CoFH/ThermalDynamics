@@ -56,11 +56,11 @@ public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNo
 
     //@formatter:off
     @Override public final G getGrid() { return grid; }
-    public final World getWorld() { return grid.getWorld(); }
     @Override public final BlockPos getPos() { return pos; }
-    public boolean isLoaded() { return loaded; }
+    @Override public boolean isLoaded() { return loaded; }
     @Override public EnumSet<Direction> getConnections() { return connections; }
     @Override public EnumMap<Direction, INodeAttachment> getAttachments() { return attachments; }
+    public final World getWorld() { return grid.getWorld(); }
     public void setPos(BlockPos pos) { this.pos = pos; }
     public void setGrid(G grid) { this.grid = grid; }
     public void setLoaded(boolean loaded) { this.loaded = loaded; }

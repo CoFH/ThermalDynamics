@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 
 import static cofh.lib.util.constants.Constants.ID_THERMAL;
 import static cofh.thermal.core.ThermalCore.ITEMS;
+import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_DUCT;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ITEM_BUFFER;
 
 public class TDynRecipeProvider extends RecipeProviderCoFH {
@@ -51,6 +52,16 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .pattern("RCR")
                 .pattern("IQI")
                 .unlockedBy("has_quartz", has(Tags.Items.GEMS_QUARTZ))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(reg.get(ID_ENERGY_DUCT), 6)
+                .define('G', Tags.Items.GLASS)
+                .define('L', ItemTagsCoFH.INGOTS_LEAD)
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .pattern("RRR")
+                .pattern("LGL")
+                .pattern("RRR")
+                .unlockedBy("has_lead", has(ItemTagsCoFH.INGOTS_LEAD))
                 .save(consumer);
     }
 

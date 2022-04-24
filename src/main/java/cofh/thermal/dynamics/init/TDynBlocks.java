@@ -38,7 +38,7 @@ public class TDynBlocks {
     // region HELPERS
     private static void registerTileBlocks() {
 
-        registerBlock(ID_ENERGY_DUCT, () -> new TileBlockDuctEnergy(of(Material.METAL).noCollission().instabreak())); // TODO proper properties.
+        registerBlock(ID_ENERGY_DUCT, () -> new TileBlockDuctEnergy(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).harvestTool(ToolType.PICKAXE).dynamicShape().noOcclusion()));
 
         IntSupplier storageAugs = () -> ThermalConfig.storageAugments;
 

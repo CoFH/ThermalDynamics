@@ -4,13 +4,17 @@ import cofh.lib.capability.IRedstoneFluxStorage;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
-import static cofh.lib.util.constants.NBTTags.TAG_ENERGY;
-import static cofh.lib.util.constants.NBTTags.TAG_ENERGY_MAX;
+import static cofh.lib.util.constants.NBTTags.*;
 
 public final class GridEnergyStorage implements IRedstoneFluxStorage, INBTSerializable<CompoundNBT> {
 
     private long capacity;
     private long energy;
+
+    //    private long[] samples = new long[100];
+    //    private byte sampleTracker = 0;
+    //    private long rollingTotal = 0;
+    //    private long rollingAverage = 0;
 
     public GridEnergyStorage(long capacity) {
 
@@ -45,23 +49,30 @@ public final class GridEnergyStorage implements IRedstoneFluxStorage, INBTSerial
         return energy;
     }
 
+    public void tick() {
+
+        //        rollingTotal += samples[sampleTracker];
+        //        rollingAverage = rollingTotal / samples.length;
+        //
+        //        ++sampleTracker;
+        //        if (sampleTracker >= samples.length) {
+        //            sampleTracker = 0;
+        //        }
+        //        rollingTotal -= samples[sampleTracker];
+        //        samples[sampleTracker] = 0;
+        //
+        //        System.out.println(rollingAverage);
+    }
+
     // region NBT
     public GridEnergyStorage read(CompoundNBT nbt) {
 
+        this.capacity = nbt.getLong(TAG_CAPACITY);
         this.energy = nbt.getLong(TAG_ENERGY);
         return this;
     }
 
     public CompoundNBT write(CompoundNBT nbt) {
-
-        if (this.capacity <= 0) {
-            return nbt;
-        }
-        nbt.putLong(TAG_ENERGY, energy);
-        return nbt;
-    }
-
-    public CompoundNBT writeWithParams(CompoundNBT nbt) {
 
         if (this.capacity <= 0) {
             return nbt;
@@ -88,6 +99,7 @@ public final class GridEnergyStorage implements IRedstoneFluxStorage, INBTSerial
     @Override
     public int receiveEnergy(int maxReceive, boolean simulate) {
 
+        // samples[sampleTracker] += maxReceive;
         long energyReceived = Math.min(capacity - energy, maxReceive);
         if (!simulate) {
             energy += energyReceived;
@@ -120,7 +132,7 @@ public final class GridEnergyStorage implements IRedstoneFluxStorage, INBTSerial
     @Override
     public boolean canExtract() {
 
-        return true;
+        return false;
     }
 
     @Override

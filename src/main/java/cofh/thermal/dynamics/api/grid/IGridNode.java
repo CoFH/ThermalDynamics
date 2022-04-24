@@ -31,6 +31,13 @@ public interface IGridNode<G extends IGrid<?, ?>> {
     BlockPos getPos();
 
     /**
+     * Flag returning if the node is loaded.
+     *
+     * @return The node's loaded state.
+     */
+    boolean isLoaded();
+
+    /**
      * The external connections this Node has.
      *
      * @return The directions this node has external connections to.
