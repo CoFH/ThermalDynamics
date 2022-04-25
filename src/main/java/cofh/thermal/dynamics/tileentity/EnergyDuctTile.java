@@ -14,9 +14,9 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
-public class DuctTileEnergy extends DuctTileBase {
+public class EnergyDuctTile extends DuctTileBase {
 
-    public DuctTileEnergy() {
+    public EnergyDuctTile() {
 
         super(TDynReferences.ENERGY_DUCT_TILE);
     }

@@ -84,6 +84,7 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     @Override
     public void onModified() {
 
+        distArray = new IEnergyGridNode[0];
         setCapacity(getNodes().size() * NODE_CAPACITY);
         super.onModified();
     }

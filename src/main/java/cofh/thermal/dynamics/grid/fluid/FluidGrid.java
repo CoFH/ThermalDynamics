@@ -1,5 +1,6 @@
 package cofh.thermal.dynamics.grid.fluid;
 
+import cofh.thermal.dynamics.api.grid.energy.IEnergyGridNode;
 import cofh.thermal.dynamics.api.grid.fluid.IFluidGrid;
 import cofh.thermal.dynamics.api.grid.fluid.IFluidGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
@@ -87,6 +88,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     @Override
     public void onModified() {
 
+        distArray = new IFluidGridNode[0];
         setCapacity(getNodes().size() * NODE_CAPACITY);
         super.onModified();
     }

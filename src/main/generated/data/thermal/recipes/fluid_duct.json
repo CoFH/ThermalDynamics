@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CLC"
+  ],
+  "key": {
+    "L": {
+      "tag": "forge:ingots/lead"
+    },
+    "C": {
+      "tag": "forge:ingots/copper"
+    }
+  },
+  "result": {
+    "item": "thermal:fluid_duct",
+    "count": 4
+  }
+}

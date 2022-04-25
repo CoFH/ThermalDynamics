@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.block;
 
-import cofh.thermal.dynamics.tileentity.DuctTileFluid;
+import cofh.thermal.dynamics.tileentity.FluidDuctTile;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockReader;
@@ -18,7 +18,7 @@ public class TileBlockDuctFluid extends TileBlockDuctBase {
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
 
-        return new DuctTileFluid();
+        return new FluidDuctTile();
     }
 
 }

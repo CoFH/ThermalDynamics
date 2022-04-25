@@ -14,9 +14,9 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
-public class DuctTileFluid extends DuctTileBase {
+public class FluidDuctTile extends DuctTileBase {
 
-    public DuctTileFluid() {
+    public FluidDuctTile() {
 
         super(TDynReferences.FLUID_DUCT_TILE);
     }
