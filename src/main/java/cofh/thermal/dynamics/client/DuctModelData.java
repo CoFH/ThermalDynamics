@@ -1,10 +1,13 @@
 package cofh.thermal.dynamics.client;
 
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Created by covers1624 on 12/26/21.
@@ -16,6 +19,10 @@ public class DuctModelData implements IModelData {
     // X - Unused
     // XXXXXXXXXXXXXXXX_XXXXEEEEEEIIIIII
     private int state;
+    @Nullable
+    private ResourceLocation fill;
+    @Nullable
+    private ResourceLocation[] servos;
 
     public DuctModelData() {
 
@@ -24,38 +31,42 @@ public class DuctModelData implements IModelData {
     public DuctModelData(DuctModelData other) {
 
         state = other.state;
+        fill = other.fill;
+        if (other.servos != null) {
+            servos = other.servos.clone();
+        }
     }
 
     public void setInternalConnection(Direction dir, boolean present) {
 
-        int state = getConnectionState();
-        if (present) {
-            state |= (1 << dir.ordinal());
-        } else {
-            state &= ~(1 << dir.ordinal());
-        }
-        setConnectionState(state);
+        setStateBit(dir.ordinal(), present);
     }
 
     public void setExternalConnection(Direction dir, boolean present) {
 
-        int state = getConnectionState();
-        if (present) {
-            state |= 1 << (dir.ordinal() + 6);
-        } else {
-            state &= ~(1 << (dir.ordinal() + 6));
+        setStateBit(dir.ordinal() + 6, present);
+    }
+
+    public void setFill(@Nullable ResourceLocation loc) {
+
+        fill = loc;
+    }
+
+    public void setServo(Direction dir, @Nullable ResourceLocation loc) {
+        if (servos == null) {
+            servos = new ResourceLocation[6];
         }
-        setConnectionState(state);
+        servos[dir.ordinal()] = null;
     }
 
     public boolean hasInternalConnection(Direction dir) {
 
-        return (state & (1 << dir.ordinal())) > 0;
+        return isStateBitSet(dir.ordinal());
     }
 
     public boolean hasExternalConnection(Direction dir) {
 
-        return (state & (1 << (dir.ordinal() + 6))) > 0;
+        return isStateBitSet(dir.ordinal() + 6);
     }
 
     public int getConnectionState() {
@@ -63,9 +74,37 @@ public class DuctModelData implements IModelData {
         return state;
     }
 
+    private void setStateBit(int bit, boolean value) {
+        int state = getConnectionState();
+        if (value) {
+            state |= 1 << bit;
+        } else {
+            state &= ~(1 << bit);
+        }
+        setConnectionState(state);
+    }
+
+    private boolean isStateBitSet(int bit) {
+        return (state & (1 << bit)) > 0;
+    }
+
     private void setConnectionState(int state) {
 
         this.state = state;
+    }
+
+    @Nullable
+    public ResourceLocation getFill() {
+
+        return fill;
+    }
+
+    @Nullable
+    public ResourceLocation getServo(Direction dir) {
+
+        if (servos == null) return null;
+
+        return servos[dir.ordinal()];
     }
 
     //@formatter:off
@@ -82,13 +121,16 @@ public class DuctModelData implements IModelData {
 
         DuctModelData that = (DuctModelData) o;
 
-        return state == that.state;
+        if (state != that.state) return false;
+        if (!Objects.equals(fill, that.fill)) return false;
+        return Arrays.equals(servos, that.servos);
     }
 
     @Override
     public int hashCode() {
-
-        return state;
+        int result = state;
+        result = 31 * result + (fill != null ? fill.hashCode() : 0);
+        result = 31 * result + Arrays.hashCode(servos);
+        return result;
     }
-
 }

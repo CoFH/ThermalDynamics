@@ -1,5 +1,6 @@
 package cofh.thermal.dynamics.client.model;
 
+import cofh.lib.client.renderer.model.RetexturedBakedQuad;
 import cofh.thermal.dynamics.client.DuctModelData;
 import cofh.thermal.dynamics.client.model.DuctModelLoader.DuctGeometry;
 import com.google.common.collect.ImmutableList;
@@ -9,9 +10,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.*;
 import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
@@ -36,7 +39,7 @@ import java.util.function.Supplier;
  */
 public class DuctModelLoader implements IModelLoader<DuctGeometry> {
 
-    private static final ResourceLocation NO_TEXTURE = new ResourceLocation("cofh:no_texture");
+    private static final ResourceLocation BLANK = new ResourceLocation("thermal:blank");
 
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager) {
@@ -87,6 +90,8 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
             boolean isInventory = owner.getPartVisibility(INV, false);
             // Map<Face, List(FrontFace, BackFace)>
             EnumMap<Direction, List<BakedQuad>> center = buildCenter(owner, spriteFunc, transform, modelLoc);
+            // Map<Face, List(FrontFace, BackFace)>
+            EnumMap<Direction, List<BakedQuad>> centerFill = buildCenterFill(owner, spriteFunc, transform, modelLoc);
             // Map<Connection Side, List(FrontFaces & BackFaces)>
             EnumMap<Direction, List<BakedQuad>> ductSides = buildGroupParts("duct", owner, spriteFunc, transform, modelLoc);
             // Map<Connection Side, List(FrontFaces & BackFaces)>
@@ -94,7 +99,7 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
             // Map<Connection Side, List(FrontFaces & BackFaces)>
             EnumMap<Direction, List<BakedQuad>> connections = buildGroupParts("attach", owner, spriteFunc, transform, modelLoc);
 
-            return new DuctModel(owner, spriteFunc.apply(owner.resolveTexture("particle")), center, ductSides, ductFill, connections, isInventory);
+            return new DuctModel(owner, spriteFunc.apply(owner.resolveTexture("particle")), center, centerFill, ductSides, ductFill, connections, isInventory);
         }
 
         private EnumMap<Direction, List<BakedQuad>> buildCenter(IModelConfiguration owner, Function<RenderMaterial, TextureAtlasSprite> spriteFunc, IModelTransform transform, ResourceLocation modelLoc) {
@@ -116,6 +121,16 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
                 EnumMap<Direction, List<BakedQuad>> baked = bake(back, owner, spriteFunc, transform, modelLoc);
                 // These are inverse in the json.
                 flip(baked);
+                merge(quads, baked);
+            }
+            return quads;
+        }
+
+        private EnumMap<Direction, List<BakedQuad>> buildCenterFill(IModelConfiguration owner, Function<RenderMaterial, TextureAtlasSprite> spriteFunc, IModelTransform transform, ResourceLocation modelLoc) {
+            EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
+            BlockPart frontFill = getPart("center/fill", "frontface");
+            if (frontFill != null) {
+                EnumMap<Direction, List<BakedQuad>> baked = bake(frontFill, owner, spriteFunc, transform, modelLoc);
                 merge(quads, baked);
             }
             return quads;
@@ -149,10 +164,7 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
             for (Map.Entry<Direction, BlockPartFace> entry : part.faces.entrySet()) {
                 Direction dir = entry.getKey();
                 BlockPartFace face = entry.getValue();
-                RenderMaterial material = owner.resolveTexture(face.texture);
-                if (material.texture().equals(NO_TEXTURE)) continue;
-
-                TextureAtlasSprite sprite = spriteFunc.apply(material);
+                TextureAtlasSprite sprite = spriteFunc.apply(owner.resolveTexture(face.texture));
                 quads.get(dir).add(BlockModel.makeBakedQuad(part, face, sprite, dir, transform, modelLoc));
             }
             return quads;
@@ -175,8 +187,6 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
                 for (BlockPart part : namedPart.values()) {
                     for (BlockPartFace face : part.faces.values()) {
                         RenderMaterial mat = owner.resolveTexture(face.texture);
-                        if (mat.texture().equals(NO_TEXTURE)) continue;
-
                         if (MissingTextureSprite.getLocation().equals(mat.texture())) {
                             missingTextureErrors.add(Pair.of(face.texture, owner.getModelName()));
                         }
@@ -235,17 +245,22 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
         private final IModelConfiguration config;
         private final TextureAtlasSprite particle;
         private final Map<Direction, List<BakedQuad>> centerModel;
+        private final Map<Direction, List<BakedQuad>> centerFill;
         private final Map<Direction, List<BakedQuad>> sides;
         private final Map<Direction, List<BakedQuad>> fill;
         private final Map<Direction, List<BakedQuad>> connections;
         private final boolean isInventory;
         private final Map<DuctModelData, List<BakedQuad>> modelCache = new HashMap<>();
+        private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> centerFillCache = new HashMap<>();
+        private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> fillCache = new HashMap<>();
+        private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> servoCache = new HashMap<>();
 
-        public DuctModel(IModelConfiguration config, TextureAtlasSprite particle, EnumMap<Direction, List<BakedQuad>> centerModel, EnumMap<Direction, List<BakedQuad>> sides, EnumMap<Direction, List<BakedQuad>> fill, EnumMap<Direction, List<BakedQuad>> connections, boolean isInventory) {
+        public DuctModel(IModelConfiguration config, TextureAtlasSprite particle, EnumMap<Direction, List<BakedQuad>> centerModel, EnumMap<Direction, List<BakedQuad>> centerFill, EnumMap<Direction, List<BakedQuad>> sides, EnumMap<Direction, List<BakedQuad>> fill, EnumMap<Direction, List<BakedQuad>> connections, boolean isInventory) {
 
             this.config = config;
             this.particle = particle;
             this.centerModel = ImmutableMap.copyOf(centerModel);
+            this.centerFill = ImmutableMap.copyOf(centerFill);
             this.sides = ImmutableMap.copyOf(sides);
             this.fill = ImmutableMap.copyOf(fill);
             this.connections = ImmutableMap.copyOf(connections);
@@ -277,21 +292,80 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
                 for (Direction dir : Direction.values()) {
                     boolean internal = modelData.hasInternalConnection(dir);
                     boolean external = modelData.hasExternalConnection(dir);
+                    ResourceLocation servo = modelData.getServo(dir);
+
                     if (!internal && !external) {
-                        quads.addAll(centerModel.get(dir));
+                        quads.addAll(filterBlank(centerModel.get(dir)));
+                        quads.addAll(filterBlank(rebake(centerFillCache, centerFill, modelData.getFill(), dir)));
                     }
                     if (internal) {
-                        quads.addAll(sides.get(dir));
-                        quads.addAll(fill.get(dir));
+                        quads.addAll(filterBlank(sides.get(dir)));
+                        quads.addAll(filterBlank(rebake(fillCache, fill, modelData.getFill(), dir)));
                     } else if (external) {
-                        quads.addAll(sides.get(dir));
-                        quads.addAll(fill.get(dir));
-                        quads.addAll(connections.get(dir));
+                        quads.addAll(filterBlank(sides.get(dir)));
+                        quads.addAll(filterBlank(rebake(fillCache, fill, modelData.getFill(), dir)));
+                        quads.addAll(filterBlank(rebake(servoCache, connections, servo, dir)));
                     }
                 }
                 modelQuads = quads.build();
                 modelCache.put(new DuctModelData(modelData), modelQuads);
                 return modelQuads;
+            }
+        }
+
+        private List<BakedQuad> filterBlank(List<BakedQuad> quads) {
+            List<BakedQuad> newQuads = new ArrayList<>(quads.size());
+            for (BakedQuad quad : quads) {
+                if (!quad.getSprite().getName().equals(BLANK)) {
+                    newQuads.add(quad);
+                }
+            }
+            return newQuads;
+        }
+
+        private List<BakedQuad> rebake(Map<ResourceLocation, Map<Direction, List<BakedQuad>>> cache, Map<Direction, List<BakedQuad>> raw, @Nullable ResourceLocation texture, Direction dir) {
+
+            // Easy bail if there are no quads.
+            List<BakedQuad> fillQuads = raw.get(dir);
+            if (fillQuads.isEmpty()) return ImmutableList.of();
+
+            // Again if there is no texture.
+            if (texture == null) return fillQuads;
+
+            // Is it cached already?
+            Map<Direction, List<BakedQuad>> retextured = cache.get(texture);
+            if (retextured != null) {
+                List<BakedQuad> quads = retextured.get(dir);
+                // Sure is!
+                if (quads != null) return quads;
+            }
+            // Whatever intellij, I know what im doing.
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized (cache) {
+                retextured = cache.get(texture); // Another thread could have computed whilst we were locked.
+                if (retextured != null) {
+                    List<BakedQuad> quads = retextured.get(dir);
+                    // \o/ memory saved++
+                    if (quads != null) return quads;
+                } else {
+                    retextured = new HashMap<>();
+                    cache.put(texture, retextured);
+                }
+
+                // Grab the sprite
+                TextureAtlasSprite sprite = Minecraft.getInstance()
+                        .getModelManager()
+                        .getAtlas(PlayerContainer.BLOCK_ATLAS)
+                        .getSprite(texture);
+
+                // Retexture
+                List<BakedQuad> newQuads = new ArrayList<>(fillQuads.size());
+                for (BakedQuad quad : fillQuads) {
+                    newQuads.add(new RetexturedBakedQuad(quad, sprite));
+                }
+                // slap in cache.
+                retextured.put(dir, newQuads);
+                return newQuads;
             }
         }
 

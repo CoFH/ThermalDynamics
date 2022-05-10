@@ -3,6 +3,6 @@
   "textures": {
     "duct": "thermal:block/ducts/fluid_duct_glass",
     "duct_connector": "thermal:block/ducts/fluid_duct_connector",
-    "fill": "cofh:no_texture"
+    "fill": "thermal:blank"
   }
 }
