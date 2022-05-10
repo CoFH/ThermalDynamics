@@ -2,7 +2,8 @@
   "parent": "thermal:block/duct",
   "textures": {
     "duct": "thermal:block/ducts/energy_duct",
-    "duct_connector": "thermal:block/ducts/energy_duct_connector"
+    "duct_connector": "thermal:block/ducts/energy_duct_connector",
+    "fill": "thermal:block/cells/energy_cell_center"
   },
   "visibility": {
     "inv": true

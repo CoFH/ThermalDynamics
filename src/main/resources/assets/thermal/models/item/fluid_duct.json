@@ -2,7 +2,8 @@
   "parent": "thermal:block/duct",
   "textures": {
     "duct": "thermal:block/ducts/fluid_duct",
-    "duct_connector": "thermal:block/ducts/fluid_duct_connector"
+    "duct_connector": "thermal:block/ducts/fluid_duct_connector",
+    "fill": "cofh:no_texture"
   },
   "visibility": {
     "inv": true
