@@ -8,6 +8,7 @@ import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
+import com.google.common.collect.Sets;
 import com.google.common.graph.EndpointPair;
 import io.netty.buffer.Unpooled;
 import net.covers1624.quack.collection.ColUtils;
@@ -123,7 +124,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             // - Generate a new node at the adjacent position.
             // - Unlink the 'a/b' nodes from each other and re-link with the adjacent node.
             // - Add link to the node we just placed.
-            AbstractGridNode<?> abMiddle = insertNode(grid, adjacent.getHostPos(), host.getHostPos());
+            AbstractGridNode<?> abMiddle = insertNode(grid, adjacent.getHostPos(), host.getHostPos(), host.getExposedTypes());
             grid.nodeGraph.putEdgeValue(abMiddle, newNode, new HashSet<>());
             grid.checkInvariant();
 
@@ -176,21 +177,22 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
      * <p>
      * This method assumes there is not already a node at <code>pos</code>.
      *
-     * @param grid The grid to add the node to.
-     * @param pos  The position in the grid to generate the node.
-     * @param from The position next to <code>pos</code> which triggered this insertion.
-     *             May be <code>pos</code> if no adjacent position exist. This position will
-     *             be ignored when searching for adjacent grid hosts to build the new node.
+     * @param grid       The grid to add the node to.
+     * @param pos        The position in the grid to generate the node.
+     * @param from       The position next to <code>pos</code> which triggered this insertion.
+     *                   May be <code>pos</code> if no adjacent position exist. This position will
+     *                   be ignored when searching for adjacent grid hosts to build the new node.
+     * @param typeFilter When locating adjacent grids, they must have any of these {@link IGridType types} exposed.
      * @return The new node at the position.
      */
-    private AbstractGridNode<?> insertNode(AbstractGrid<?, ?> grid, BlockPos pos, BlockPos from) {
+    private AbstractGridNode<?> insertNode(AbstractGrid<?, ?> grid, BlockPos pos, BlockPos from, Set<IGridType<?>> typeFilter) {
         // We are adding a duct, next to an existing duct that does not have a node.
         // There is only one valid case for this, where there are 2 nodes directly attached.
 
         assert grid.getNodes().get(pos) == null;
 
         // Find the 2 aforementioned existing nodes.
-        List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, pos, from);
+        List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, pos, from, typeFilter);
         assert attached.size() == 2;
 
         Pair<IGridNode<?>, Set<BlockPos>> a = attached.get(0);
@@ -235,7 +237,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             Optional<IGridNode<?>> adjOpt = branch.getNode();
             if (!adjOpt.isPresent()) {
                 // Adjacent isn't present, just generate node.
-                AbstractGridNode<?> abMiddle = insertNode(grid, branch.getHostPos(), node.getPos());
+                AbstractGridNode<?> abMiddle = insertNode(grid, branch.getHostPos(), node.getPos(), host.getExposedTypes());
                 if (DEBUG) {
                     LOGGER.info(" T intersection creation. New Node: {}, Adjacent: {}",
                             node.getPos(),
@@ -314,7 +316,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
         } else {
             if (canConnect) {
-                insertNode(grid, host.getHostPos(), host.getHostPos());
+                insertNode(grid, host.getHostPos(), host.getHostPos(), host.getExposedTypes());
                 ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
             }
         }
@@ -409,7 +411,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             }
         } else {
             // We are a host without a node, between 2 nodes.
-            List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, host.getHostPos(), host.getHostPos());
+            List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, host.getHostPos(), host.getHostPos(), host.getExposedTypes());
             assert attached.size() == 2;
             AbstractGridNode<?> a = (AbstractGridNode<?>) attached.get(0).getLeft();
             AbstractGridNode<?> b = (AbstractGridNode<?>) attached.get(1).getLeft();
@@ -424,7 +426,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         for (IGridHostInternal adjHost : adjacentHosts.values()) {
             if (!adjHost.getNode().isPresent()) {
                 // We always need to create a new node here.
-                Pair<IGridNode<?>, Set<BlockPos>> foundEdge = only(GridHelper.locateAttachedNodes(world, adjHost.getHostPos(), host.getHostPos()));
+                Pair<IGridNode<?>, Set<BlockPos>> foundEdge = only(GridHelper.locateAttachedNodes(world, adjHost.getHostPos(), host.getHostPos(), host.getExposedTypes()));
                 assert foundEdge != null;
                 AbstractGridNode<?> newNode = grid.newNode(adjHost.getHostPos());
                 AbstractGridNode<?> foundNode = (AbstractGridNode<?>) foundEdge.getLeft();
@@ -677,12 +679,18 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         }
     }
 
-    private EnumMap<Direction, IGridHostInternal> getAdjacentGrids(IGridHost host) {
+    private EnumMap<Direction, IGridHostInternal> getAdjacentGrids(IGridHostInternal host) {
 
         EnumMap<Direction, IGridHostInternal> adjacentGrids = new EnumMap<>(Direction.class);
         for (Direction dir : Direction.values()) {
-            GridHelper.getGridHost(world, host.getHostPos().relative(dir))
-                    .ifPresent(gridHost -> adjacentGrids.put(dir, (IGridHostInternal) gridHost));
+            Optional<IGridHost> otherOpt = GridHelper.getGridHost(world, host.getHostPos().relative(dir));
+            if (otherOpt.isPresent()) {
+                IGridHostInternal other = (IGridHostInternal) otherOpt.get();
+                // Ignore grids which don't expose any of our types.
+                if (!Sets.intersection(other.getExposedTypes(), host.getExposedTypes()).isEmpty()) {
+                    adjacentGrids.put(dir, other);
+                }
+            }
         }
         return adjacentGrids;
     }

@@ -4,7 +4,10 @@ import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.grid.IGridNode;
+import cofh.thermal.dynamics.api.grid.IGridType;
+import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -63,13 +66,14 @@ public class GridHelper {
     /**
      * Locate all {@link IGridNode GridNodes} attached to the given {@link BlockPos}.
      *
-     * @param world The {@link World} to search in.
-     * @param start The {@link BlockPos} to start scanning from.
-     * @param from  The {@link BlockPos} to ignore. Usually the adjacent block which is performing this check.
+     * @param world      The {@link World} to search in.
+     * @param start      The {@link BlockPos} to start scanning from.
+     * @param from       The {@link BlockPos} to ignore. Usually the adjacent block which is performing this check.
+     * @param typeFilter Found grid hosts must have any of these {@link IGridType types} exposed.
      * @return The attached {@link IGridNode GridNodes} and the {@link BlockPos positions} between <code>start</code>
      * and the found {@link IGridNode}.
      */
-    public static List<Pair<IGridNode<?>, Set<BlockPos>>> locateAttachedNodes(World world, BlockPos start, BlockPos from) {
+    public static List<Pair<IGridNode<?>, Set<BlockPos>>> locateAttachedNodes(World world, BlockPos start, BlockPos from, Set<IGridType<?>> typeFilter) {
 
         Set<BlockPos> visited = new HashSet<>();
         LinkedList<IGridHost> candidates = new LinkedList<>();
@@ -78,7 +82,9 @@ public class GridHelper {
         addCandidates(world, start, visited, candidates);
         ImmutableList.Builder<Pair<IGridNode<?>, Set<BlockPos>>> builder = ImmutableList.builder();
         while (!candidates.isEmpty()) {
-            IGridHost host = candidates.pop();
+            IGridHostInternal host = (IGridHostInternal) candidates.pop();
+            if (Sets.intersection(host.getExposedTypes(), typeFilter).isEmpty()) continue;
+
             Optional<IGridNode<?>> nodeOpt = host.getNode();
             if (nodeOpt.isPresent()) {
                 builder.add(Pair.of(nodeOpt.get(), getPositionsBetween(start, host.getHostPos())));
