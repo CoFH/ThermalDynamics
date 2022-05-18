@@ -4,14 +4,15 @@ import cofh.thermal.dynamics.api.grid.IGrid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-/**
- * @author King Lemming
- */
 public interface IFluidGrid extends IGrid<IFluidGrid, IFluidGridNode>, IFluidHandler {
 
     int getCapacity();
 
     FluidStack getFluid();
+
+    int getFluidAmount();
+
+    void setBaseCapacity(int baseCapacity);
 
     void setCapacity(int capacity);
 

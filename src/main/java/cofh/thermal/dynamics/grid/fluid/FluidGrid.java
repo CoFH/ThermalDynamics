@@ -1,6 +1,5 @@
 package cofh.thermal.dynamics.grid.fluid;
 
-import cofh.thermal.dynamics.api.grid.energy.IEnergyGridNode;
 import cofh.thermal.dynamics.api.grid.fluid.IFluidGrid;
 import cofh.thermal.dynamics.api.grid.fluid.IFluidGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
@@ -21,14 +20,12 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
-
 /**
  * @author King Lemming
  */
 public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implements IFluidGrid {
 
-    protected final int NODE_CAPACITY = 4000;
+    protected final int NODE_CAPACITY = 100;
 
     protected final GridFluidStorage storage = new GridFluidStorage(NODE_CAPACITY);
     protected LazyOptional<?> fluidCap = LazyOptional.empty();
@@ -50,7 +47,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     @Override
     public void tick() {
 
-        // storage.tick();
+        storage.tick();
 
         if (distArray.length != getNodes().size()) {
             distArray = getNodes().values().toArray(new IFluidGridNode[0]);
@@ -61,12 +58,19 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
             distIndex = 0;
         }
         for (int i = distIndex; i < distArray.length; ++i) {
-            if (rrNodeTick(curIndex, i)) return;
+            if (rrNodeTick(curIndex, i)) {
+                storage.postTick();
+                return;
+            }
         }
         for (int i = 0; i < distIndex; ++i) {
-            if (rrNodeTick(curIndex, i)) return;
+            if (rrNodeTick(curIndex, i)) {
+                storage.postTick();
+                return;
+            }
         }
         ++distIndex;
+        storage.postTick();
     }
 
     private boolean rrNodeTick(int curIndex, int i) {
@@ -89,15 +93,16 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     public void onModified() {
 
         distArray = new IFluidGridNode[0];
-        setCapacity(getNodes().size() * NODE_CAPACITY);
+        setBaseCapacity(getNodes().size() * NODE_CAPACITY);
         super.onModified();
     }
 
     @Override
     public void onMerge(IFluidGrid from) {
 
-        storage.setCapacity(NODE_CAPACITY * getNodes().size());
-        storage.fill(from.getFluid(), EXECUTE);
+        storage.setBaseCapacity(NODE_CAPACITY * getNodes().size());
+        storage.setCapacity(this.getCapacity() + from.getCapacity());
+        storage.setFluid(new FluidStack(storage.getFluid(), this.getFluidAmount() + from.getFluidAmount()));
     }
 
     @Override
@@ -107,17 +112,21 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
         for (IFluidGrid grid : others) {
             int gridNodes = grid.getNodes().size();
             totalNodes += grid.getNodes().size();
-            grid.setCapacity(NODE_CAPACITY * gridNodes);
+            grid.setBaseCapacity(NODE_CAPACITY * gridNodes);
+            grid.setCapacity(this.getCapacity());
+        }
+        if (getFluid().isEmpty()) {
+            return;
         }
         int fluidPerNode = getFluid().getAmount() / totalNodes;
         int remFluid = getFluid().getAmount() % totalNodes;
 
         for (IFluidGrid grid : others) {
             int gridNodes = grid.getNodes().size();
-            grid.fill(new FluidStack(getFluid(), (fluidPerNode * gridNodes)), EXECUTE);
+            grid.setFluid(new FluidStack(getFluid(), (fluidPerNode * gridNodes)));
         }
         // First grid gets the extra. Why? Because there's always a first grid.
-        others.get(0).fill(new FluidStack(getFluid(), remFluid), EXECUTE);
+        others.get(0).setFluid(new FluidStack(getFluid(), others.get(0).getFluid().getAmount() + remFluid));
     }
 
     @Override
@@ -145,7 +154,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
             return tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir).isPresent();
         }
         return false;
-        // return tile.getCapability(ThermalFluidHelper.getBaseFluidSystem()).isPresent();
+        // return tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).isPresent();
     }
 
     @Nonnull
@@ -167,29 +176,14 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
         fluidCap.invalidate();
     }
 
-    // region IFluidGrid
-    public int getCapacity() {
-
-        return storage.getCapacity();
-    }
-
-    public FluidStack getFluid() {
-
-        return storage.getFluid();
-    }
-
-    public void setCapacity(int capacity) {
-
-        storage.setCapacity(capacity);
-    }
-
-    public void setFluid(FluidStack fluid) {
-
-        storage.setFluid(fluid);
-    }
-    // endregion
-
     //@formatter:off
+    @Override public int getCapacity() { return storage.getBaseCapacity(); }
+    @Override public FluidStack getFluid() { return storage.getFluid(); }
+    @Override public int getFluidAmount() { return storage.getFluid().getAmount(); }
+    @Override public void setBaseCapacity(int baseCapacity) { storage.setBaseCapacity(baseCapacity); }
+    @Override public void setCapacity(int capacity) { storage.setCapacity(capacity); }
+    @Override public void setFluid(FluidStack fluid) { storage.setFluid(fluid); }
+
     @Override public int getTanks() { return storage.getTanks(); }
     @Override public FluidStack getFluidInTank(int tank) { return storage.getFluidInTank(tank); }
     @Override public int fill(FluidStack resource, FluidAction action) { return storage.fill(resource, action); }

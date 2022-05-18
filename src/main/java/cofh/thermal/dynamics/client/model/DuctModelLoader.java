@@ -127,6 +127,7 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
         }
 
         private EnumMap<Direction, List<BakedQuad>> buildCenterFill(IModelConfiguration owner, Function<RenderMaterial, TextureAtlasSprite> spriteFunc, IModelTransform transform, ResourceLocation modelLoc) {
+
             EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
             BlockPart frontFill = getPart("center/fill", "frontface");
             if (frontFill != null) {
@@ -314,6 +315,7 @@ public class DuctModelLoader implements IModelLoader<DuctGeometry> {
         }
 
         private List<BakedQuad> filterBlank(List<BakedQuad> quads) {
+
             List<BakedQuad> newQuads = new ArrayList<>(quads.size());
             for (BakedQuad quad : quads) {
                 if (!quad.getSprite().getName().equals(BLANK)) {

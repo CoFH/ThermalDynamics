@@ -24,7 +24,7 @@ import java.util.UUID;
  */
 public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> implements IEnergyGrid {
 
-    protected final long NODE_CAPACITY = 100000;
+    protected final long NODE_CAPACITY = 100;
 
     protected final GridEnergyStorage storage = new GridEnergyStorage(NODE_CAPACITY);
     protected LazyOptional<?> energyCap = LazyOptional.empty();
@@ -46,7 +46,7 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     @Override
     public void tick() {
 
-        // storage.tick();
+        storage.tick();
 
         if (distArray.length != getNodes().size()) {
             distArray = getNodes().values().toArray(new IEnergyGridNode[0]);
@@ -57,12 +57,19 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
             distIndex = 0;
         }
         for (int i = distIndex; i < distArray.length; ++i) {
-            if (rrNodeTick(curIndex, i)) return;
+            if (rrNodeTick(curIndex, i)) {
+                storage.postTick();
+                return;
+            }
         }
         for (int i = 0; i < distIndex; ++i) {
-            if (rrNodeTick(curIndex, i)) return;
+            if (rrNodeTick(curIndex, i)) {
+                storage.postTick();
+                return;
+            }
         }
         ++distIndex;
+        storage.postTick();
     }
 
     private boolean rrNodeTick(int curIndex, int i) {
@@ -85,14 +92,15 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     public void onModified() {
 
         distArray = new IEnergyGridNode[0];
-        setCapacity(getNodes().size() * NODE_CAPACITY);
+        setBaseCapacity(getNodes().size() * NODE_CAPACITY);
         super.onModified();
     }
 
     @Override
     public void onMerge(IEnergyGrid from) {
 
-        storage.setCapacity(NODE_CAPACITY * getNodes().size());
+        storage.setBaseCapacity(NODE_CAPACITY * getNodes().size());
+        storage.setCapacity(this.getCapacity() + from.getCapacity());
         storage.setEnergy(storage.getEnergy() + from.getEnergy());
     }
 
@@ -103,7 +111,11 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
         for (IEnergyGrid grid : others) {
             int gridNodes = grid.getNodes().size();
             totalNodes += grid.getNodes().size();
-            grid.setCapacity(NODE_CAPACITY * gridNodes);
+            grid.setBaseCapacity(NODE_CAPACITY * gridNodes);
+            grid.setCapacity(this.getCapacity());
+        }
+        if (getEnergy() <= 0) {
+            return;
         }
         long energyPerNode = getEnergy() / totalNodes;
         long remEnergy = getEnergy() % totalNodes;
@@ -163,29 +175,13 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
         energyCap.invalidate();
     }
 
-    // region IEnergyGrid
-    public long getCapacity() {
-
-        return storage.getCapacity();
-    }
-
-    public long getEnergy() {
-
-        return storage.getEnergy();
-    }
-
-    public void setCapacity(long capacity) {
-
-        storage.setCapacity(capacity);
-    }
-
-    public void setEnergy(long energy) {
-
-        storage.setEnergy(energy);
-    }
-    // endregion
-
     //@formatter:off
+    @Override public long getCapacity() { return storage.getBaseCapacity(); }
+    @Override public long getEnergy() { return storage.getEnergy(); }
+    @Override public void setBaseCapacity(long capacity) { storage.setBaseCapacity(capacity); }
+    @Override public void setCapacity(long capacity) { storage.setCapacity(capacity); }
+    @Override public void setEnergy(long energy) { storage.setEnergy(energy); }
+
     @Override public int receiveEnergy(int maxReceive, boolean simulate) { return storage.receiveEnergy(maxReceive, simulate); }
     @Override public int extractEnergy(int maxExtract, boolean simulate) { return storage.extractEnergy(maxExtract, simulate); }
     @Override public int getEnergyStored() { return storage.getEnergyStored(); }

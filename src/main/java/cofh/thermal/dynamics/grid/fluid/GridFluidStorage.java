@@ -10,43 +10,69 @@ import javax.annotation.Nonnull;
 
 import static cofh.lib.util.constants.Constants.MAX_CAPACITY;
 import static cofh.lib.util.constants.NBTTags.TAG_CAPACITY;
+import static cofh.lib.util.constants.NBTTags.TAG_TRACK_OUT;
 
 public final class GridFluidStorage implements IFluidHandler, INBTSerializable<CompoundNBT> {
 
+    private int baseCapacity;
     private int capacity;
+
     private FluidStack fluid = FluidStack.EMPTY;
 
-    //    private int[] samples = new long[100];
-    //    private byte sampleTracker = 0;
-    //    private int rollingTotal = 0;
-    //    private int rollingAverage = 0;
+    private byte sampleTracker = 0;
 
-    public GridFluidStorage(int capacity) {
+    //    private final int[] samplesIn = new int[40];
+    //    private int rollingIn = 0;
+    //    private int averageIn = 0;
 
-        this.capacity = capacity;
+    private final int[] samplesOut = new int[40];
+    private int rollingOut = 0;
+    private int averageOut = 0;
+
+    public GridFluidStorage(int baseCapacity) {
+
+        this.baseCapacity = baseCapacity;
+    }
+
+    public GridFluidStorage setBaseCapacity(int baseCapacity) {
+
+        this.baseCapacity = MathHelper.clamp(baseCapacity, 0, MAX_CAPACITY);
+        //        if (!this.fluid.isEmpty()) {
+        //            this.fluid.setAmount(MathHelper.clamp(this.fluid.getAmount(), 0, baseCapacity));
+        //        }
+        return this;
     }
 
     public GridFluidStorage setCapacity(int capacity) {
 
-        this.capacity = MathHelper.clamp(capacity, 0, MAX_CAPACITY);
-        if (!this.fluid.isEmpty()) {
-            this.fluid.setAmount(MathHelper.clamp(this.fluid.getAmount(), 0, capacity));
-        }
+        this.capacity = capacity;
+        resetTrackers();
         return this;
     }
 
     public GridFluidStorage setFluid(FluidStack fluid) {
 
         this.fluid = fluid.copy();
-        if (!this.fluid.isEmpty()) {
-            this.fluid.setAmount(MathHelper.clamp(this.fluid.getAmount(), 0, capacity));
-        }
+        //        if (!this.fluid.isEmpty()) {
+        //            this.fluid.setAmount(MathHelper.clamp(this.fluid.getAmount(), 0, baseCapacity));
+        //        }
         return this;
     }
 
-    public int getCapacity() {
+    public void resetTrackers() {
 
-        return capacity;
+        sampleTracker = 0;
+
+        //        rollingIn = 0;
+        //        averageIn = 0;
+
+        rollingOut = 0;
+        averageOut = 0;
+    }
+
+    public int getBaseCapacity() {
+
+        return baseCapacity;
     }
 
     public FluidStack getFluid() {
@@ -56,29 +82,60 @@ public final class GridFluidStorage implements IFluidHandler, INBTSerializable<C
 
     public void tick() {
 
-        //        rollingTotal += samples[sampleTracker];
-        //        rollingAverage = rollingTotal / samples.length;
-        //
-        //        ++sampleTracker;
-        //        if (sampleTracker >= samples.length) {
-        //            sampleTracker = 0;
-        //        }
-        //        rollingTotal -= samples[sampleTracker];
-        //        samples[sampleTracker] = 0;
+        samplesOut[sampleTracker] = fluid.getAmount();
+    }
+
+    public void postTick() {
+
+        //        rollingIn += samplesIn[sampleTracker];
+        //        averageIn = rollingIn / samplesIn.length;
+
+        samplesOut[sampleTracker] -= fluid.getAmount();
+        rollingOut += samplesOut[sampleTracker];
+        averageOut = rollingOut / samplesOut.length;
+
+        ++sampleTracker;
+        if (sampleTracker >= samplesOut.length) {
+            sampleTracker = 0;
+            updateCapacity();
+
+            //            System.out.println("Average attempted input (2 seconds): " + averageIn);
+            System.out.println("Average realized output (2 seconds): " + averageOut);
+            System.out.println("Dynamic capacity:" + capacity);
+            System.out.println("Fluid stored:" + fluid.getAmount());
+        }
+        //        rollingIn -= samplesIn[sampleTracker];
+        //        samplesIn[sampleTracker] = 0;
+        rollingOut -= samplesOut[sampleTracker];
+        samplesOut[sampleTracker] = 0;
+    }
+
+    private void updateCapacity() {
+
+        this.capacity = Math.max(baseCapacity, 4 * averageOut);
     }
 
     // region NBT
     public GridFluidStorage read(CompoundNBT nbt) {
 
-        FluidStack fluid = FluidStack.loadFluidStackFromNBT(nbt);
-        setFluid(fluid);
+        setFluid(FluidStack.loadFluidStackFromNBT(nbt));
+        this.baseCapacity = nbt.getInt(TAG_CAPACITY);
+
+        //        this.averageIn = nbt.getInt(TAG_TRACK_IN);
+        this.averageOut = nbt.getInt(TAG_TRACK_OUT);
+
+        updateCapacity();
         return this;
     }
 
     public CompoundNBT write(CompoundNBT nbt) {
 
         fluid.writeToNBT(nbt);
-        nbt.putInt(TAG_CAPACITY, capacity);
+        nbt.putInt(TAG_CAPACITY, baseCapacity);
+
+        //        nbt.putInt(TAG_TRACK_IN, averageIn);
+        nbt.putInt(TAG_TRACK_OUT, averageOut);
+
         return nbt;
     }
 
@@ -128,6 +185,9 @@ public final class GridFluidStorage implements IFluidHandler, INBTSerializable<C
             return fluid.getAmount();
         }
         if (!fluid.isFluidEqual(resource)) {
+            return 0;
+        }
+        if (fluid.getAmount() >= capacity) {
             return 0;
         }
         int filled = capacity - fluid.getAmount();

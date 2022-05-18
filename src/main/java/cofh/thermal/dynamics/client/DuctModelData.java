@@ -53,6 +53,7 @@ public class DuctModelData implements IModelData {
     }
 
     public void setServo(Direction dir, @Nullable ResourceLocation loc) {
+
         if (servos == null) {
             servos = new ResourceLocation[6];
         }
@@ -75,6 +76,7 @@ public class DuctModelData implements IModelData {
     }
 
     private void setStateBit(int bit, boolean value) {
+
         int state = getConnectionState();
         if (value) {
             state |= 1 << bit;
@@ -85,6 +87,7 @@ public class DuctModelData implements IModelData {
     }
 
     private boolean isStateBitSet(int bit) {
+
         return (state & (1 << bit)) > 0;
     }
 
@@ -128,9 +131,11 @@ public class DuctModelData implements IModelData {
 
     @Override
     public int hashCode() {
+
         int result = state;
         result = 31 * result + (fill != null ? fill.hashCode() : 0);
         result = 31 * result + Arrays.hashCode(servos);
         return result;
     }
+
 }
