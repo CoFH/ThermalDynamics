@@ -1,6 +1,8 @@
 package cofh.thermal.dynamics.handler;
 
 import cofh.core.network.packet.client.ModelUpdatePacket;
+import cofh.requack.collection.ColUtils;
+import cofh.requack.collection.StreamableIterable;
 import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.api.grid.*;
 import cofh.thermal.dynamics.api.helper.GridHelper;
@@ -11,8 +13,6 @@ import cofh.thermal.dynamics.network.client.GridDebugPacket;
 import com.google.common.collect.Sets;
 import com.google.common.graph.EndpointPair;
 import io.netty.buffer.Unpooled;
-import net.covers1624.quack.collection.ColUtils;
-import net.covers1624.quack.collection.StreamableIterable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
@@ -31,10 +31,10 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static net.covers1624.quack.collection.ColUtils.only;
-import static net.covers1624.quack.collection.ColUtils.onlyOrDefault;
-import static net.covers1624.quack.util.SneakyUtils.notPossible;
-import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
+import static cofh.requack.collection.ColUtils.only;
+import static cofh.requack.collection.ColUtils.onlyOrDefault;
+import static cofh.requack.util.SneakyUtils.notPossible;
+import static cofh.requack.util.SneakyUtils.unsafeCast;
 
 /**
  * @author covers1624

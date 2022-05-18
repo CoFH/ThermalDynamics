@@ -18,8 +18,8 @@ import net.minecraftforge.client.model.data.IModelData;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
+import static cofh.requack.util.SneakyUtils.notPossible;
 import static java.util.Objects.requireNonNull;
-import static net.covers1624.quack.util.SneakyUtils.notPossible;
 
 public abstract class DuctTileBase extends TileEntity implements IGridHostInternal {
 

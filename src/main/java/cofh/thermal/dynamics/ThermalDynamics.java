@@ -3,6 +3,7 @@ package cofh.thermal.dynamics;
 import cofh.lib.capability.NullCapabilityStorage;
 import cofh.lib.network.PacketHandler;
 import cofh.lib.util.DeferredRegisterCoFH;
+import cofh.requack.util.SneakyUtils;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.client.DebugRenderer;
@@ -14,7 +15,6 @@ import cofh.thermal.dynamics.init.TDynContainers;
 import cofh.thermal.dynamics.init.TDynGrids;
 import cofh.thermal.dynamics.init.TDynItems;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
-import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
@@ -31,6 +31,7 @@ import net.minecraftforge.registries.RegistryBuilder;
 import java.util.function.Supplier;
 
 import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
+import static cofh.requack.util.SneakyUtils.nullC;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_GRID_TYPE;
 import static cofh.thermal.dynamics.init.TDynReferences.*;
 import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;
@@ -38,7 +39,6 @@ import static cofh.thermal.lib.common.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
 import static cofh.thermal.lib.common.ThermalFlags.setFlag;
 import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_COLLECTOR;
 import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_NULLIFIER;
-import static net.covers1624.quack.util.SneakyUtils.nullC;
 
 @Mod (ID_THERMAL_DYNAMICS)
 public class ThermalDynamics {
@@ -106,7 +106,7 @@ public class ThermalDynamics {
     // region HELPERS
     private void registerGuiFactories() {
 
-        ScreenManager.register(ENERGY_DISTRIBUTOR_CONTAINER, EnergyDistributorScreen::new);
+        // ScreenManager.register(ENERGY_DISTRIBUTOR_CONTAINER, EnergyDistributorScreen::new);
         ScreenManager.register(ITEM_BUFFER_CONTAINER, ItemBufferScreen::new);
     }
 

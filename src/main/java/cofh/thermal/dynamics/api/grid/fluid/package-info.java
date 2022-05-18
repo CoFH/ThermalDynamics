@@ -3,7 +3,7 @@
 @FieldsAreNonnullByDefault
 package cofh.thermal.dynamics.api.grid.fluid;
 
-import net.covers1624.quack.annotation.FieldsAreNonnullByDefault;
-import net.covers1624.quack.annotation.MethodsReturnNonnullByDefault;
+import cofh.requack.annotation.FieldsAreNonnullByDefault;
+import cofh.requack.annotation.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;

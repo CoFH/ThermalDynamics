@@ -22,8 +22,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.function.LongFunction;
 
-import static net.covers1624.quack.util.SneakyUtils.notPossible;
-import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
+import static cofh.requack.util.SneakyUtils.notPossible;
+import static cofh.requack.util.SneakyUtils.unsafeCast;
 
 /**
  * Abstract base class for all {@link IGrid} implementations.

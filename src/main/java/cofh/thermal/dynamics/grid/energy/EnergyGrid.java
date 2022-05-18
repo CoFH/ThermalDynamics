@@ -24,7 +24,7 @@ import java.util.UUID;
  */
 public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> implements IEnergyGrid {
 
-    protected final long NODE_CAPACITY = 100;
+    protected final long NODE_CAPACITY = 400;
 
     protected final GridEnergyStorage storage = new GridEnergyStorage(NODE_CAPACITY);
     protected LazyOptional<?> energyCap = LazyOptional.empty();

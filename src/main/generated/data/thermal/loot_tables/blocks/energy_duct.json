@@ -6,12 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "cofh_core:nbt_sync"
-            }
-          ],
-          "name": "thermal:energy_distributor"
+          "name": "thermal:energy_duct"
         }
       ],
       "conditions": [
