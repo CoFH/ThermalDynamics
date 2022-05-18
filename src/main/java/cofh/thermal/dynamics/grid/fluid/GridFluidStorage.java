@@ -100,9 +100,9 @@ public final class GridFluidStorage implements IFluidHandler, INBTSerializable<C
             updateCapacity();
 
             //            System.out.println("Average attempted input (2 seconds): " + averageIn);
-            System.out.println("Average realized output (2 seconds): " + averageOut);
-            System.out.println("Dynamic capacity:" + capacity);
-            System.out.println("Fluid stored:" + fluid.getAmount());
+            //            System.out.println("Average realized output (2 seconds): " + averageOut);
+            //            System.out.println("Dynamic capacity:" + capacity);
+            //            System.out.println("Fluid stored:" + fluid.getAmount());
         }
         //        rollingIn -= samplesIn[sampleTracker];
         //        samplesIn[sampleTracker] = 0;

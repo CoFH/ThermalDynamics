@@ -116,7 +116,7 @@ public class ThermalDynamics {
         RenderType cutoutMipped = RenderType.cutoutMipped();
         RenderType translucent = RenderType.translucent();
 
-        RenderTypeLookup.setRenderLayer(ENERGY_DISTRIBUTOR_BLOCK, cutout);
+        // RenderTypeLookup.setRenderLayer(ENERGY_DISTRIBUTOR_BLOCK, cutout);
 
         // RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_ENDER_TUNNEL), translucent);
 
@@ -124,8 +124,8 @@ public class ThermalDynamics {
         //        RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_ITEM_BUFFER), cutout);
 
         RenderTypeLookup.setRenderLayer(ENERGY_DUCT_BLOCK, cutoutMipped);
-        RenderTypeLookup.setRenderLayer(FLUID_DUCT_BLOCK, cutoutMipped);
-        RenderTypeLookup.setRenderLayer(FLUID_DUCT_GLASS_BLOCK, cutoutMipped);
+        //        RenderTypeLookup.setRenderLayer(FLUID_DUCT_BLOCK, cutoutMipped);
+        //        RenderTypeLookup.setRenderLayer(FLUID_DUCT_GLASS_BLOCK, cutoutMipped);
     }
     // endregion
 }

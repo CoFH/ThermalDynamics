@@ -14,7 +14,8 @@ import java.util.function.Consumer;
 
 import static cofh.lib.util.constants.Constants.ID_THERMAL;
 import static cofh.thermal.core.ThermalCore.ITEMS;
-import static cofh.thermal.dynamics.init.TDynIDs.*;
+import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_DUCT;
+import static cofh.thermal.dynamics.init.TDynIDs.ID_ITEM_BUFFER;
 
 public class TDynRecipeProvider extends RecipeProviderCoFH {
 
@@ -63,19 +64,19 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .unlockedBy("has_lead", has(ItemTagsCoFH.INGOTS_LEAD))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT), 4)
-                .define('L', ItemTagsCoFH.INGOTS_LEAD)
-                .define('C', ItemTagsCoFH.INGOTS_COPPER)
-                .pattern("CLC")
-                .unlockedBy("has_copper", has(ItemTagsCoFH.INGOTS_COPPER))
-                .save(consumer);
-
-        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT_GLASS), 4)
-                .define('G', ItemTagsCoFH.HARDENED_GLASS)
-                .define('C', ItemTagsCoFH.INGOTS_COPPER)
-                .pattern("CGC")
-                .unlockedBy("has_copper", has(ItemTagsCoFH.INGOTS_COPPER))
-                .save(consumer);
+        //        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT), 4)
+        //                .define('L', ItemTagsCoFH.INGOTS_LEAD)
+        //                .define('C', ItemTagsCoFH.INGOTS_COPPER)
+        //                .pattern("CLC")
+        //                .unlockedBy("has_copper", has(ItemTagsCoFH.INGOTS_COPPER))
+        //                .save(consumer);
+        //
+        //        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT_GLASS), 4)
+        //                .define('G', ItemTagsCoFH.HARDENED_GLASS)
+        //                .define('C', ItemTagsCoFH.INGOTS_COPPER)
+        //                .pattern("CGC")
+        //                .unlockedBy("has_copper", has(ItemTagsCoFH.INGOTS_COPPER))
+        //                .save(consumer);
     }
 
 }

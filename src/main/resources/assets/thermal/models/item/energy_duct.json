@@ -1,8 +1,8 @@
 {
-  "parent": "thermal:block/duct",
+  "parent": "thermal:block/duct_inventory",
   "textures": {
     "duct": "thermal:block/ducts/energy_duct",
-    "duct_connector": "thermal:block/ducts/energy_duct_connector",
+    "duct_end": "thermal:block/ducts/energy_duct",
     "fill": "thermal:block/cells/energy_cell_center"
   },
   "visibility": {
