@@ -1,5 +1,6 @@
 package cofh.thermal.dynamics.client.model;
 
+import cofh.lib.dynamics.BackfaceBakedQuad;
 import cofh.thermal.dynamics.client.renderer.model.DuctBakedModel;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
@@ -85,7 +86,7 @@ public class DuctModel implements IModelGeometry<DuctModel> {
         }
         BlockPart back = getPart("center/duct", "backface");
         if (back != null) {
-            EnumMap<Direction, List<BakedQuad>> baked = bake(back, owner, spriteFunc, transform, modelLoc);
+            EnumMap<Direction, List<BakedQuad>> baked = bakeBack(back, owner, spriteFunc, transform, modelLoc);
             // These are inverse in the json.
             flip(baked);
             merge(quads, baked);
@@ -134,6 +135,20 @@ public class DuctModel implements IModelGeometry<DuctModel> {
             BlockPartFace face = entry.getValue();
             TextureAtlasSprite sprite = spriteFunc.apply(owner.resolveTexture(face.texture));
             quads.get(dir).add(BlockModel.makeBakedQuad(part, face, sprite, dir, transform, modelLoc));
+        }
+        return quads;
+    }
+
+    private EnumMap<Direction, List<BakedQuad>> bakeBack(BlockPart part, IModelConfiguration owner, Function<RenderMaterial, TextureAtlasSprite> spriteFunc, IModelTransform transform, ResourceLocation modelLoc) {
+
+        EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
+        fill(quads, part.faces.keySet(), LinkedList::new);
+
+        for (Map.Entry<Direction, BlockPartFace> entry : part.faces.entrySet()) {
+            Direction dir = entry.getKey();
+            BlockPartFace face = entry.getValue();
+            TextureAtlasSprite sprite = spriteFunc.apply(owner.resolveTexture(face.texture));
+            quads.get(dir).add(BackfaceBakedQuad.from(BlockModel.makeBakedQuad(part, face, sprite, dir, transform, modelLoc)));
         }
         return quads;
     }

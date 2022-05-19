@@ -1,6 +1,7 @@
 package cofh.thermal.dynamics.client.renderer.model;
 
 import cofh.lib.client.renderer.model.RetexturedBakedQuad;
+import cofh.lib.dynamics.BackfaceBakedQuad;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -96,16 +97,19 @@ public class DuctBakedModel implements IBakedModel {
                 ResourceLocation servo = modelData.getServo(dir);
 
                 if (!internal && !external) {
-                    quads.addAll(filterBlank(centerModel.get(dir)));
-                    quads.addAll(filterBlank(rebake(CENTER_FILL_CACHE, centerFill, modelData.getFill(), dir)));
+                    List<BakedQuad> fillQuads = rebake(CENTER_FILL_CACHE, centerFill, modelData.getFill(), dir);
+                    quads.addAll(filterBlank(centerModel.get(dir), !fillQuads.isEmpty()));
+                    quads.addAll(filterBlank(fillQuads, false));
                 }
                 if (internal) {
-                    quads.addAll(filterBlank(sides.get(dir)));
-                    quads.addAll(filterBlank(rebake(FILL_CACHE, fill, modelData.getFill(), dir)));
+                    List<BakedQuad> fillQuads = rebake(FILL_CACHE, fill, modelData.getFill(), dir);
+                    quads.addAll(filterBlank(sides.get(dir), !fillQuads.isEmpty()));
+                    quads.addAll(filterBlank(fillQuads, false));
                 } else if (external) {
-                    quads.addAll(filterBlank(sides.get(dir)));
-                    quads.addAll(filterBlank(rebake(FILL_CACHE, fill, modelData.getFill(), dir)));
-                    quads.addAll(filterBlank(rebake(SERVO_CACHE, connections, servo, dir)));
+                    List<BakedQuad> fillQuads = rebake(FILL_CACHE, fill, modelData.getFill(), dir);
+                    quads.addAll(filterBlank(sides.get(dir), !fillQuads.isEmpty()));
+                    quads.addAll(filterBlank(fillQuads, false));
+                    quads.addAll(filterBlank(rebake(SERVO_CACHE, connections, servo, dir), false));
                 }
             }
             modelQuads = quads.build();
@@ -114,11 +118,13 @@ public class DuctBakedModel implements IBakedModel {
         }
     }
 
-    private List<BakedQuad> filterBlank(List<BakedQuad> quads) {
+    private List<BakedQuad> filterBlank(List<BakedQuad> quads, boolean cullBack) {
 
         List<BakedQuad> newQuads = new ArrayList<>(quads.size());
         for (BakedQuad quad : quads) {
-            if (!quad.getSprite().getName().equals(BLANK)) {
+            if (cullBack && quad instanceof BackfaceBakedQuad || quad.getSprite().getName().equals(BLANK)) {
+                // do nothing
+            } else {
                 newQuads.add(quad);
             }
         }
