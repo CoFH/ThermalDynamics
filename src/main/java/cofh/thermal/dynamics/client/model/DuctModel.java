@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.client.model;
 
-import cofh.lib.dynamics.BackfaceBakedQuad;
+import cofh.thermal.lib.util.BackfaceBakedQuad;
 import cofh.thermal.dynamics.client.renderer.model.DuctBakedModel;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;

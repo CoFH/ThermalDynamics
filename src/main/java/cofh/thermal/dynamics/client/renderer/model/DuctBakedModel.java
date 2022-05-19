@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.client.renderer.model;
 
 import cofh.lib.client.renderer.model.RetexturedBakedQuad;
-import cofh.lib.dynamics.BackfaceBakedQuad;
+import cofh.thermal.lib.util.BackfaceBakedQuad;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -71,6 +71,9 @@ public class DuctBakedModel implements IBakedModel {
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull IModelData extraData) {
 
+        if (side != null) {
+            return Collections.emptyList();
+        }
         if (isInventory) {
             extraData = INV_DATA;
         }

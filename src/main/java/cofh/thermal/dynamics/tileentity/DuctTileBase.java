@@ -13,6 +13,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
 
 import javax.annotation.Nonnull;
@@ -27,6 +28,7 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
     private Optional<IGrid<?, ?>> grid = Optional.empty();
 
     private final DuctModelData modelData = new DuctModelData();
+    private boolean modelUpdate;
 
     public DuctTileBase(TileEntityType<?> type) {
 
@@ -70,19 +72,32 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
         return grid;
     }
 
+    public void requestModelDataUpdate() {
+
+        TileEntity te = getTileEntity();
+        World world = te.getLevel();
+        if (world != null && world.isClientSide) {
+            modelUpdate = true;
+            ModelDataManager.requestModelDataRefresh(te);
+        }
+    }
+
     @Nonnull
     @Override
     public IModelData getModelData() {
 
-        for (Direction dir : Direction.values()) {
-            Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
-            if (gridHostOpt.isPresent()) {
-                IGridHostInternal gridHost = (IGridHostInternal) gridHostOpt.get();
-                modelData.setInternalConnection(dir, gridHost.getExposedTypes().equals(getExposedTypes()));
-            } else {
-                modelData.setInternalConnection(dir, false);
+        if (modelUpdate) {
+            for (Direction dir : Direction.values()) {
+                Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+                if (gridHostOpt.isPresent()) {
+                    IGridHostInternal gridHost = (IGridHostInternal) gridHostOpt.get();
+                    modelData.setInternalConnection(dir, gridHost.getExposedTypes().equals(getExposedTypes()));
+                } else {
+                    modelData.setInternalConnection(dir, false);
+                }
+                modelData.setExternalConnection(dir, canConnect(dir));
             }
-            modelData.setExternalConnection(dir, canConnect(dir));
+            modelUpdate = false;
         }
         return modelData;
     }
