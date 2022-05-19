@@ -5,7 +5,7 @@ import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.api.internal.IGridHostInternal;
-import cofh.thermal.dynamics.client.DuctModelData;
+import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;

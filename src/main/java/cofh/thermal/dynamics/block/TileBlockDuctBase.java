@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.block;
 
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.internal.IGridHostInternal;
-import cofh.thermal.dynamics.client.DuctModelData;
+import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import cofh.thermal.dynamics.tileentity.DuctTileBase;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

@@ -1,9 +1,11 @@
 package cofh.thermal.dynamics.event;
 
-import cofh.thermal.dynamics.client.model.DuctModelLoader;
+import cofh.thermal.dynamics.client.model.DuctModel;
+import cofh.thermal.dynamics.client.renderer.model.DuctBakedModel;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -14,9 +16,15 @@ import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
 public class TDynClientSetupEvents {
 
     @SubscribeEvent
-    public static void registerModels(ModelRegistryEvent event) {
+    public static void registerModels(final ModelRegistryEvent event) {
 
-        ModelLoaderRegistry.registerLoader(new ResourceLocation(ID_THERMAL_DYNAMICS, "duct"), new DuctModelLoader());
+        ModelLoaderRegistry.registerLoader(new ResourceLocation(ID_THERMAL_DYNAMICS, "duct"), new DuctModel.Loader());
+    }
+
+    @SubscribeEvent
+    public static void postStitch(TextureStitchEvent.Post event) {
+
+        DuctBakedModel.clearCache();
     }
 
 }

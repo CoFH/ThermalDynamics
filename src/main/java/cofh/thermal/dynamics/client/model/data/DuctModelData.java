@@ -1,4 +1,4 @@
-package cofh.thermal.dynamics.client;
+package cofh.thermal.dynamics.client.model.data;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;

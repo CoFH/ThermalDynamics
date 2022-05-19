@@ -1,12 +1,10 @@
 package cofh.thermal.dynamics.init;
 
 import cofh.core.util.ProxyUtils;
-import cofh.thermal.dynamics.inventory.container.EnergyDistributorContainer;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 
 import static cofh.thermal.core.ThermalCore.CONTAINERS;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_DISTRIBUTOR;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ITEM_BUFFER;
 
 public class TDynContainers {
