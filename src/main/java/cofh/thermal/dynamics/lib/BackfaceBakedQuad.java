@@ -1,4 +1,4 @@
-package cofh.thermal.lib.util;
+package cofh.thermal.dynamics.lib;
 
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.FaceBakery;

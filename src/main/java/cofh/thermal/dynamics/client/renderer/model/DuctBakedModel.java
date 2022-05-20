@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.client.renderer.model;
 
 import cofh.lib.client.renderer.model.RetexturedBakedQuad;
-import cofh.thermal.lib.util.BackfaceBakedQuad;
+import cofh.thermal.dynamics.lib.BackfaceBakedQuad;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

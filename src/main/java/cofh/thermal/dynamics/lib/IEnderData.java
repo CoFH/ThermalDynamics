@@ -1,4 +1,4 @@
-package cofh.thermal.lib.util;
+package cofh.thermal.dynamics.lib;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
