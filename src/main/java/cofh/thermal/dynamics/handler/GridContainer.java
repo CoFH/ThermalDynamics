@@ -101,6 +101,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         host.setGrid(grid);
         grid.newNode(host.getHostPos());
         addGridLookup(grid, host.getHostPos());
+        grid.onGridHostAdded(host);
         grid.checkInvariant();
         grid.onModified();
     }
@@ -126,7 +127,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             // - Add link to the node we just placed.
             AbstractGridNode<?> abMiddle = insertNode(grid, adjacent.getHostPos(), host.getHostPos(), host.getExposedTypes());
             grid.nodeGraph.putEdgeValue(abMiddle, newNode, new HashSet<>());
-            grid.checkInvariant();
 
             if (DEBUG) {
                 LOGGER.info(" T intersection creation. New Node: {}, Adjacent: {}",
@@ -160,15 +160,14 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
                 }
                 grid.removeNode(adjacentNode);
                 grid.nodeGraph.putEdgeValue(newNode, edge, values);
-                grid.checkInvariant();
             } else {
                 if (DEBUG) {
                     LOGGER.info("Adding new single node. adjacent {}, new {}", adjacentNode.getPos(), newNode.getPos());
                 }
                 grid.nodeGraph.putEdgeValue(newNode, adjacentNode, new HashSet<>());
-                grid.checkInvariant();
             }
         }
+        grid.onGridHostAdded(host);
         grid.onModified();
     }
 
@@ -257,6 +256,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             }
         }
         simplifyNode(node);
+        grid.onGridHostAdded(host);
         grid.checkInvariant();
         grid.onModified();
     }
@@ -386,6 +386,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             simplifyNode(adjacentNode);
             grid.checkInvariant();
         }
+        grid.onGridHostRemoved(host);
         grid.onModified();
     }
 
@@ -443,6 +444,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
                 grid.checkInvariant();
             }
         }
+        grid.onGridHostRemoved(host);
         grid.onModified();
     }
 

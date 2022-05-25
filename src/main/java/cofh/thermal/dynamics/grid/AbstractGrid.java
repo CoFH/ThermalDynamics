@@ -3,6 +3,7 @@ package cofh.thermal.dynamics.grid;
 import cofh.thermal.dynamics.api.grid.*;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.api.internal.IGridHostInternal;
+import cofh.thermal.dynamics.api.internal.IUpdateableGridHostInternal;
 import cofh.thermal.dynamics.handler.GridContainer;
 import com.google.common.graph.*;
 import it.unimi.dsi.fastutil.longs.*;
@@ -55,6 +56,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
      */
     private final Long2ObjectMap<List<AbstractGridNode<?>>> nodesPerChunk = new Long2ObjectRBTreeMap<>();
     private final LongSet loadedChunks = new LongOpenHashSet();
+    private final Set<BlockPos> updatableNodes = new HashSet<>();
     private final IGridType<G> gridType;
     private final UUID id;
     private final World world;
@@ -117,6 +119,16 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             assert nodesPerChunk.get(chunkPos).contains(node);
             assert node.isLoaded() == loadedChunks.contains(chunkPos);
         }
+
+        for (BlockPos pos : updatableNodes) {
+            if (!world.isLoaded(pos)) {
+                continue;
+            }
+
+            Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(world, pos);
+            assert gridHostOpt.isPresent();
+            assert gridHostOpt.get() instanceof IUpdateableGridHostInternal;
+        }
     }
 
     private void checkPos(BlockPos pos, GridContainer gridContainer) {
@@ -126,8 +138,10 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         }
         Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(world, pos);
         assert gridHostOpt.isPresent();
-        assert gridHostOpt.get().getGrid().isPresent();
-        assert gridHostOpt.get().getGrid().get() == this;
+        IGridHost gridHost = gridHostOpt.get();
+        assert gridHost.getGrid().isPresent();
+        assert gridHost.getGrid().get() == this;
+        assert !(gridHost instanceof IUpdateableGridHostInternal) || updatableNodes.contains(gridHost.getHostPos());
 
         assert gridContainer.getGrid(pos) == this;
     }
@@ -320,6 +334,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             node.onGridChange(unsafeCast(other));
         }
         onMerge(unsafeCast(other));
+        updatableNodes.addAll(other.updatableNodes);
     }
 
     // Called to split the current grid into the specified partitions.
@@ -351,6 +366,13 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             }
             // Update all hosts within the new grid of the change.
             updateGridHosts(world, positionCollector.getChunkPositions(), newGrid);
+            for (Set<BlockPos> positions : positionCollector.getChunkPositions().values()) {
+                for (BlockPos position : positions) {
+                    if (updatableNodes.remove(position)) {
+                        newGrid.updatableNodes.add(position);
+                    }
+                }
+            }
 
             // Insert all nodes into the Grid's lookup maps and update the node about the grid change.
             for (AbstractGridNode<?> node : splitGraph) {
@@ -413,6 +435,18 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
      * @param others The other grids.
      */
     public abstract void onSplit(List<G> others);
+
+    public void onGridHostAdded(IGridHostInternal host) {
+        if (host instanceof IUpdateableGridHostInternal) {
+            updatableNodes.add(host.getHostPos());
+        }
+    }
+
+    public void onGridHostRemoved(IGridHost host) {
+        if (host instanceof IUpdateableGridHostInternal) {
+            updatableNodes.remove(host.getHostPos());
+        }
+    }
 
     //@formatter:off
     @Override public final UUID getId() { return id; }
