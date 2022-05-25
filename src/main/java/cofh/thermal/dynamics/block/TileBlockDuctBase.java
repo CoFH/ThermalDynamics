@@ -1,5 +1,6 @@
 package cofh.thermal.dynamics.block;
 
+import cofh.lib.block.IDismantleable;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
@@ -30,7 +31,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public abstract class TileBlockDuctBase extends Block implements IWaterLoggable {
+public abstract class TileBlockDuctBase extends Block implements IWaterLoggable, IDismantleable {
 
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
