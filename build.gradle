@@ -13,6 +13,7 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'net.covers1624.signing' version '1.1.4'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -85,10 +86,15 @@ minecraft {
     }
 }
 
+configurations {
+    shadowIn
+    compile.extendsFrom shadowIn
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
 
-    // compile 'net.covers1624:Quack:0.4.0.42' // Quack :D
+    shadowIn 'net.covers1624:Quack:0.4.0.42' // Quack :D
     compileOnly 'org.jetbrains:annotations:22.0.0'
 
     compile fg.deobf("com.teamcofh:cofh_core:${mc_version}-${cofh_core_version}")
@@ -102,11 +108,16 @@ test {
     useJUnitPlatform()
 }
 
+reobf {
+    shadowJar {}
+    jar { enabled = false } // Disable jar.
+}
+
 signing {
     if (!signProps.isEmpty()) {
         jars {
-            sign jar
-            after 'reobfJar'
+            sign shadowJar
+            after 'reobfShadowJar'
 
             keyStore = signProps.keyStore
             alias = signProps.alias
@@ -116,7 +127,10 @@ signing {
     }
 }
 
-jar {
+jar.enabled = false
+shadowJar {
+    finalizedBy 'reobfShadowJar'
+    classifier = ''
     manifest {
         attributes([
                 'Specification-Title'     : "${mod_name}",
@@ -128,6 +142,10 @@ jar {
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+
+    configurations = [project.configurations.shadowIn]
+
+    relocate 'net.covers1624.quack', 'cofh.requack'
 }
 
 task srcJar(type: Jar) {
