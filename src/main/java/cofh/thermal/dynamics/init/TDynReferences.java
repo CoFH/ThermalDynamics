@@ -7,10 +7,7 @@ import cofh.thermal.dynamics.api.grid.item.IItemGrid;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
 import cofh.thermal.dynamics.inventory.container.EnergyDistributorContainer;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
-import cofh.thermal.dynamics.tileentity.EnergyDistributorTile;
-import cofh.thermal.dynamics.tileentity.EnergyDuctTile;
-import cofh.thermal.dynamics.tileentity.FluidDuctTile;
-import cofh.thermal.dynamics.tileentity.ItemBufferTile;
+import cofh.thermal.dynamics.tileentity.*;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.tileentity.TileEntityType;
@@ -47,6 +44,8 @@ public class TDynReferences {
     public static final Block FLUID_DUCT_GLASS_BLOCK = null;
     @ObjectHolder (ID_FLUID_DUCT)
     public static final TileEntityType<FluidDuctTile> FLUID_DUCT_TILE = null;
+    @ObjectHolder (ID_FLUID_DUCT_GLASS)
+    public static final TileEntityType<FluidDuctGlassTile> FLUID_DUCT_GLASS_TILE = null;
 
     //    @ObjectHolder(ID_DEVICE_FLUID_BUFFER)
     //    public static final Block DEVICE_FLUID_BUFFER_BLOCK = null;

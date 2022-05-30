@@ -1,11 +1,13 @@
 package cofh.thermal.dynamics.tileentity;
 
+import cofh.lib.tileentity.ITileLocation;
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
@@ -19,16 +21,16 @@ import net.minecraftforge.client.model.data.IModelData;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static net.covers1624.quack.util.SneakyUtils.notPossible;
 import static java.util.Objects.requireNonNull;
+import static net.covers1624.quack.util.SneakyUtils.notPossible;
 
-public abstract class DuctTileBase extends TileEntity implements IGridHostInternal {
+public abstract class DuctTileBase extends TileEntity implements IGridHostInternal, ITileLocation {
 
     // Only available server side.
-    private Optional<IGrid<?, ?>> grid = Optional.empty();
+    protected Optional<IGrid<?, ?>> grid = Optional.empty();
 
-    private final DuctModelData modelData = new DuctModelData();
-    private boolean modelUpdate;
+    protected final DuctModelData modelData = new DuctModelData();
+    protected boolean modelUpdate;
 
     public DuctTileBase(TileEntityType<?> type) {
 
@@ -74,11 +76,9 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
 
     public void requestModelDataUpdate() {
 
-        TileEntity te = getTileEntity();
-        World world = te.getLevel();
-        if (world != null && world.isClientSide) {
+        if (this.level != null && level.isClientSide) {
             modelUpdate = true;
-            ModelDataManager.requestModelDataRefresh(te);
+            ModelDataManager.requestModelDataRefresh(this);
         }
     }
 
@@ -111,4 +111,30 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
 
     protected abstract boolean canConnect(Direction dir);
 
+    // region ILocationAccess
+
+    @Override
+    public Block block() {
+
+        return getBlockState().getBlock();
+    }
+
+    @Override
+    public BlockState state() {
+
+        return getBlockState();
+    }
+
+    @Override
+    public BlockPos pos() {
+
+        return worldPosition;
+    }
+
+    @Override
+    public World world() {
+
+        return level;
+    }
+    // endregion
 }

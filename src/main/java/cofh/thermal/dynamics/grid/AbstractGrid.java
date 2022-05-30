@@ -35,8 +35,8 @@ import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 @SuppressWarnings ("UnstableApiUsage")
 public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> implements IGrid<G, N>, INBTSerializable<CompoundNBT> {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final boolean DEBUG = AbstractGrid.class.desiredAssertionStatus();
+    protected static final Logger LOGGER = LogManager.getLogger();
+    protected static final boolean DEBUG = AbstractGrid.class.desiredAssertionStatus();
 
     /**
      * The {@link ValueGraph} of nodes stored in this grid.
@@ -50,16 +50,16 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     /**
      * The same list of nodes, indexed by BlockPos.
      */
-    private final Map<BlockPos, AbstractGridNode<?>> nodes = new Object2ObjectRBTreeMap<>();
+    protected final Map<BlockPos, AbstractGridNode<?>> nodes = new Object2ObjectRBTreeMap<>();
     /**
      * The same list of nodes, indexed by ChunkPos.
      */
-    private final Long2ObjectMap<List<AbstractGridNode<?>>> nodesPerChunk = new Long2ObjectRBTreeMap<>();
-    private final LongSet loadedChunks = new LongOpenHashSet();
-    private final Set<BlockPos> updatableNodes = new HashSet<>();
-    private final IGridType<G> gridType;
-    private final UUID id;
-    private final World world;
+    protected final Long2ObjectMap<List<AbstractGridNode<?>>> nodesPerChunk = new Long2ObjectRBTreeMap<>();
+    protected final LongSet loadedChunks = new LongOpenHashSet();
+    protected final Set<BlockPos> updatableHosts = new HashSet<>();
+    protected final IGridType<G> gridType;
+    protected final UUID id;
+    protected final World world;
     public boolean isLoaded;
 
     protected AbstractGrid(IGridType<G> gridType, UUID id, World world) {
@@ -120,11 +120,10 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             assert node.isLoaded() == loadedChunks.contains(chunkPos);
         }
 
-        for (BlockPos pos : updatableNodes) {
+        for (BlockPos pos : updatableHosts) {
             if (!world.isLoaded(pos)) {
                 continue;
             }
-
             Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(world, pos);
             assert gridHostOpt.isPresent();
             assert gridHostOpt.get() instanceof IUpdateableGridHostInternal;
@@ -141,7 +140,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         IGridHost gridHost = gridHostOpt.get();
         assert gridHost.getGrid().isPresent();
         assert gridHost.getGrid().get() == this;
-        assert !(gridHost instanceof IUpdateableGridHostInternal) || updatableNodes.contains(gridHost.getHostPos());
+        assert !(gridHost instanceof IUpdateableGridHostInternal) || updatableHosts.contains(gridHost.getHostPos());
 
         assert gridContainer.getGrid(pos) == this;
     }
@@ -209,8 +208,16 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             edgeTag.put("value", valueTag);
             edges.add(edgeTag);
         }
-
         tag.put("edges", edges);
+
+        ListNBT updateable = new ListNBT();
+        for (BlockPos pos : updatableHosts) {
+            CompoundNBT updateTag = new CompoundNBT();
+            updateTag.put("pos", NBTUtil.writeBlockPos(pos));
+            updateable.add(updateTag);
+        }
+        tag.put("updateable", updateable);
+
         return tag;
     }
 
@@ -219,7 +226,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
         ListNBT nodes = nbt.getList("nodes", 10);
 
-        for (int i = 0; i < nodes.size(); i++) {
+        for (int i = 0; i < nodes.size(); ++i) {
             CompoundNBT nodeTag = nodes.getCompound(i);
             BlockPos pos = NBTUtil.readBlockPos(nodeTag.getCompound("pos"));
             AbstractGridNode<?> node = newNode(pos, false);
@@ -227,20 +234,25 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         }
 
         ListNBT edges = nbt.getList("edges", 10);
-        for (int i = 0; i < edges.size(); i++) {
+        for (int i = 0; i < edges.size(); ++i) {
             CompoundNBT edgeTag = edges.getCompound(i);
             BlockPos uPos = NBTUtil.readBlockPos(edgeTag.getCompound("U"));
             BlockPos vPos = NBTUtil.readBlockPos(edgeTag.getCompound("V"));
             Set<BlockPos> value = new HashSet<>();
             ListNBT valueTag = edgeTag.getList("value", 10);
-            for (int j = 0; j < valueTag.size(); j++) {
+            for (int j = 0; j < valueTag.size(); ++j) {
                 value.add(NBTUtil.readBlockPos(valueTag.getCompound(j)));
             }
             nodeGraph.putEdgeValue(this.nodes.get(uPos), this.nodes.get(vPos), value);
         }
-
+        ListNBT updateable = nbt.getList("updateable", 10);
+        for (int i = 0; i < updateable.size(); ++i) {
+            CompoundNBT updateTag = updateable.getCompound(i);
+            BlockPos pos = NBTUtil.readBlockPos(updateTag.getCompound("pos"));
+            updatableHosts.add(pos);
+        }
         // Make sure no Node positions are identity match to BlockPos.ZERO
-        assert this.nodes.values().stream().noneMatch(e -> e.getPos() == BlockPos.ZERO);
+        assert !DEBUG || this.nodes.values().stream().noneMatch(e -> e.getPos() == BlockPos.ZERO);
     }
 
     public abstract AbstractGridNode<G> newNode();
@@ -334,7 +346,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             node.onGridChange(unsafeCast(other));
         }
         onMerge(unsafeCast(other));
-        updatableNodes.addAll(other.updatableNodes);
+        updatableHosts.addAll(other.updatableHosts);
     }
 
     // Called to split the current grid into the specified partitions.
@@ -368,8 +380,8 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             updateGridHosts(world, positionCollector.getChunkPositions(), newGrid);
             for (Set<BlockPos> positions : positionCollector.getChunkPositions().values()) {
                 for (BlockPos position : positions) {
-                    if (updatableNodes.remove(position)) {
-                        newGrid.updatableNodes.add(position);
+                    if (updatableHosts.remove(position)) {
+                        newGrid.updatableHosts.add(position);
                     }
                 }
             }
@@ -410,7 +422,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
      */
     public void onModified() {
 
-        checkInvariant();
+        if (DEBUG) {
+            checkInvariant();
+        }
     }
 
     /**
@@ -437,14 +451,16 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     public abstract void onSplit(List<G> others);
 
     public void onGridHostAdded(IGridHostInternal host) {
+
         if (host instanceof IUpdateableGridHostInternal) {
-            updatableNodes.add(host.getHostPos());
+            updatableHosts.add(host.getHostPos());
         }
     }
 
     public void onGridHostRemoved(IGridHost host) {
+
         if (host instanceof IUpdateableGridHostInternal) {
-            updatableNodes.remove(host.getHostPos());
+            updatableHosts.remove(host.getHostPos());
         }
     }
 

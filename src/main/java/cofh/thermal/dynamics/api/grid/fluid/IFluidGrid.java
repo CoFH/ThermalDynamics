@@ -10,6 +10,8 @@ public interface IFluidGrid extends IGrid<IFluidGrid, IFluidGridNode>, IFluidHan
 
     FluidStack getFluid();
 
+    FluidStack getRenderFluid();
+
     int getFluidAmount();
 
     void setBaseCapacity(int baseCapacity);

@@ -1,7 +1,6 @@
 package cofh.thermal.dynamics.event;
 
 import cofh.thermal.dynamics.client.model.DuctModel;
-import cofh.thermal.dynamics.client.renderer.model.DuctBakedModel;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -24,7 +23,7 @@ public class TDynClientSetupEvents {
     @SubscribeEvent
     public static void postStitch(TextureStitchEvent.Post event) {
 
-        DuctBakedModel.clearCache();
+        DuctModel.clearCaches();
     }
 
 }

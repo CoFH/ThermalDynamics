@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.client.model;
 
-import cofh.thermal.dynamics.lib.BackfaceBakedQuad;
 import cofh.thermal.dynamics.client.renderer.model.DuctBakedModel;
+import cofh.thermal.dynamics.lib.BackfaceBakedQuad;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -28,6 +28,15 @@ public class DuctModel implements IModelGeometry<DuctModel> {
 
     private final Map<String, Map<String, BlockPart>> parts;
 
+    protected static List<DuctBakedModel> bakedModels = new ArrayList<>();
+
+    public static void clearCaches() {
+
+        for (DuctBakedModel model : bakedModels) {
+            model.clearCache();
+        }
+    }
+
     public DuctModel(Map<String, Map<String, BlockPart>> parts) {
 
         this.parts = parts;
@@ -48,7 +57,9 @@ public class DuctModel implements IModelGeometry<DuctModel> {
         // Map<Connection Side, List(FrontFaces & BackFaces)>
         EnumMap<Direction, List<BakedQuad>> connections = buildGroupParts("attach", owner, spriteGetter, modelTransform, modelLocation);
 
-        return new DuctBakedModel(owner, spriteGetter.apply(owner.resolveTexture("particle")), center, centerFill, ductSides, ductFill, connections, isInventory);
+        DuctBakedModel model = new DuctBakedModel(owner, spriteGetter.apply(owner.resolveTexture("particle")), center, centerFill, ductSides, ductFill, connections, isInventory);
+        bakedModels.add(model);
+        return model;
     }
 
     @Override

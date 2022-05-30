@@ -31,8 +31,7 @@ import java.util.function.Supplier;
 
 import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_GRID_TYPE;
-import static cofh.thermal.dynamics.init.TDynReferences.ENERGY_DUCT_BLOCK;
-import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_CONTAINER;
+import static cofh.thermal.dynamics.init.TDynReferences.*;
 import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;
 import static cofh.thermal.lib.common.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
 import static cofh.thermal.lib.common.ThermalFlags.setFlag;
@@ -122,8 +121,8 @@ public class ThermalDynamics {
         //        RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_ITEM_BUFFER), cutout);
 
         RenderTypeLookup.setRenderLayer(ENERGY_DUCT_BLOCK, cutout);
-        //        RenderTypeLookup.setRenderLayer(FLUID_DUCT_BLOCK, cutout);
-        //        RenderTypeLookup.setRenderLayer(FLUID_DUCT_GLASS_BLOCK, cutout);
+        RenderTypeLookup.setRenderLayer(FLUID_DUCT_BLOCK, cutout);
+        RenderTypeLookup.setRenderLayer(FLUID_DUCT_GLASS_BLOCK, cutout);
     }
     // endregion
 }

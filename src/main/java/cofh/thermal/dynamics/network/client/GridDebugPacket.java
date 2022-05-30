@@ -37,7 +37,7 @@ public class GridDebugPacket extends PacketBase implements IPacketClient {
             Map<BlockPos, List<BlockPos>> newNodes = new HashMap<>();
             UUID uuid = data.readUUID();
             int numNodes = data.readVarInt();
-            for (int i = 0; i < numNodes; i++) {
+            for (int i = 0; i < numNodes; ++i) {
                 BlockPos nodePos = data.readBlockPos();
                 int numEdges = data.readVarInt();
                 List<BlockPos> edges = new ArrayList<>(numEdges);

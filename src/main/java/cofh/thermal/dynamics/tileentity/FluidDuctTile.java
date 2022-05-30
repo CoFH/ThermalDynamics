@@ -4,6 +4,7 @@ import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -15,6 +16,11 @@ import java.util.Collections;
 import java.util.Set;
 
 public class FluidDuctTile extends DuctTileBase {
+
+    public FluidDuctTile(TileEntityType<?> type) {
+
+        super(type);
+    }
 
     public FluidDuctTile() {
 

@@ -1,14 +1,18 @@
 package cofh.thermal.dynamics.grid.fluid;
 
+import cofh.core.util.helpers.FluidHelper;
+import cofh.lib.util.TimeTracker;
 import cofh.thermal.dynamics.api.grid.fluid.IFluidGrid;
 import cofh.thermal.dynamics.api.grid.fluid.IFluidGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
+import cofh.thermal.dynamics.api.internal.IUpdateableGridHostInternal;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -20,6 +24,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
+import static cofh.lib.util.constants.Constants.BUCKET_VOLUME;
+
 /**
  * @author King Lemming
  */
@@ -29,6 +35,11 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
 
     protected final GridFluidStorage storage = new GridFluidStorage(NODE_CAPACITY);
     protected LazyOptional<?> fluidCap = LazyOptional.empty();
+
+    protected FluidStack renderFluid = FluidStack.EMPTY;
+    protected FluidStack prevRenderFluid = FluidStack.EMPTY;
+    protected TimeTracker timeTracker = new TimeTracker();
+    protected boolean wasFilled;
 
     protected IFluidGridNode[] distArray = new IFluidGridNode[0];
     protected int distIndex = 0;
@@ -48,6 +59,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     public void tick() {
 
         storage.tick();
+        renderUpdate();
 
         if (distArray.length != getNodes().size()) {
             distArray = getNodes().values().toArray(new IFluidGridNode[0]);
@@ -87,6 +99,27 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
             return true;
         }
         return false;
+    }
+
+    private void renderUpdate() {
+
+        prevRenderFluid = renderFluid;
+        renderFluid = new FluidStack(getFluid(), BUCKET_VOLUME);
+
+        if (!FluidHelper.fluidsEqual(prevRenderFluid, renderFluid) || wasFilled && timeTracker.hasDelayPassed(world, 40)) {
+            if (!wasFilled && renderFluid.isEmpty()) {
+                timeTracker.markTime(world);
+                wasFilled = true;
+                return;
+            }
+            for (BlockPos pos : updatableHosts) {
+                if (world.isLoaded(pos) && world.getBlockEntity(pos) instanceof IUpdateableGridHostInternal) {
+                    // TODO: replace with optimized version w/ J17
+                    ((IUpdateableGridHostInternal) world.getBlockEntity(pos)).update();
+                }
+            }
+            wasFilled = false;
+        }
     }
 
     @Override
@@ -179,6 +212,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     //@formatter:off
     @Override public int getCapacity() { return storage.getBaseCapacity(); }
     @Override public FluidStack getFluid() { return storage.getFluid(); }
+    @Override public FluidStack getRenderFluid() { return renderFluid; }
     @Override public int getFluidAmount() { return storage.getFluid().getAmount(); }
     @Override public void setBaseCapacity(int baseCapacity) { storage.setBaseCapacity(baseCapacity); }
     @Override public void setCapacity(int capacity) { storage.setCapacity(capacity); }

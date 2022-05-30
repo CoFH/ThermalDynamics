@@ -1,8 +1,8 @@
 package cofh.thermal.dynamics.client.renderer.model;
 
 import cofh.lib.client.renderer.model.RetexturedBakedQuad;
-import cofh.thermal.dynamics.lib.BackfaceBakedQuad;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
+import cofh.thermal.dynamics.lib.BackfaceBakedQuad;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockState;
@@ -24,9 +24,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
+
 public class DuctBakedModel implements IBakedModel {
 
-    private static final ResourceLocation BLANK = new ResourceLocation("thermal:blank");
     private static final boolean DEBUG = Boolean.getBoolean("DuctModel.debug");
 
     private static final DuctModelData INV_DATA = Util.make(new DuctModelData(), data -> {
@@ -34,12 +35,12 @@ public class DuctBakedModel implements IBakedModel {
         data.setInternalConnection(Direction.DOWN, true);
     });
 
-    public static void clearCache() {
+    public void clearCache() {
 
-        MODEL_CACHE.clear();
-        CENTER_FILL_CACHE.clear();
-        FILL_CACHE.clear();
-        SERVO_CACHE.clear();
+        modelCache.clear();
+        centerFillCache.clear();
+        fillCache.clear();
+        servoCache.clear();
     }
 
     private final IModelConfiguration config;
@@ -50,10 +51,10 @@ public class DuctBakedModel implements IBakedModel {
     private final Map<Direction, List<BakedQuad>> fill;
     private final Map<Direction, List<BakedQuad>> connections;
     private final boolean isInventory;
-    private static final Map<DuctModelData, List<BakedQuad>> MODEL_CACHE = new HashMap<>();
-    private static final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> CENTER_FILL_CACHE = new HashMap<>();
-    private static final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> FILL_CACHE = new HashMap<>();
-    private static final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> SERVO_CACHE = new HashMap<>();
+    private final Map<DuctModelData, List<BakedQuad>> modelCache = new HashMap<>();
+    private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> centerFillCache = new HashMap<>();
+    private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> fillCache = new HashMap<>();
+    private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> servoCache = new HashMap<>();
 
     public DuctBakedModel(IModelConfiguration config, TextureAtlasSprite particle, EnumMap<Direction, List<BakedQuad>> centerModel, EnumMap<Direction, List<BakedQuad>> centerFill, EnumMap<Direction, List<BakedQuad>> sides, EnumMap<Direction, List<BakedQuad>> fill, EnumMap<Direction, List<BakedQuad>> connections, boolean isInventory) {
 
@@ -87,11 +88,11 @@ public class DuctBakedModel implements IBakedModel {
 
     private List<BakedQuad> getModelFor(DuctModelData modelData) {
 
-        List<BakedQuad> modelQuads = MODEL_CACHE.get(modelData); // TODO race condition with DuctModelData being mutable?
+        List<BakedQuad> modelQuads = modelCache.get(modelData); // TODO race condition with DuctModelData being mutable?
         if (!DEBUG && modelQuads != null) return modelQuads;
 
-        synchronized (MODEL_CACHE) {
-            modelQuads = MODEL_CACHE.get(modelData); // Another thread could have computed whilst we were locked.
+        synchronized (modelCache) {
+            modelQuads = modelCache.get(modelData); // Another thread could have computed whilst we were locked.
             if (!DEBUG && modelQuads != null) return modelQuads;
             ImmutableList.Builder<BakedQuad> quads = ImmutableList.builder();
             for (Direction dir : Direction.values()) {
@@ -100,23 +101,23 @@ public class DuctBakedModel implements IBakedModel {
                 ResourceLocation servo = modelData.getServo(dir);
 
                 if (!internal && !external) {
-                    List<BakedQuad> fillQuads = rebake(CENTER_FILL_CACHE, centerFill, modelData.getFill(), dir);
+                    List<BakedQuad> fillQuads = rebake(centerFillCache, centerFill, modelData.getFill(), dir);
                     quads.addAll(filterBlank(centerModel.get(dir), !fillQuads.isEmpty()));
                     quads.addAll(filterBlank(fillQuads, false));
                 }
                 if (internal) {
-                    List<BakedQuad> fillQuads = rebake(FILL_CACHE, fill, modelData.getFill(), dir);
+                    List<BakedQuad> fillQuads = rebake(fillCache, fill, modelData.getFill(), dir);
                     quads.addAll(filterBlank(sides.get(dir), !fillQuads.isEmpty()));
                     quads.addAll(filterBlank(fillQuads, false));
                 } else if (external) {
-                    List<BakedQuad> fillQuads = rebake(FILL_CACHE, fill, modelData.getFill(), dir);
+                    List<BakedQuad> fillQuads = rebake(fillCache, fill, modelData.getFill(), dir);
                     quads.addAll(filterBlank(sides.get(dir), !fillQuads.isEmpty()));
                     quads.addAll(filterBlank(fillQuads, false));
-                    quads.addAll(filterBlank(rebake(SERVO_CACHE, connections, servo, dir), false));
+                    quads.addAll(filterBlank(rebake(servoCache, connections, servo, dir), false));
                 }
             }
             modelQuads = quads.build();
-            MODEL_CACHE.put(new DuctModelData(modelData), modelQuads);
+            modelCache.put(new DuctModelData(modelData), modelQuads);
             return modelQuads;
         }
     }
@@ -125,7 +126,7 @@ public class DuctBakedModel implements IBakedModel {
 
         List<BakedQuad> newQuads = new ArrayList<>(quads.size());
         for (BakedQuad quad : quads) {
-            if (cullBack && quad instanceof BackfaceBakedQuad || quad.getSprite().getName().equals(BLANK)) {
+            if (cullBack && quad instanceof BackfaceBakedQuad || quad.getSprite().getName().equals(BLANK_TEXTURE)) {
                 // do nothing
             } else {
                 newQuads.add(quad);
