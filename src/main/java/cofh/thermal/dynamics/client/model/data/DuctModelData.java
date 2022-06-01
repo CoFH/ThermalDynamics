@@ -24,6 +24,8 @@ public class DuctModelData implements IModelData {
     @Nullable
     private ResourceLocation[] servos;
 
+    private int fillColor = 0xFFFFFF;
+
     public DuctModelData() {
 
     }
@@ -50,6 +52,11 @@ public class DuctModelData implements IModelData {
     public void setFill(@Nullable ResourceLocation loc) {
 
         fill = loc;
+    }
+
+    public void setFillColor(int color) {
+
+        fillColor = color;
     }
 
     public void setServo(Direction dir, @Nullable ResourceLocation loc) {
@@ -108,6 +115,11 @@ public class DuctModelData implements IModelData {
         if (servos == null) return null;
 
         return servos[dir.ordinal()];
+    }
+
+    public int getFillColor() {
+
+        return fillColor;
     }
 
     //@formatter:off

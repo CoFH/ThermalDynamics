@@ -454,6 +454,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
         if (host instanceof IUpdateableGridHostInternal) {
             updatableHosts.add(host.getHostPos());
+            ((IUpdateableGridHostInternal) host).update();
         }
     }
 

@@ -1,10 +1,12 @@
 package cofh.thermal.dynamics.client.renderer.model;
 
+import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.client.renderer.model.RetexturedBakedQuad;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import cofh.thermal.dynamics.lib.BackfaceBakedQuad;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.BakedQuad;
@@ -52,9 +54,9 @@ public class DuctBakedModel implements IBakedModel {
     private final Map<Direction, List<BakedQuad>> connections;
     private final boolean isInventory;
     private final Map<DuctModelData, List<BakedQuad>> modelCache = new HashMap<>();
-    private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> centerFillCache = new HashMap<>();
-    private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> fillCache = new HashMap<>();
-    private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> servoCache = new HashMap<>();
+    private final Map<TexColorWrapper, Map<Direction, List<BakedQuad>>> centerFillCache = new Object2ObjectOpenHashMap<>();
+    private final Map<TexColorWrapper, Map<Direction, List<BakedQuad>>> fillCache = new Object2ObjectOpenHashMap<>();
+    private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> servoCache = new Object2ObjectOpenHashMap<>();  // TODO Servos
 
     public DuctBakedModel(IModelConfiguration config, TextureAtlasSprite particle, EnumMap<Direction, List<BakedQuad>> centerModel, EnumMap<Direction, List<BakedQuad>> centerFill, EnumMap<Direction, List<BakedQuad>> sides, EnumMap<Direction, List<BakedQuad>> fill, EnumMap<Direction, List<BakedQuad>> connections, boolean isInventory) {
 
@@ -101,19 +103,16 @@ public class DuctBakedModel implements IBakedModel {
                 ResourceLocation servo = modelData.getServo(dir);
 
                 if (!internal && !external) {
-                    List<BakedQuad> fillQuads = rebake(centerFillCache, centerFill, modelData.getFill(), dir);
+                    List<BakedQuad> fillQuads = rebakeFill(centerFillCache, centerFill, modelData.getFill(), modelData.getFillColor(), dir);
                     quads.addAll(filterBlank(centerModel.get(dir), !fillQuads.isEmpty()));
                     quads.addAll(filterBlank(fillQuads, false));
-                }
-                if (internal) {
-                    List<BakedQuad> fillQuads = rebake(fillCache, fill, modelData.getFill(), dir);
+                } else {
+                    List<BakedQuad> fillQuads = rebakeFill(fillCache, fill, modelData.getFill(), modelData.getFillColor(), dir);
                     quads.addAll(filterBlank(sides.get(dir), !fillQuads.isEmpty()));
                     quads.addAll(filterBlank(fillQuads, false));
-                } else if (external) {
-                    List<BakedQuad> fillQuads = rebake(fillCache, fill, modelData.getFill(), dir);
-                    quads.addAll(filterBlank(sides.get(dir), !fillQuads.isEmpty()));
-                    quads.addAll(filterBlank(fillQuads, false));
-                    quads.addAll(filterBlank(rebake(servoCache, connections, servo, dir), false));
+                    if (external) {
+                        quads.addAll(filterBlank(rebakeServo(servoCache, connections, servo, dir), false));
+                    }
                 }
             }
             modelQuads = quads.build();
@@ -135,7 +134,53 @@ public class DuctBakedModel implements IBakedModel {
         return newQuads;
     }
 
-    private List<BakedQuad> rebake(Map<ResourceLocation, Map<Direction, List<BakedQuad>>> cache, Map<Direction, List<BakedQuad>> raw, @Nullable ResourceLocation texture, Direction dir) {
+    private List<BakedQuad> rebakeFill(Map<TexColorWrapper, Map<Direction, List<BakedQuad>>> cache, Map<Direction, List<BakedQuad>> raw, @Nullable ResourceLocation texture, int color, Direction dir) {
+
+        // Easy bail if there are no quads.
+        List<BakedQuad> fillQuads = raw.get(dir);
+        if (fillQuads.isEmpty()) return ImmutableList.of();
+
+        // Again if there is no texture.
+        if (texture == null) return fillQuads;
+
+        // Is it cached already?
+        Map<Direction, List<BakedQuad>> retextured = cache.get(new TexColorWrapper(texture, color));
+        if (retextured != null) {
+            List<BakedQuad> quads = retextured.get(dir);
+            // Sure is!
+            if (quads != null) return quads;
+        }
+        // Whatever intellij, I know what im doing.
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+        synchronized (cache) {
+            retextured = cache.get(new TexColorWrapper(texture, color)); // Another thread could have computed whilst we were locked.
+            if (retextured != null) {
+                List<BakedQuad> quads = retextured.get(dir);
+                // \o/ memory saved++
+                if (quads != null) return quads;
+            } else {
+                retextured = new HashMap<>();
+                cache.put(new TexColorWrapper(texture, color), retextured);
+            }
+
+            // Grab the sprite
+            TextureAtlasSprite sprite = Minecraft.getInstance()
+                    .getModelManager()
+                    .getAtlas(PlayerContainer.BLOCK_ATLAS)
+                    .getSprite(texture);
+
+            // Retexture
+            List<BakedQuad> newQuads = new ArrayList<>(fillQuads.size());
+            for (BakedQuad quad : fillQuads) {
+                newQuads.add(new RetexturedBakedQuad(RenderHelper.mulColor(quad, color), sprite));
+            }
+            // slap in cache.
+            retextured.put(dir, newQuads);
+            return newQuads;
+        }
+    }
+
+    private List<BakedQuad> rebakeServo(Map<ResourceLocation, Map<Direction, List<BakedQuad>>> cache, Map<Direction, List<BakedQuad>> raw, @Nullable ResourceLocation texture, Direction dir) {
 
         // Easy bail if there are no quads.
         List<BakedQuad> fillQuads = raw.get(dir);
@@ -179,6 +224,25 @@ public class DuctBakedModel implements IBakedModel {
             retextured.put(dir, newQuads);
             return newQuads;
         }
+    }
+
+    private static class TexColorWrapper {
+
+        ResourceLocation texture;
+        int color;
+
+        public TexColorWrapper(ResourceLocation texture, int color) {
+
+            this.texture = texture;
+            this.color = color;
+        }
+
+        @Override
+        public int hashCode() {
+
+            return texture.hashCode() + color * 31;
+        }
+
     }
 
     //@formatter:off
