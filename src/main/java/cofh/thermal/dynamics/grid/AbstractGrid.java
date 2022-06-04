@@ -345,8 +345,8 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             node.setGrid(unsafeCast(this));
             node.onGridChange(unsafeCast(other));
         }
-        onMerge(unsafeCast(other));
         updatableHosts.addAll(other.updatableHosts);
+        onMerge(unsafeCast(other));
     }
 
     // Called to split the current grid into the specified partitions.
@@ -424,6 +424,16 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
         if (DEBUG) {
             checkInvariant();
+        }
+    }
+
+    protected void updateHosts() {
+
+        for (BlockPos pos : updatableHosts) {
+            if (world.isLoaded(pos) && world.getBlockEntity(pos) instanceof IUpdateableGridHostInternal) {
+                // TODO: replace with optimized version w/ J17
+                ((IUpdateableGridHostInternal) world.getBlockEntity(pos)).update();
+            }
         }
     }
 

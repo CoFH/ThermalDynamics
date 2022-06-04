@@ -5,7 +5,7 @@ buildscript {
         maven { url 'https://maven.minecraftforge.net/' }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:4.1.+'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 
@@ -13,7 +13,7 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'net.covers1624.signing' version '1.1.4'
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -88,7 +88,7 @@ minecraft {
 
 configurations {
     shadowIn
-    compile.extendsFrom shadowIn
+    implementation.extendsFrom shadowIn
 }
 
 dependencies {
@@ -97,8 +97,8 @@ dependencies {
     shadowIn 'net.covers1624:Quack:0.4.0.42' // Quack :D
     compileOnly 'org.jetbrains:annotations:22.0.0'
 
-    compile fg.deobf("com.teamcofh:cofh_core:${mc_version}-${cofh_core_version}")
-    compile fg.deobf("com.teamcofh:thermal_foundation:${mc_version}-${thermal_foundation_version}")
+    implementation fg.deobf("com.teamcofh:cofh_core:${mc_version}-${cofh_core_version}")
+    implementation fg.deobf("com.teamcofh:thermal_foundation:${mc_version}-${thermal_foundation_version}")
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

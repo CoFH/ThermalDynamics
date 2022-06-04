@@ -1,9 +1,7 @@
 package cofh.thermal.dynamics.init;
 
 import cofh.core.block.TileBlock6Way;
-import cofh.thermal.dynamics.block.TileBlockDuctEnergy;
-import cofh.thermal.dynamics.block.TileBlockDuctFluid;
-import cofh.thermal.dynamics.block.TileBlockDuctFluidGlass;
+import cofh.thermal.dynamics.block.TileBlockDuct;
 import cofh.thermal.dynamics.tileentity.EnergyDuctTile;
 import cofh.thermal.dynamics.tileentity.FluidDuctGlassTile;
 import cofh.thermal.dynamics.tileentity.FluidDuctTile;
@@ -39,9 +37,9 @@ public class TDynBlocks {
     private static void registerTileBlocks() {
 
 
-        registerBlock(ID_ENERGY_DUCT, () -> new TileBlockDuctEnergy(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).harvestTool(ToolType.PICKAXE).dynamicShape().noOcclusion()));
-        registerBlock(ID_FLUID_DUCT, () -> new TileBlockDuctFluid(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).harvestTool(ToolType.PICKAXE).dynamicShape().noOcclusion()));
-        registerBlock(ID_FLUID_DUCT_GLASS, () -> new TileBlockDuctFluidGlass(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).harvestTool(ToolType.PICKAXE).dynamicShape().noOcclusion()));
+        registerBlock(ID_ENERGY_DUCT, () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).harvestTool(ToolType.PICKAXE).dynamicShape().noOcclusion(), EnergyDuctTile::new));
+        registerBlock(ID_FLUID_DUCT, () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).harvestTool(ToolType.PICKAXE).dynamicShape().noOcclusion(), FluidDuctTile::new));
+        registerBlock(ID_FLUID_DUCT_GLASS, () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).harvestTool(ToolType.PICKAXE).dynamicShape().noOcclusion(), FluidDuctGlassTile::new));
 
 
         IntSupplier storageAugs = () -> ThermalConfig.storageAugments;

@@ -1,10 +1,14 @@
 package cofh.thermal.dynamics.block;
 
 import cofh.lib.block.IDismantleable;
+import cofh.lib.util.raytracer.IndexedVoxelShape;
+import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import cofh.thermal.dynamics.tileentity.DuctTileBase;
+import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.kinds.IdF;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
@@ -30,31 +34,32 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-public abstract class TileBlockDuctBase extends Block implements IWaterLoggable, IDismantleable {
+public class TileBlockDuct extends Block implements IWaterLoggable, IDismantleable {
 
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    private static final Int2ObjectMap<MultiIndexedVoxelShape> SHAPE_CACHE = new Int2ObjectOpenHashMap<>(512);
+    private static final IndexedVoxelShape BASE_SHAPE = new IndexedVoxelShape(Block.box(4.5, 4.5, 4.5, 11.5, 11.5, 11.5), 0);
 
-    private static final Int2ObjectMap<VoxelShape> SHAPE_CACHE = new Int2ObjectOpenHashMap<>(512);
+    protected final Supplier<? extends DuctTileBase> supplier;
 
-    private static final VoxelShape BASE_SHAPE = Block.box(4.5, 4.5, 4.5, 11.5, 11.5, 11.5);
-
-    private static final VoxelShape[] INTERNAL_CONNECTION = new VoxelShape[]{
-            Block.box(4.5, 0, 4.5, 11.5, 4.5, 11.5),
-            Block.box(4.5, 11.5, 4.5, 11.5, 16, 11.5),
-            Block.box(4.5, 4.5, 0, 11.5, 11.5, 4.5),
-            Block.box(4.5, 4.5, 11.5, 11.5, 11.5, 16),
-            Block.box(0, 4.5, 4.5, 4.5, 11.5, 11.5),
-            Block.box(11.5, 4.5, 4.5, 16, 11.5, 11.5)
+    private static final IndexedVoxelShape[] INTERNAL_CONNECTION = new IndexedVoxelShape[]{
+            new IndexedVoxelShape(Block.box(4.5, 0, 4.5, 11.5, 4.5, 11.5), 1),
+            new IndexedVoxelShape(Block.box(4.5, 11.5, 4.5, 11.5, 16, 11.5), 2),
+            new IndexedVoxelShape(Block.box(4.5, 4.5, 0, 11.5, 11.5, 4.5), 3),
+            new IndexedVoxelShape(Block.box(4.5, 4.5, 11.5, 11.5, 11.5, 16), 4),
+            new IndexedVoxelShape(Block.box(0, 4.5, 4.5, 4.5, 11.5, 11.5), 5),
+            new IndexedVoxelShape(Block.box(11.5, 4.5, 4.5, 16, 11.5, 11.5), 6)
     };
 
-    private static final VoxelShape[] EXTERNAL_CONNECTION = new VoxelShape[]{
-            Block.box(3.5, 0, 3.5, 12.5, 4.5, 12.5),
-            Block.box(3.5, 11.5, 3.5, 12.5, 16, 12.5),
-            Block.box(3.5, 3.5, 0, 12.5, 12.5, 4.5),
-            Block.box(3.5, 3.5, 11.5, 12.5, 12.5, 16),
-            Block.box(0, 3.5, 3.5, 4.5, 12.5, 12.5),
-            Block.box(11.5, 3.5, 3.5, 16, 12.5, 12.5)
+    private static final IndexedVoxelShape[] EXTERNAL_CONNECTION = new IndexedVoxelShape[]{
+            new IndexedVoxelShape(Block.box(3.5, 0, 3.5, 12.5, 4.5, 12.5), 7),
+            new IndexedVoxelShape(Block.box(3.5, 11.5, 3.5, 12.5, 16, 12.5), 8),
+            new IndexedVoxelShape(Block.box(3.5, 3.5, 0, 12.5, 12.5, 4.5), 9),
+            new IndexedVoxelShape(Block.box(3.5, 3.5, 11.5, 12.5, 12.5, 16), 10),
+            new IndexedVoxelShape(Block.box(0, 3.5, 3.5, 4.5, 12.5, 12.5), 11),
+            new IndexedVoxelShape(Block.box(11.5, 3.5, 3.5, 16, 12.5, 12.5), 12)
     };
 
     private static VoxelShape getConnectionShape(int connectionState) {
@@ -62,21 +67,24 @@ public abstract class TileBlockDuctBase extends Block implements IWaterLoggable,
         if (SHAPE_CACHE.containsKey(connectionState)) {
             return SHAPE_CACHE.get(connectionState);
         }
-        VoxelShape retShape = BASE_SHAPE;
+        ImmutableSet.Builder<IndexedVoxelShape> cuboids = ImmutableSet.builder();
+        cuboids.add(BASE_SHAPE);
         for (int i = 0; i < 6; ++i) {
             if ((connectionState & (1 << i + 6)) > 0) {
-                retShape = VoxelShapes.or(retShape, EXTERNAL_CONNECTION[i]);
+                cuboids.add(EXTERNAL_CONNECTION[i]);
             } else if ((connectionState & (1 << i)) > 0) {
-                retShape = VoxelShapes.or(retShape, INTERNAL_CONNECTION[i]);
+                cuboids.add(INTERNAL_CONNECTION[i]);
             }
         }
+        MultiIndexedVoxelShape retShape = new MultiIndexedVoxelShape(cuboids.build());
         SHAPE_CACHE.put(connectionState, retShape);
         return retShape;
     }
 
-    public TileBlockDuctBase(Properties properties) {
+    public TileBlockDuct(Properties properties, Supplier<? extends DuctTileBase> supplier) {
 
         super(properties);
+        this.supplier = supplier;
     }
 
     @Override
@@ -89,6 +97,12 @@ public abstract class TileBlockDuctBase extends Block implements IWaterLoggable,
     public boolean hasTileEntity(BlockState state) {
 
         return true;
+    }
+
+    @Override
+    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+
+        return supplier.get();
     }
 
     @Override

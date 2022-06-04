@@ -5,14 +5,12 @@ import cofh.lib.util.TimeTracker;
 import cofh.thermal.dynamics.api.grid.fluid.IFluidGrid;
 import cofh.thermal.dynamics.api.grid.fluid.IFluidGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.api.internal.IUpdateableGridHostInternal;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -112,12 +110,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
                 wasFilled = true;
                 return;
             }
-            for (BlockPos pos : updatableHosts) {
-                if (world.isLoaded(pos) && world.getBlockEntity(pos) instanceof IUpdateableGridHostInternal) {
-                    // TODO: replace with optimized version w/ J17
-                    ((IUpdateableGridHostInternal) world.getBlockEntity(pos)).update();
-                }
-            }
+            updateHosts();
             wasFilled = false;
         }
     }
@@ -136,6 +129,8 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
         storage.setBaseCapacity(NODE_CAPACITY * getNodes().size());
         storage.setCapacity(this.getCapacity() + from.getCapacity());
         storage.setFluid(new FluidStack(storage.getFluid(), this.getFluidAmount() + from.getFluidAmount()));
+
+        updateHosts();
     }
 
     @Override
