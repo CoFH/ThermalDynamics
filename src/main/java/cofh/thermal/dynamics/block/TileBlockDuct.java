@@ -109,10 +109,7 @@ public class TileBlockDuct extends Block implements IWaterLoggable, IDismantleab
     @Override
     public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
 
-        if (Utils.isClientWorld(worldIn)) {
-            return ActionResultType.SUCCESS;
-        }
-        if (Utils.isWrench(player.getItemInHand(handIn).getItem())) {
+        if (Utils.isServerWorld(worldIn) && Utils.isWrench(player.getItemInHand(handIn).getItem())) {
             if (hit.subHit == 0) {
                 // TODO: Attempt connection w/ adjacent duct OR block
             } else if (hit.subHit < 7) {
