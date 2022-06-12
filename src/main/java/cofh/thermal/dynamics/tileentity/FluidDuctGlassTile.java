@@ -4,7 +4,7 @@ import cofh.core.network.packet.client.TileStatePacket;
 import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.tileentity.ITilePacketHandler;
-import cofh.thermal.dynamics.api.internal.IGridHostUpdateable;
+import cofh.thermal.dynamics.api.grid.IGridHostUpdateable;
 import cofh.thermal.dynamics.grid.fluid.FluidGrid;
 import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.block.BlockState;

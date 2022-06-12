@@ -2,7 +2,6 @@ package cofh.thermal.dynamics.grid;
 
 import cofh.thermal.dynamics.api.grid.*;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.api.internal.IGridHostUpdateable;
 import cofh.thermal.dynamics.handler.GridContainer;
 import com.google.common.graph.*;
 import it.unimi.dsi.fastutil.longs.*;
