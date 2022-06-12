@@ -4,7 +4,6 @@ import cofh.core.network.packet.client.ModelUpdatePacket;
 import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.api.grid.*;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
@@ -61,9 +60,9 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     }
 
     @Override
-    public void onGridHostPlaced(IGridHostInternal host) {
+    public void onGridHostPlaced(IGridHost host) {
 
-        EnumMap<Direction, IGridHostInternal> adjacentGrids = getAdjacentGrids(host);
+        EnumMap<Direction, IGridHost> adjacentGrids = getAdjacentGrids(host);
         // We aren't adjacent to anything else, new grid.
         if (adjacentGrids.isEmpty()) {
             constructNewGrid(host);
@@ -71,10 +70,10 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         }
 
         if (adjacentGrids.size() == 1) {
-            Map.Entry<Direction, IGridHostInternal> adjacent = ColUtils.only(adjacentGrids.entrySet());
+            Map.Entry<Direction, IGridHost> adjacent = ColUtils.only(adjacentGrids.entrySet());
             extendGrid(host, adjacent.getValue(), adjacent.getKey());
         } else {
-            List<IGridHostInternal> branches = new ArrayList<>(adjacentGrids.values());
+            List<IGridHost> branches = new ArrayList<>(adjacentGrids.values());
             // Merge grids!
 
             // Check if we would be merging 2 isolated grids.
@@ -91,7 +90,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         }
     }
 
-    private void constructNewGrid(IGridHostInternal host) {
+    private void constructNewGrid(IGridHost host) {
 
         if (DEBUG) {
             LOGGER.info("Constructing new grid for {}", host.getHostPos());
@@ -105,7 +104,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         grid.onModified();
     }
 
-    private void extendGrid(IGridHostInternal host, IGridHost adjacent, Direction adjacentDir) {
+    private void extendGrid(IGridHost host, IGridHost adjacent, Direction adjacentDir) {
 
         Optional<IGridNode<?>> adjacentNodeOpt = adjacent.getNode();
         Optional<IGrid<?, ?>> adjacentGridOpt = adjacent.getGrid();
@@ -221,7 +220,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         return abMiddle;
     }
 
-    private void mergeGridBranches(IGridHostInternal host, List<IGridHostInternal> branches, boolean wasMerge) {
+    private void mergeGridBranches(IGridHost host, List<IGridHost> branches, boolean wasMerge) {
 
         assert branches.size() != 1;
 
@@ -256,10 +255,10 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         grid.onModified();
     }
 
-    private void mergeGrids(List<IGridHostInternal> branches) {
+    private void mergeGrids(List<IGridHost> branches) {
 
         Set<AbstractGrid<?, ?>> grids = new HashSet<>();
-        for (IGridHostInternal branch : branches) {
+        for (IGridHost branch : branches) {
             AbstractGrid<?, ?> abstractGrid = (AbstractGrid<?, ?>) branch.getGrid().orElseThrow(notPossible());
             grids.add(abstractGrid);
         }
@@ -278,9 +277,9 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     }
 
     @Override
-    public void onGridHostDestroyed(IGridHostInternal host) {
+    public void onGridHostRemoved(IGridHost host) {
 
-        EnumMap<Direction, IGridHostInternal> adjacentHosts = getAdjacentGrids(host);
+        EnumMap<Direction, IGridHost> adjacentHosts = getAdjacentGrids(host);
         if (adjacentHosts.isEmpty()) {
             // No adjacent grids, just remove the grid.
             removeSingleGrid(host);
@@ -296,7 +295,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     }
 
     @Override
-    public void onGridHostNeighborChanged(IGridHostInternal host) {
+    public void onGridHostNeighborChanged(IGridHost host) {
 
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid()
                 .orElseThrow(notPossible());
@@ -316,7 +315,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         }
     }
 
-    private void removeSingleGrid(IGridHostInternal host) {
+    private void removeSingleGrid(IGridHost host) {
 
         if (DEBUG) {
             LOGGER.info("Removing grid for {}", host.getHostPos());
@@ -332,7 +331,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         removeGridLookup(grid, host.getHostPos());
     }
 
-    private void shrinkGrid(IGridHostInternal host, IGridHost adjacent) {
+    private void shrinkGrid(IGridHost host, IGridHost adjacent) {
 
         Optional<IGridNode<?>> adjacentNodeOpt = adjacent.getNode();
         Optional<IGrid<?, ?>> adjacentGridOpt = adjacent.getGrid();
@@ -381,7 +380,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         grid.onModified();
     }
 
-    private void removeNode(IGridHostInternal host, EnumMap<Direction, IGridHostInternal> adjacentHosts) {
+    private void removeNode(IGridHost host, EnumMap<Direction, IGridHost> adjacentHosts) {
         // We are removing a host which has a node, we need to:
         // - Disconnect all connected edges.
         // - Iterate all adjacent hosts
@@ -413,7 +412,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         }
 
         // Create/delete adjacent nodes if required
-        for (IGridHostInternal adjHost : adjacentHosts.values()) {
+        for (IGridHost adjHost : adjacentHosts.values()) {
             if (!adjHost.getNode().isPresent()) {
                 // We always need to create a new node here.
                 Pair<IGridNode<?>, Set<BlockPos>> foundEdge = only(GridHelper.locateAttachedNodes(world, adjHost.getHostPos(), host.getHostPos(), host.getExposedTypes()));
@@ -474,7 +473,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         }
     }
 
-    private void separateGrids(IGridHostInternal host) {
+    private void separateGrids(IGridHost host) {
 
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid()
                 .orElseThrow(notPossible());
@@ -667,13 +666,13 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         }
     }
 
-    private EnumMap<Direction, IGridHostInternal> getAdjacentGrids(IGridHostInternal host) {
+    private EnumMap<Direction, IGridHost> getAdjacentGrids(IGridHost host) {
 
-        EnumMap<Direction, IGridHostInternal> adjacentGrids = new EnumMap<>(Direction.class);
+        EnumMap<Direction, IGridHost> adjacentGrids = new EnumMap<>(Direction.class);
         for (Direction dir : Direction.values()) {
             Optional<IGridHost> otherOpt = GridHelper.getGridHost(world, host.getHostPos().relative(dir));
             if (otherOpt.isPresent()) {
-                IGridHostInternal other = (IGridHostInternal) otherOpt.get();
+                IGridHost other = otherOpt.get();
                 // Ignore grids which don't expose any of our types.
                 if (!Sets.intersection(other.getExposedTypes(), host.getExposedTypes()).isEmpty()) {
                     adjacentGrids.put(dir, other);

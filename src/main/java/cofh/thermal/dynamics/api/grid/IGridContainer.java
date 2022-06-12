@@ -1,7 +1,6 @@
 package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.TDynApi;
-import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -22,11 +21,11 @@ public interface IGridContainer {
     @Nullable
     IGrid<?, ?> getGrid(BlockPos pos);
 
-    void onGridHostPlaced(IGridHostInternal host);
+    void onGridHostPlaced(IGridHost host);
 
-    void onGridHostDestroyed(IGridHostInternal host);
+    void onGridHostRemoved(IGridHost host);
 
-    void onGridHostNeighborChanged(IGridHostInternal host);
+    void onGridHostNeighborChanged(IGridHost host);
 
     static Optional<IGridContainer> getCapability(IWorld _world) {
 

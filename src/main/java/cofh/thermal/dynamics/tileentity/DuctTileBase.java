@@ -5,7 +5,6 @@ import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -24,7 +23,7 @@ import java.util.Optional;
 import static java.util.Objects.requireNonNull;
 import static net.covers1624.quack.util.SneakyUtils.notPossible;
 
-public abstract class DuctTileBase extends TileEntity implements IGridHostInternal, ITileLocation {
+public abstract class DuctTileBase extends TileEntity implements ITileLocation, IGridHost {
 
     // Only available server side.
     protected Optional<IGrid<?, ?>> grid = Optional.empty();
@@ -70,7 +69,6 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
                     .orElseThrow(notPossible());
             grid = Optional.of(requireNonNull(gridContainer.getGrid(getBlockPos())));
         }
-
         return grid;
     }
 
@@ -90,7 +88,7 @@ public abstract class DuctTileBase extends TileEntity implements IGridHostIntern
             for (Direction dir : Direction.values()) {
                 Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
                 if (gridHostOpt.isPresent()) {
-                    IGridHostInternal gridHost = (IGridHostInternal) gridHostOpt.get();
+                    IGridHost gridHost = gridHostOpt.get();
                     modelData.setInternalConnection(dir, gridHost.getExposedTypes().equals(getExposedTypes()));
                 } else {
                     modelData.setInternalConnection(dir, false);

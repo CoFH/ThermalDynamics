@@ -2,8 +2,7 @@ package cofh.thermal.dynamics.grid;
 
 import cofh.thermal.dynamics.api.grid.*;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.api.internal.IGridHostInternal;
-import cofh.thermal.dynamics.api.internal.IUpdateableGridHostInternal;
+import cofh.thermal.dynamics.api.internal.IGridHostUpdateable;
 import cofh.thermal.dynamics.handler.GridContainer;
 import com.google.common.graph.*;
 import it.unimi.dsi.fastutil.longs.*;
@@ -126,7 +125,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             }
             Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(world, pos);
             assert gridHostOpt.isPresent();
-            assert gridHostOpt.get() instanceof IUpdateableGridHostInternal;
+            assert gridHostOpt.get() instanceof IGridHostUpdateable;
         }
     }
 
@@ -140,7 +139,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         IGridHost gridHost = gridHostOpt.get();
         assert gridHost.getGrid().isPresent();
         assert gridHost.getGrid().get() == this;
-        assert !(gridHost instanceof IUpdateableGridHostInternal) || updatableHosts.contains(gridHost.getHostPos());
+        assert !(gridHost instanceof IGridHostUpdateable) || updatableHosts.contains(gridHost.getHostPos());
 
         assert gridContainer.getGrid(pos) == this;
     }
@@ -410,7 +409,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                     LOGGER.error("Node not connected to grid! Chunk modified externally. {}", pos);
                     continue;
                 }
-                IGridHostInternal gridHost = (IGridHostInternal) gridHostOpt.get();
+                IGridHost gridHost = gridHostOpt.get();
                 gridHost.setGrid(grid);
             }
         }
@@ -430,9 +429,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     protected void updateHosts() {
 
         for (BlockPos pos : updatableHosts) {
-            if (world.isLoaded(pos) && world.getBlockEntity(pos) instanceof IUpdateableGridHostInternal) {
+            if (world.isLoaded(pos) && world.getBlockEntity(pos) instanceof IGridHostUpdateable) {
                 // TODO: replace with optimized version w/ J17
-                ((IUpdateableGridHostInternal) world.getBlockEntity(pos)).update();
+                ((IGridHostUpdateable) world.getBlockEntity(pos)).update();
             }
         }
     }
@@ -460,17 +459,17 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
      */
     public abstract void onSplit(List<G> others);
 
-    public void onGridHostAdded(IGridHostInternal host) {
+    public void onGridHostAdded(IGridHost host) {
 
-        if (host instanceof IUpdateableGridHostInternal) {
+        if (host instanceof IGridHostUpdateable) {
             updatableHosts.add(host.getHostPos());
-            ((IUpdateableGridHostInternal) host).update();
+            ((IGridHostUpdateable) host).update();
         }
     }
 
     public void onGridHostRemoved(IGridHost host) {
 
-        if (host instanceof IUpdateableGridHostInternal) {
+        if (host instanceof IGridHostUpdateable) {
             updatableHosts.remove(host.getHostPos());
         }
     }

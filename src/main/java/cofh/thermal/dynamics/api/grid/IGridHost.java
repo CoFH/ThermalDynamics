@@ -10,6 +10,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Represents an object capable of hosting a {@link IGrid}.
@@ -34,6 +35,10 @@ public interface IGridHost {
      * @return The raw grid.
      */
     Optional<IGrid<?, ?>> getGrid();
+
+    void setGrid(IGrid<?, ?> grid);
+
+    Set<IGridType<?>> getExposedTypes();
 
     /**
      * Gets the {@link IGridNode} hosted by this grid host.

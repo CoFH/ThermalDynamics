@@ -5,7 +5,6 @@ import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.grid.IGridNode;
 import cofh.thermal.dynamics.api.grid.IGridType;
-import cofh.thermal.dynamics.api.internal.IGridHostInternal;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import net.minecraft.tileentity.TileEntity;
@@ -82,7 +81,7 @@ public class GridHelper {
         addCandidates(world, start, visited, candidates);
         ImmutableList.Builder<Pair<IGridNode<?>, Set<BlockPos>>> builder = ImmutableList.builder();
         while (!candidates.isEmpty()) {
-            IGridHostInternal host = (IGridHostInternal) candidates.pop();
+            IGridHost host = candidates.pop();
             if (Sets.intersection(host.getExposedTypes(), typeFilter).isEmpty()) continue;
 
             Optional<IGridNode<?>> nodeOpt = host.getNode();

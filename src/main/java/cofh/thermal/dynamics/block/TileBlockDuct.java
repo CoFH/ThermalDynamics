@@ -1,20 +1,21 @@
 package cofh.thermal.dynamics.block;
 
 import cofh.lib.block.IDismantleable;
+import cofh.lib.util.Utils;
 import cofh.lib.util.raytracer.IndexedVoxelShape;
 import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
-import cofh.thermal.dynamics.api.internal.IGridHostInternal;
+import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import cofh.thermal.dynamics.tileentity.DuctTileBase;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.kinds.IdF;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.IWaterLoggable;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItemUseContext;
@@ -23,11 +24,13 @@ import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -106,14 +109,32 @@ public class TileBlockDuct extends Block implements IWaterLoggable, IDismantleab
     }
 
     @Override
+    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+
+        if (Utils.isClientWorld(worldIn)) {
+            return ActionResultType.SUCCESS;
+        }
+        if (Utils.isWrench(player.getItemInHand(handIn).getItem())) {
+            if (hit.subHit == 0) {
+                // TODO: Attempt connection w/ adjacent duct OR block
+            } else if (hit.subHit < 7) {
+                // TODO: Sever connection w/ adjacent duct
+            } else {
+                // TODO: Sever connection w/ adjacent block
+            }
+        }
+        return ActionResultType.PASS;
+    }
+
+    @Override
     public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos adj, boolean isMoving) {
 
         if (world.isClientSide()) {
             return;
         }
         TileEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof IGridHostInternal) {
-            IGridHostInternal host = (IGridHostInternal) tile;
+        if (tile instanceof IGridHost) {
+            IGridHost host = (IGridHost) tile;
             Optional<IGridContainer> gridContainer = IGridContainer.getCapability(world);
             gridContainer.ifPresent(e -> e.onGridHostNeighborChanged(host));
         }
@@ -126,8 +147,8 @@ public class TileBlockDuct extends Block implements IWaterLoggable, IDismantleab
             return;
         }
         TileEntity tile = worldIn.getBlockEntity(pos);
-        if (tile instanceof IGridHostInternal) {
-            IGridHostInternal host = (IGridHostInternal) tile;
+        if (tile instanceof IGridHost) {
+            IGridHost host = (IGridHost) tile;
             Optional<IGridContainer> gridContainer = IGridContainer.getCapability(worldIn);
             gridContainer.ifPresent(e -> e.onGridHostPlaced(host));
         }
@@ -138,10 +159,10 @@ public class TileBlockDuct extends Block implements IWaterLoggable, IDismantleab
 
         if (state.getBlock() != newState.getBlock()) {
             TileEntity tile = worldIn.getBlockEntity(pos);
-            if (tile instanceof IGridHostInternal) {
-                IGridHostInternal host = (IGridHostInternal) tile;
+            if (tile instanceof IGridHost) {
+                IGridHost host = (IGridHost) tile;
                 Optional<IGridContainer> gridContainer = IGridContainer.getCapability(worldIn);
-                gridContainer.ifPresent(e -> e.onGridHostDestroyed(host));
+                gridContainer.ifPresent(e -> e.onGridHostRemoved(host));
             }
             super.onRemove(state, worldIn, pos, newState, isMoving);
         }
