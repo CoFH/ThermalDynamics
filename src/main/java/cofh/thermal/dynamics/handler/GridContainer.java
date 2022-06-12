@@ -68,7 +68,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             constructNewGrid(host);
             return;
         }
-
         if (adjacentGrids.size() == 1) {
             Map.Entry<Direction, IGridHost> adjacent = ColUtils.only(adjacentGrids.entrySet());
             extendGrid(host, adjacent.getValue(), adjacent.getKey());
