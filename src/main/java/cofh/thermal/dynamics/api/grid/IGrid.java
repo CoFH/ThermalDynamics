@@ -77,7 +77,7 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
      * @param pos The position.
      * @return If the grid can connect to any adjacent blocks.
      */
-    default boolean canConnectToAdjacent(BlockPos pos) {
+    default boolean canConnectExternally(BlockPos pos) {
 
         for (Direction dir : Direction.values()) {
             if (canConnectOnSide(pos.relative(dir), dir.getOpposite())) {

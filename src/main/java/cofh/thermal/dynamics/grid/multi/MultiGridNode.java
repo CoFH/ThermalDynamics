@@ -20,9 +20,9 @@ public class MultiGridNode extends AbstractGridNode<IMultiGrid> implements IMult
     }
 
     @Override
-    public <G extends IGrid<?, ?>> Optional<IGridNode<G>> getSubGrid(IGridType<G> type) {
+    public <G extends IGrid<?, ?>> IGridNode<G> getSubGrid(IGridType<G> type) {
 
-        return Optional.empty();
+        return null;
     }
 
 }

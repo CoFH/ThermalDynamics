@@ -68,11 +68,11 @@ public class GridHelper {
      * @param world      The {@link World} to search in.
      * @param start      The {@link BlockPos} to start scanning from.
      * @param from       The {@link BlockPos} to ignore. Usually the adjacent block which is performing this check.
-     * @param typeFilter Found grid hosts must have any of these {@link IGridType types} exposed.
+     * @param origin     Found grid hosts must be connectable to this host.
      * @return The attached {@link IGridNode GridNodes} and the {@link BlockPos positions} between <code>start</code>
      * and the found {@link IGridNode}.
      */
-    public static List<Pair<IGridNode<?>, Set<BlockPos>>> locateAttachedNodes(World world, BlockPos start, BlockPos from, Set<IGridType<?>> typeFilter) {
+    public static List<Pair<IGridNode<?>, Set<BlockPos>>> locateAttachedNodes(World world, BlockPos start, BlockPos from, IGridHost origin) {
 
         Set<BlockPos> visited = new HashSet<>();
         LinkedList<IGridHost> candidates = new LinkedList<>();
@@ -82,11 +82,11 @@ public class GridHelper {
         ImmutableList.Builder<Pair<IGridNode<?>, Set<BlockPos>>> builder = ImmutableList.builder();
         while (!candidates.isEmpty()) {
             IGridHost host = candidates.pop();
-            if (Sets.intersection(host.getExposedTypes(), typeFilter).isEmpty()) continue;
+            if (!host.canConnectTo(origin)) continue;
 
-            Optional<IGridNode<?>> nodeOpt = host.getNode();
-            if (nodeOpt.isPresent()) {
-                builder.add(Pair.of(nodeOpt.get(), getPositionsBetween(start, host.getHostPos())));
+            IGridNode<?> node = host.getNode();
+            if (node != null) {
+                builder.add(Pair.of(node, getPositionsBetween(start, host.getHostPos())));
             } else {
                 addCandidates(world, host.getHostPos(), visited, candidates);
             }

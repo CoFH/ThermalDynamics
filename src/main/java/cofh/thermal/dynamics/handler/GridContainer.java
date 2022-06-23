@@ -7,7 +7,6 @@ import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
-import com.google.common.collect.Sets;
 import com.google.common.graph.EndpointPair;
 import io.netty.buffer.Unpooled;
 import net.covers1624.quack.collection.ColUtils;
@@ -77,7 +76,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
             // Check if we would be merging 2 isolated grids.
             boolean sameGrid = StreamableIterable.of(branches)
-                    .map(e -> e.getGrid().orElseThrow(notPossible()))
+                    .map(IGridHost::getGrid)
                     .distinct()
                     .count() == 1;
             if (!sameGrid) {
@@ -105,25 +104,24 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
     private void extendGrid(IGridHost host, IGridHost adjacent, Direction adjacentDir) {
 
-        Optional<IGridNode<?>> adjacentNodeOpt = adjacent.getNode();
-        Optional<IGrid<?, ?>> adjacentGridOpt = adjacent.getGrid();
+        AbstractGridNode<?> adjacentNode = (AbstractGridNode<?>) adjacent.getNode();
+        AbstractGrid<?, ?> adjacentGrid = (AbstractGrid<?, ?>) adjacent.getGrid();
 
-        assert adjacentGridOpt.isPresent(); // All adjacent nodes should have a Grid when this method is called.
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) adjacentGridOpt.get();
+        assert adjacentGrid != null; // All adjacent nodes should have a Grid when this method is called.
 
         // Set the GridHost's grid.
-        host.setGrid(grid);
+        host.setGrid(adjacentGrid);
 
-        AbstractGridNode<?> newNode = grid.newNode(host.getHostPos());
-        addGridLookup(grid, newNode.getPos());
-        if (!adjacentNodeOpt.isPresent()) {
+        AbstractGridNode<?> newNode = adjacentGrid.newNode(host.getHostPos());
+        addGridLookup(adjacentGrid, newNode.getPos());
+        if (adjacentNode == null) {
             // We are adding a duct next to another duct which does not have a node associated, we need to:
             // - Identify the 2 nodes at either end of this adjacent duct (a/b).
             // - Generate a new node at the adjacent position.
             // - Unlink the 'a/b' nodes from each other and re-link with the adjacent node.
             // - Add link to the node we just placed.
-            AbstractGridNode<?> abMiddle = insertNode(grid, adjacent.getHostPos(), host.getHostPos(), host.getExposedTypes());
-            grid.nodeGraph.putEdgeValue(abMiddle, newNode, new HashSet<>());
+            AbstractGridNode<?> abMiddle = insertNode(adjacentGrid, adjacent.getHostPos(), host.getHostPos(), host);
+            adjacentGrid.nodeGraph.putEdgeValue(abMiddle, newNode, new HashSet<>());
 
             if (DEBUG) {
                 LOGGER.info(" T intersection creation. New Node: {}, Adjacent: {}",
@@ -137,12 +135,11 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             // - If there is a single edge to the node we are adjacent to and that edge is on the same axis as the new node:
             //   - Remove the edge, remove the node and re-link the edge to the new node and increment edge length by one.
             // - If there is 0, more than one edge, or the edge is not on the same axis, we can just link to the new node.
-            AbstractGridNode<?> adjacentNode = (AbstractGridNode<?>) adjacentNodeOpt.get();
-            Set<AbstractGridNode<?>> edgeNodes = grid.nodeGraph.adjacentNodes(adjacentNode);
+            Set<AbstractGridNode<?>> edgeNodes = adjacentGrid.nodeGraph.adjacentNodes(adjacentNode);
 
             AbstractGridNode<?> edge = onlyOrDefault(edgeNodes, null);
-            if (edge != null && isOnSameAxis(newNode.getPos(), edge.getPos()) && !grid.canConnectToAdjacent(adjacentNode.getPos())) {
-                Set<BlockPos> values = grid.nodeGraph.edgeValue(adjacentNode, edge);
+            if (edge != null && isOnSameAxis(newNode.getPos(), edge.getPos()) && !adjacentGrid.canConnectExternally(adjacentNode.getPos())) {
+                Set<BlockPos> values = adjacentGrid.nodeGraph.edgeValue(adjacentNode, edge);
                 int oldLen = values.size();
                 values.add(adjacentNode.getPos());
                 if (DEBUG) {
@@ -155,17 +152,17 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
                             values.size()
                     );
                 }
-                grid.removeNode(adjacentNode);
-                grid.nodeGraph.putEdgeValue(newNode, edge, values);
+                adjacentGrid.removeNode(adjacentNode);
+                adjacentGrid.nodeGraph.putEdgeValue(newNode, edge, values);
             } else {
                 if (DEBUG) {
                     LOGGER.info("Adding new single node. adjacent {}, new {}", adjacentNode.getPos(), newNode.getPos());
                 }
-                grid.nodeGraph.putEdgeValue(newNode, adjacentNode, new HashSet<>());
+                adjacentGrid.nodeGraph.putEdgeValue(newNode, adjacentNode, new HashSet<>());
             }
         }
-        grid.onGridHostAdded(host);
-        grid.onModified();
+        adjacentGrid.onGridHostAdded(host);
+        adjacentGrid.onModified();
     }
 
     /**
@@ -173,22 +170,22 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
      * <p>
      * This method assumes there is not already a node at <code>pos</code>.
      *
-     * @param grid       The grid to add the node to.
-     * @param pos        The position in the grid to generate the node.
-     * @param from       The position next to <code>pos</code> which triggered this insertion.
-     *                   May be <code>pos</code> if no adjacent position exist. This position will
-     *                   be ignored when searching for adjacent grid hosts to build the new node.
-     * @param typeFilter When locating adjacent grids, they must have any of these {@link IGridType types} exposed.
+     * @param grid   The grid to add the node to.
+     * @param pos    The position in the grid to generate the node.
+     * @param from   The position next to <code>pos</code> which triggered this insertion.
+     *               May be <code>pos</code> if no adjacent position exist. This position will
+     *               be ignored when searching for adjacent grid hosts to build the new node.
+     * @param origin When locating adjacent grids, they must be connectable to this host.
      * @return The new node at the position.
      */
-    private AbstractGridNode<?> insertNode(AbstractGrid<?, ?> grid, BlockPos pos, BlockPos from, Set<IGridType<?>> typeFilter) {
+    private AbstractGridNode<?> insertNode(AbstractGrid<?, ?> grid, BlockPos pos, BlockPos from, IGridHost origin) {
         // We are adding a duct, next to an existing duct that does not have a node.
         // There is only one valid case for this, where there are 2 nodes directly attached.
 
         assert grid.getNodes().get(pos) == null;
 
         // Find the 2 aforementioned existing nodes.
-        List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, pos, from, typeFilter);
+        List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, pos, from, origin);
         assert attached.size() == 2;
 
         Pair<IGridNode<?>, Set<BlockPos>> a = attached.get(0);
@@ -223,16 +220,18 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
         assert branches.size() != 1;
 
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) branches.get(0).getGrid().orElseThrow(notPossible());
+        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) branches.get(0).getGrid();
+        assert grid != null;
+
         host.setGrid(grid);
         // More than 2 branches, or the 2 adjacent branches aren't on the same axis as us. We must generate a node.
         AbstractGridNode<?> node = grid.newNode(host.getHostPos());
         addGridLookup(grid, node.getPos());
         for (IGridHost branch : branches) {
-            Optional<IGridNode<?>> adjOpt = branch.getNode();
-            if (!adjOpt.isPresent()) {
+            AbstractGridNode<?> adj = (AbstractGridNode<?>) branch.getNode();
+            if (adj == null) {
                 // Adjacent isn't present, just generate node.
-                AbstractGridNode<?> abMiddle = insertNode(grid, branch.getHostPos(), node.getPos(), host.getExposedTypes());
+                AbstractGridNode<?> abMiddle = insertNode(grid, branch.getHostPos(), node.getPos(), host);
                 if (DEBUG) {
                     LOGGER.info(" T intersection creation. New Node: {}, Adjacent: {}",
                             node.getPos(),
@@ -241,7 +240,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
                 }
                 grid.nodeGraph.putEdgeValue(abMiddle, node, new HashSet<>());
             } else {
-                AbstractGridNode<?> adj = (AbstractGridNode<?>) adjOpt.get();
                 grid.nodeGraph.putEdgeValue(adj, node, new HashSet<>());
                 simplifyNode(adj);
                 if (DEBUG) {
@@ -258,7 +256,9 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
         Set<AbstractGrid<?, ?>> grids = new HashSet<>();
         for (IGridHost branch : branches) {
-            AbstractGrid<?, ?> abstractGrid = (AbstractGrid<?, ?>) branch.getGrid().orElseThrow(notPossible());
+            AbstractGrid<?, ?> abstractGrid = (AbstractGrid<?, ?>) branch.getGrid();
+            assert abstractGrid != null;
+
             grids.add(abstractGrid);
         }
 
@@ -296,19 +296,20 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     @Override
     public void onGridHostNeighborChanged(IGridHost host) {
 
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid()
-                .orElseThrow(notPossible());
-        Optional<IGridNode<?>> nodeOpt = host.getNode();
-        boolean canConnect = grid.canConnectToAdjacent(host.getHostPos());
-        if (nodeOpt.isPresent()) {
-            if (!canConnect) {
-                simplifyNode((AbstractGridNode<?>) nodeOpt.get());
+        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
+        assert grid != null;
+
+        AbstractGridNode<?> node = (AbstractGridNode<?>) host.getNode();
+        boolean canExternallyConnect = grid.canConnectExternally(host.getHostPos());
+        if (node != null) {
+            if (!canExternallyConnect) {
+                simplifyNode(node);
             }
-            ((AbstractGridNode<?>) nodeOpt.get()).clearConnections();
+            node.clearConnections();
             ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
         } else {
-            if (canConnect) {
-                insertNode(grid, host.getHostPos(), host.getHostPos(), host.getExposedTypes());
+            if (canExternallyConnect) {
+                insertNode(grid, host.getHostPos(), host.getHostPos(), host);
                 ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
             }
         }
@@ -321,8 +322,9 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         }
         assert host.getExposedTypes().size() == 1; // TODO, multi grids.
 
-        assert host.getGrid().isPresent();
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid().get();
+        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
+        assert grid != null;
+
         assert grid.getNodes().size() == 1;
         assert grid.getNodes().containsKey(host.getHostPos());
         grids.remove(grid.getId());
@@ -332,24 +334,21 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
     private void shrinkGrid(IGridHost host, IGridHost adjacent) {
 
-        Optional<IGridNode<?>> adjacentNodeOpt = adjacent.getNode();
-        Optional<IGrid<?, ?>> adjacentGridOpt = adjacent.getGrid();
+        AbstractGridNode<?> adjacentNode = (AbstractGridNode<?>) adjacent.getNode();
+        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) adjacent.getGrid();
 
-        assert adjacentGridOpt.isPresent(); // All adjacent nodes should have a Grid when this method is called.
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) adjacentGridOpt.get();
+        assert grid != null; // All adjacent nodes should have a Grid when this method is called.
+        assert host.getGrid() == host.getGrid();
 
-        assert host.getGrid().isPresent() && grid == host.getGrid().get();
-
-        AbstractGridNode<?> currNode = (AbstractGridNode<?>) host.getNode()
-                .orElseThrow(notPossible());
+        AbstractGridNode<?> currNode = (AbstractGridNode<?>) host.getNode();
 
         removeGridLookup(grid, currNode.getPos());
-        if (!adjacentNodeOpt.isPresent()) {
+        if (adjacentNode == null) {
             // We are removing a node which is not adjacent to another node.
             // We must do the following:
             // - Remove the current node.
             // - Create a new node for our adjacent with path length decremented by one.
-            AbstractGridNode<?> adjacentNode = grid.newNode(adjacent.getHostPos());
+            adjacentNode = grid.newNode(adjacent.getHostPos());
 
             Set<AbstractGridNode<?>> edgeNodes = grid.nodeGraph.adjacentNodes(currNode);
             AbstractGridNode<?> edge = only(edgeNodes);
@@ -368,7 +367,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             }
             grid.removeNode(currNode);
         } else {
-            AbstractGridNode<?> adjacentNode = (AbstractGridNode<?>) adjacentNodeOpt.get();
             // Nuke the current node
             grid.removeNode(currNode);
 
@@ -387,20 +385,22 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         //   - Check if the node can be removed simplifying the grid.
         //  - If the adjacent host does not have a node.
         //   - Always create a new node.
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid()
-                .orElseThrow(notPossible());
+        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
+        assert grid != null;
+
+        AbstractGridNode<?> removing = (AbstractGridNode<?>) host.getNode();
 
         removeGridLookup(grid, host.getHostPos());
-        if (host.getNode().isPresent()) {
+        if (removing != null) {
             // All we need to do is remove the node.
-            AbstractGridNode<?> removing = (AbstractGridNode<?>) host.getNode().get();
+
             grid.removeNode(removing);
             if (DEBUG) {
                 LOGGER.info("Removing node: {}", removing.getPos());
             }
         } else {
             // We are a host without a node, between 2 nodes.
-            List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, host.getHostPos(), host.getHostPos(), host.getExposedTypes());
+            List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, host.getHostPos(), host.getHostPos(), host);
             assert attached.size() == 2;
             AbstractGridNode<?> a = (AbstractGridNode<?>) attached.get(0).getLeft();
             AbstractGridNode<?> b = (AbstractGridNode<?>) attached.get(1).getLeft();
@@ -412,9 +412,10 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
         // Create/delete adjacent nodes if required
         for (IGridHost adjHost : adjacentHosts.values()) {
-            if (!adjHost.getNode().isPresent()) {
+            AbstractGridNode<?> adjNode = (AbstractGridNode<?>) adjHost.getNode();
+            if (adjNode == null) {
                 // We always need to create a new node here.
-                Pair<IGridNode<?>, Set<BlockPos>> foundEdge = only(GridHelper.locateAttachedNodes(world, adjHost.getHostPos(), host.getHostPos(), host.getExposedTypes()));
+                Pair<IGridNode<?>, Set<BlockPos>> foundEdge = only(GridHelper.locateAttachedNodes(world, adjHost.getHostPos(), host.getHostPos(), host));
                 assert foundEdge != null;
                 AbstractGridNode<?> newNode = grid.newNode(adjHost.getHostPos());
                 AbstractGridNode<?> foundNode = (AbstractGridNode<?>) foundEdge.getLeft();
@@ -425,7 +426,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
                 }
             } else {
                 // Attempt to simplify the node.
-                AbstractGridNode<?> adjNode = (AbstractGridNode<?>) adjHost.getNode().get();
                 simplifyNode(adjNode);
             }
         }
@@ -438,7 +438,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         AbstractGrid<?, ?> grid = unsafeCast(node.getGrid());
 
         // We can't simplify if we can connect to adjacent blocks.
-        if (grid.canConnectToAdjacent(node.getPos())) {
+        if (grid.canConnectExternally(node.getPos())) {
             return;
         }
         Set<AbstractGridNode<?>> edgesSet = grid.nodeGraph.adjacentNodes(node);
@@ -474,8 +474,8 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
     private void separateGrids(IGridHost host) {
 
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid()
-                .orElseThrow(notPossible());
+        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
+        assert grid != null;
 
         // Check if the grid
         List<Set<AbstractGridNode<?>>> splitGraphs = GraphHelper.separateGraphs(grid.nodeGraph);
@@ -673,7 +673,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
             if (otherOpt.isPresent()) {
                 IGridHost other = otherOpt.get();
                 // Ignore grids which don't expose any of our types.
-                if (!Sets.intersection(other.getExposedTypes(), host.getExposedTypes()).isEmpty()) {
+                if (host.canConnectTo(other)) {
                     adjacentGrids.put(dir, other);
                 }
             }

@@ -90,7 +90,7 @@ public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdate
     @Override
     public PacketBuffer getStatePacket(PacketBuffer buffer) {
 
-        renderFluid = ((FluidGrid) (getGrid().get())).getRenderFluid();
+        renderFluid = ((FluidGrid) getGrid()).getRenderFluid();
         buffer.writeFluidStack(renderFluid);
 
         return buffer;

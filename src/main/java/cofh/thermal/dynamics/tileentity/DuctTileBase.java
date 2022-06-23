@@ -18,6 +18,7 @@ import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
@@ -26,7 +27,8 @@ import static net.covers1624.quack.util.SneakyUtils.notPossible;
 public abstract class DuctTileBase extends TileEntity implements ITileLocation, IGridHost {
 
     // Only available server side.
-    protected Optional<IGrid<?, ?>> grid = Optional.empty();
+    @Nullable
+    protected IGrid<?, ?> grid = null;
 
     protected final DuctModelData modelData = new DuctModelData();
     protected boolean modelUpdate;
@@ -61,13 +63,13 @@ public abstract class DuctTileBase extends TileEntity implements ITileLocation, 
     }
 
     @Override
-    public Optional<IGrid<?, ?>> getGrid() {
+    public IGrid<?, ?> getGrid() {
 
         if (level.isClientSide) throw new UnsupportedOperationException("No grid representation on client.");
-        if (!grid.isPresent()) {
+        if (grid == null) {
             IGridContainer gridContainer = IGridContainer.getCapability(level)
                     .orElseThrow(notPossible());
-            grid = Optional.of(requireNonNull(gridContainer.getGrid(getBlockPos())));
+            grid = requireNonNull(gridContainer.getGrid(getBlockPos()));
         }
         return grid;
     }
@@ -86,10 +88,10 @@ public abstract class DuctTileBase extends TileEntity implements ITileLocation, 
 
         if (modelUpdate) {
             for (Direction dir : Direction.values()) {
-                Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
-                if (gridHostOpt.isPresent()) {
-                    IGridHost gridHost = gridHostOpt.get();
-                    modelData.setInternalConnection(dir, gridHost.getExposedTypes().equals(getExposedTypes()));
+                Optional<IGridHost> adjacentOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+                if (adjacentOpt.isPresent()) {
+                    IGridHost adjacent = adjacentOpt.get();
+                    modelData.setInternalConnection(dir, canConnectTo(adjacent));
                 } else {
                     modelData.setInternalConnection(dir, false);
                 }
@@ -104,7 +106,7 @@ public abstract class DuctTileBase extends TileEntity implements ITileLocation, 
     public void setGrid(IGrid<?, ?> grid) {
 
         if (level.isClientSide) throw new UnsupportedOperationException("No grid representation on client.");
-        this.grid = Optional.of(grid);
+        this.grid = grid;
     }
 
     protected abstract boolean canConnect(Direction dir);

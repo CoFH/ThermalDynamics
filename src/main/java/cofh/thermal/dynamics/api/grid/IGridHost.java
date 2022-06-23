@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 
-import java.util.Optional;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -34,7 +34,8 @@ public interface IGridHost {
      *
      * @return The raw grid.
      */
-    Optional<IGrid<?, ?>> getGrid();
+    @Nullable
+    IGrid<?, ?> getGrid();
 
     void setGrid(IGrid<?, ?> grid);
 
@@ -45,10 +46,12 @@ public interface IGridHost {
      *
      * @return The {@link IGridNode}.
      */
-    default Optional<IGridNode<?>> getNode() {
+    @Nullable
+    default IGridNode<?> getNode() {
 
-        Optional<IGrid<?, ?>> gridOpt = getGrid();
-        return gridOpt.map(grid -> grid.getNodes().get(getHostPos()));
+        IGrid<?, ?> grid = getGrid();
+        if (grid == null) return null;
+        return grid.getNodes().get(getHostPos());
     }
 
     /**
@@ -60,19 +63,33 @@ public interface IGridHost {
      * @param gridType The {@link IGridType}
      * @return The {@link IGridNode}
      */
-    default <G extends IGrid<?, ?>> Optional<IGridNode<G>> getNode(IGridType<G> gridType) {
+    @Nullable
+    default <G extends IGrid<?, ?>> IGridNode<G> getNode(IGridType<G> gridType) {
 
-        Optional<IGridNode<?>> nodeOpt = getNode();
-        if (!nodeOpt.isPresent()) return Optional.empty();
-        IGridNode<?> node = nodeOpt.get();
+        IGridNode<?> node = getNode();
+        if (node == null) return null;
+
         if (node.getGrid().getGridType() == TDynReferences.MULTI_GRID) {
             IMultiGridNode multiGridNode = (IMultiGridNode) node;
             return multiGridNode.getSubGrid(gridType);
         }
-        if (node.getGrid().getGridType() != gridType) return Optional.empty();
+        if (node.getGrid().getGridType() != gridType) return null;
 
         //noinspection unchecked
-        return Optional.of((IGridNode<G>) node);
+        return (IGridNode<G>) node;
     }
 
+    /**
+     * Checks if {@code other} can connect to this grid host.
+     * <p>
+     * Standard {@link #equals} semantics apply, reversing the inputs
+     * should result in the same output.
+     *
+     * @param other The other host.
+     * @return If they can connect.
+     */
+    default boolean canConnectTo(IGridHost other) {
+
+        return getExposedTypes().equals(other.getExposedTypes());
+    }
 }

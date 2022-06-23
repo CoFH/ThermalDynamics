@@ -1,5 +1,6 @@
 package cofh.thermal.dynamics.tileentity;
 
+import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.init.TDynReferences;
@@ -37,7 +38,8 @@ public class FluidDuctTile extends DuctTileBase {
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
 
-        return getGrid().isPresent() ? getGrid().get().getCapability(cap) : LazyOptional.empty();
+        IGrid<?, ?> grid = getGrid();
+        return grid != null ? grid.getCapability(cap) : LazyOptional.empty();
     }
 
     @Override

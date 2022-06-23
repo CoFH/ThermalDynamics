@@ -136,8 +136,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(world, pos);
         assert gridHostOpt.isPresent();
         IGridHost gridHost = gridHostOpt.get();
-        assert gridHost.getGrid().isPresent();
-        assert gridHost.getGrid().get() == this;
+        assert gridHost.getGrid() == this;
         assert !(gridHost instanceof IGridHostUpdateable) || updatableHosts.contains(gridHost.getHostPos());
 
         assert gridContainer.getGrid(pos) == this;
