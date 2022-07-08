@@ -84,6 +84,9 @@ public interface IGridHost {
      * <p>
      * Standard {@link #equals} semantics apply, reversing the inputs
      * should result in the same output.
+     * <p>
+     * If this method is called with the current host, it
+     * should always return true.
      *
      * @param other The other host.
      * @return If they can connect.

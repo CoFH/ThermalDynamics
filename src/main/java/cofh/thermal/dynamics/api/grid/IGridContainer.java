@@ -27,6 +27,8 @@ public interface IGridContainer {
 
     void onGridHostNeighborChanged(IGridHost host);
 
+    void onGridHostConnectabilityChanged(IGridHost host);
+
     static Optional<IGridContainer> getCapability(IWorld _world) {
 
         if (!(_world instanceof World)) {

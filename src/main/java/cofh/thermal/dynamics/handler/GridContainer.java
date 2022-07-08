@@ -315,6 +315,45 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         }
     }
 
+    @Override
+    public void onGridHostConnectabilityChanged(IGridHost host) {
+        // Check if host no longer connect to any of its adjacent nodes.
+        //  - Perform split logic.
+        // Check if host _can_ now connect to any of its adjacent nodes.
+        // - Perform join logic.
+
+        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
+        assert grid != null;
+
+        AbstractGridNode<?> a = (AbstractGridNode<?>) host.getNode();
+
+        // TODO This is all wrong
+//        EnumMap<Direction, IGridHost> adjacentHosts = getAdjacentGrids(host);
+//        for (Map.Entry<Direction, IGridHost> entry : adjacentHosts.entrySet()) {
+//            IGridHost other = entry.getValue();
+//            boolean isConnected = other.getGrid() == host.getGrid(); // TODO, wrong
+//            boolean canConnect = other.canConnectTo(host);
+//            if (isConnected == canConnect) continue; // Nothing to do.
+//
+//            if (a == null) {
+//                a = insertNode(grid, host.getHostPos(), host.getHostPos(), host);
+//            }
+//            AbstractGridNode<?> b = (AbstractGridNode<?>) other.getNode();
+//            if (b == null) {
+//                b = insertNode(grid, other.getHostPos(), other.getHostPos(), other);
+//            }
+//
+//            if (isConnected) {
+//                // Disconnect
+//                grid.nodeGraph.removeEdge(a, b);
+//                separateGrids(host);
+//            } else {
+//                // Connect
+////                if (grid.nodeGraph.edgeValue)
+//            }
+//        }
+    }
+
     private void removeSingleGrid(IGridHost host) {
 
         if (DEBUG) {
@@ -477,7 +516,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
         assert grid != null;
 
-        // Check if the grid
+        // Generate the grid nodes isolated from each other.
         List<Set<AbstractGridNode<?>>> splitGraphs = GraphHelper.separateGraphs(grid.nodeGraph);
         if (splitGraphs.size() <= 1) return;
 
