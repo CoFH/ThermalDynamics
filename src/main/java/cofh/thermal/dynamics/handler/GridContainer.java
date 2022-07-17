@@ -31,7 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static net.covers1624.quack.collection.ColUtils.only;
 import static net.covers1624.quack.collection.ColUtils.onlyOrDefault;
-import static net.covers1624.quack.util.SneakyUtils.notPossible;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
 /**
@@ -317,41 +316,98 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
 
     @Override
     public void onGridHostConnectabilityChanged(IGridHost host) {
-        // Check if host no longer connect to any of its adjacent nodes.
-        //  - Perform split logic.
-        // Check if host _can_ now connect to any of its adjacent nodes.
-        // - Perform join logic.
+        // For each adjacent grid host:
+        // - If we are connected
+        //  - Can we stay connected?
+        //    - Disconnect
+        //      - Attempt to simplify both nodes.
+        //       - Does this split the grid?
+        //         - Perform grid split
+        // - If we aren't connected
+        //  - Can we connect?
+        //    - Connect
+        //     - Do we both have nodes?
+        //       - Generate
+        //     - Are we on the same grid?
+        //       - Merge grids
+        //     - Make connections
+        //     - Attempt to simplify nodes adjacent to each node.
 
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
-        assert grid != null;
+        EnumMap<Direction, IGridHost> adjacentHosts = getAllAdjacentGrids(host);
+        for (Map.Entry<Direction, IGridHost> entry : adjacentHosts.entrySet()) {
+            IGridHost other = entry.getValue();
 
-        AbstractGridNode<?> a = (AbstractGridNode<?>) host.getNode();
+            // In here as merge/split could change it.
+            AbstractGrid<?, ?> aGrid = (AbstractGrid<?, ?>) host.getGrid();
+            assert aGrid != null;
 
-        // TODO This is all wrong
-//        EnumMap<Direction, IGridHost> adjacentHosts = getAdjacentGrids(host);
-//        for (Map.Entry<Direction, IGridHost> entry : adjacentHosts.entrySet()) {
-//            IGridHost other = entry.getValue();
-//            boolean isConnected = other.getGrid() == host.getGrid(); // TODO, wrong
-//            boolean canConnect = other.canConnectTo(host);
-//            if (isConnected == canConnect) continue; // Nothing to do.
-//
-//            if (a == null) {
-//                a = insertNode(grid, host.getHostPos(), host.getHostPos(), host);
-//            }
-//            AbstractGridNode<?> b = (AbstractGridNode<?>) other.getNode();
-//            if (b == null) {
-//                b = insertNode(grid, other.getHostPos(), other.getHostPos(), other);
-//            }
-//
-//            if (isConnected) {
-//                // Disconnect
-//                grid.nodeGraph.removeEdge(a, b);
-//                separateGrids(host);
-//            } else {
-//                // Connect
-////                if (grid.nodeGraph.edgeValue)
-//            }
-//        }
+            AbstractGridNode<?> a = (AbstractGridNode<?>) host.getNode();
+
+            AbstractGrid<?, ?> bGrid = (AbstractGrid<?, ?>) other.getGrid();
+            assert bGrid != null;
+
+            AbstractGridNode<?> b = (AbstractGridNode<?>) other.getNode();
+
+            boolean gridsConnected = aGrid == bGrid;
+            boolean nodesConnected = gridsConnected && a != null && b != null && aGrid.nodeGraph.edgeValueOrDefault(a, b, null) != null;
+            boolean canConnect = other.canConnectTo(host);
+            if (nodesConnected == canConnect) continue; // Nothing to do.
+
+
+            if (nodesConnected) {
+                // Disconnect
+                if (DEBUG) {
+                    LOGGER.info("Disconnecting nodes due to connectability change. A {}, B {}.", a.getPos(), b.getPos());
+                }
+                aGrid.nodeGraph.removeEdge(a, b);
+                // Try and simplify both nodes.
+                simplifyNode(a);
+                simplifyNode(b);
+                // Try splitting.
+                separateGrids(host);
+            } else {
+                // Connect
+                if (DEBUG) {
+                    LOGGER.info("Connecting nodes due to connectability change. A {}, B {}.", a.getPos(), b.getPos());
+                }
+
+                // Try and create nodes for, if they don't exist. We may end up deleting these
+                // if the grids are different and merge, but, it's a worthy trade-off for now.
+                if (a == null) {
+                    a = insertNode(aGrid, host.getHostPos(), host.getHostPos(), host);
+                }
+                if (b == null) {
+                    b = insertNode(bGrid, other.getHostPos(), other.getHostPos(), other);
+                }
+
+                // Perform grid merge.
+                if (!gridsConnected) {
+                    mergeGrids(Arrays.asList(host, other));
+                    aGrid = (AbstractGrid<?, ?>) a.getGrid();
+                    bGrid = (AbstractGrid<?, ?>) b.getGrid();
+                }
+                // Perform connection. (we know these are directly adjacent.)
+                aGrid.nodeGraph.putEdgeValue(a, b, new HashSet<>());
+
+                // Simplify all directly adjacent (in world) nodes of a (excluding b).
+                for (AbstractGridNode<?> adj : aGrid.nodeGraph.adjacentNodes(a)) {
+                    if (adj == b) continue;
+                    if (!aGrid.nodeGraph.edgeValue(a, adj).isEmpty()) continue;
+                    simplifyNode(adj);
+                }
+                // Simplify all directly adjacent (in world) nodes of b (excluding a)
+                for (AbstractGridNode<?> adj : aGrid.nodeGraph.adjacentNodes(b)) {
+                    if (adj == a) continue;
+                    if (!aGrid.nodeGraph.edgeValue(b, adj).isEmpty()) continue;
+                    simplifyNode(adj);
+                }
+                // Try and simplify A and B.
+                simplifyNode(a);
+                simplifyNode(b);
+            }
+
+            aGrid.onModified();
+        }
     }
 
     private void removeSingleGrid(IGridHost host) {
@@ -475,6 +531,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     private void simplifyNode(AbstractGridNode<?> node) {
 
         AbstractGrid<?, ?> grid = unsafeCast(node.getGrid());
+        if (!grid.nodeGraph.nodes().contains(node)) return;
 
         // We can't simplify if we can connect to adjacent blocks.
         if (grid.canConnectExternally(node.getPos())) {
@@ -715,6 +772,18 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
                 if (host.canConnectTo(other)) {
                     adjacentGrids.put(dir, other);
                 }
+            }
+        }
+        return adjacentGrids;
+    }
+
+    private EnumMap<Direction, IGridHost> getAllAdjacentGrids(IGridHost host) {
+
+        EnumMap<Direction, IGridHost> adjacentGrids = new EnumMap<>(Direction.class);
+        for (Direction dir : Direction.values()) {
+            Optional<IGridHost> otherOpt = GridHelper.getGridHost(world, host.getHostPos().relative(dir));
+            if (otherOpt.isPresent()) {
+                adjacentGrids.put(dir, otherOpt.get());
             }
         }
         return adjacentGrids;

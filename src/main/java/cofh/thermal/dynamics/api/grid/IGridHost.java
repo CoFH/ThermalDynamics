@@ -87,6 +87,8 @@ public interface IGridHost {
      * <p>
      * If this method is called with the current host, it
      * should always return true.
+     * <p>
+     * NOTE: {@code other} may not be connected to the same grid!
      *
      * @param other The other host.
      * @return If they can connect.
