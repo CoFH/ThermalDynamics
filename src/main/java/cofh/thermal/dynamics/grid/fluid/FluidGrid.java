@@ -8,10 +8,10 @@ import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
@@ -42,7 +42,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     protected IFluidGridNode[] distArray = new IFluidGridNode[0];
     protected int distIndex = 0;
 
-    public FluidGrid(UUID id, World world) {
+    public FluidGrid(UUID id, Level world) {
 
         super(TDynReferences.FLUID_GRID, id, world);
     }
@@ -158,22 +158,22 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
+    public CompoundTag serializeNBT() {
 
-        CompoundNBT tag = super.serializeNBT();
+        CompoundTag tag = super.serializeNBT();
         storage.write(tag);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
 
         super.deserializeNBT(nbt);
         storage.deserializeNBT(nbt);
     }
 
     @Override
-    public boolean canConnectOnSide(TileEntity tile, @Nullable Direction dir) {
+    public boolean canConnectOnSide(BlockEntity tile, @Nullable Direction dir) {
 
         if (GridHelper.getGridHost(tile).isPresent()) {
             return false; // We cannot externally connect to other grids.

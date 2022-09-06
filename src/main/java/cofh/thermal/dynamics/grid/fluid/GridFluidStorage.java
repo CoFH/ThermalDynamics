@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.grid.fluid;
 
 import cofh.lib.util.helpers.MathHelper;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -12,7 +12,7 @@ import static cofh.lib.util.constants.Constants.MAX_CAPACITY;
 import static cofh.lib.util.constants.NBTTags.TAG_CAPACITY;
 import static cofh.lib.util.constants.NBTTags.TAG_TRACK_OUT;
 
-public final class GridFluidStorage implements IFluidHandler, INBTSerializable<CompoundNBT> {
+public final class GridFluidStorage implements IFluidHandler, INBTSerializable<CompoundTag> {
 
     private int baseCapacity;
     private int capacity;
@@ -116,7 +116,7 @@ public final class GridFluidStorage implements IFluidHandler, INBTSerializable<C
     }
 
     // region NBT
-    public GridFluidStorage read(CompoundNBT nbt) {
+    public GridFluidStorage read(CompoundTag nbt) {
 
         setFluid(FluidStack.loadFluidStackFromNBT(nbt));
         this.baseCapacity = nbt.getInt(TAG_CAPACITY);
@@ -128,7 +128,7 @@ public final class GridFluidStorage implements IFluidHandler, INBTSerializable<C
         return this;
     }
 
-    public CompoundNBT write(CompoundNBT nbt) {
+    public CompoundTag write(CompoundTag nbt) {
 
         fluid.writeToNBT(nbt);
         nbt.putInt(TAG_CAPACITY, baseCapacity);
@@ -140,13 +140,13 @@ public final class GridFluidStorage implements IFluidHandler, INBTSerializable<C
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
+    public CompoundTag serializeNBT() {
 
-        return write(new CompoundNBT());
+        return write(new CompoundTag());
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
 
         read(nbt);
     }

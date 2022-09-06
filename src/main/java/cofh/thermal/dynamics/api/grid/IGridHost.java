@@ -4,9 +4,9 @@ import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
@@ -15,9 +15,9 @@ import java.util.Set;
 /**
  * Represents an object capable of hosting a {@link IGrid}.
  * <p>
- * These are usually {@link TileEntity} instances.
+ * These are usually {@link BlockEntity} instances.
  * <p>
- * This interface may be implemented directly on the {@link TileEntity},
+ * This interface may be implemented directly on the {@link BlockEntity},
  * or exposed via a {@link Capability}.
  *
  * @author covers1624
@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public interface IGridHost {
 
-    World getHostWorld();
+    Level getHostWorld();
 
     BlockPos getHostPos();
 
@@ -82,7 +82,7 @@ public interface IGridHost {
     /**
      * Checks if {@code other} can connect to this grid host.
      * <p>
-     * Standard {@link #equals} semantics apply, reversing the inputs
+     * Standard {@code equals} semantics apply, reversing the inputs
      * should result in the same output.
      * <p>
      * If this method is called with the current host, it
@@ -97,4 +97,5 @@ public interface IGridHost {
 
         return getExposedTypes().equals(other.getExposedTypes());
     }
+
 }

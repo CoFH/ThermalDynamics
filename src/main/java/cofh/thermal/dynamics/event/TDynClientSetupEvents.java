@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.event;
 
 import cofh.thermal.dynamics.client.model.DuctModel;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;

@@ -3,10 +3,10 @@ package cofh.thermal.dynamics.grid;
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridNode;
 import cofh.thermal.dynamics.api.grid.node.INodeAttachment;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.EnumMap;
@@ -19,7 +19,7 @@ import java.util.EnumSet;
  *
  * @author covers1624
  */
-public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNode<G>, INBTSerializable<CompoundNBT> {
+public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNode<G>, INBTSerializable<CompoundTag> {
 
     protected final EnumMap<Direction, INodeAttachment> attachments = new EnumMap<>(Direction.class);
     protected final EnumSet<Direction> connections = EnumSet.noneOf(Direction.class);
@@ -34,13 +34,13 @@ public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNo
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
+    public CompoundTag serializeNBT() {
 
-        return new CompoundNBT();
+        return new CompoundTag();
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
 
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractGridNode<G extends IGrid<?, ?>> implements IGridNo
     @Override public boolean isLoaded() { return loaded; }
     @Override public EnumSet<Direction> getConnections() { return connections; }
     @Override public EnumMap<Direction, INodeAttachment> getAttachments() { return attachments; }
-    public final World getWorld() { return grid.getWorld(); }
+    public final Level getWorld() { return grid.getWorld(); }
     public void setPos(BlockPos pos) { this.pos = pos; }
     public void setGrid(G grid) { this.grid = grid; }
     public void setLoaded(boolean loaded) { this.loaded = loaded; }

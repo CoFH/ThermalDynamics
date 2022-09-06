@@ -1,12 +1,12 @@
 package cofh.thermal.dynamics.grid.energy;
 
 import cofh.lib.capability.IRedstoneFluxStorage;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import static cofh.lib.util.constants.NBTTags.*;
 
-public final class GridEnergyStorage implements IRedstoneFluxStorage, INBTSerializable<CompoundNBT> {
+public final class GridEnergyStorage implements IRedstoneFluxStorage, INBTSerializable<CompoundTag> {
 
     private long baseCapacity;
     private long capacity;
@@ -109,7 +109,7 @@ public final class GridEnergyStorage implements IRedstoneFluxStorage, INBTSerial
     }
 
     // region NBT
-    public GridEnergyStorage read(CompoundNBT nbt) {
+    public GridEnergyStorage read(CompoundTag nbt) {
 
         this.energy = nbt.getLong(TAG_ENERGY);
         this.baseCapacity = nbt.getLong(TAG_ENERGY_MAX);
@@ -121,7 +121,7 @@ public final class GridEnergyStorage implements IRedstoneFluxStorage, INBTSerial
         return this;
     }
 
-    public CompoundNBT write(CompoundNBT nbt) {
+    public CompoundTag write(CompoundTag nbt) {
 
         nbt.putLong(TAG_ENERGY, energy);
         nbt.putLong(TAG_ENERGY_MAX, baseCapacity);
@@ -133,13 +133,13 @@ public final class GridEnergyStorage implements IRedstoneFluxStorage, INBTSerial
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
+    public CompoundTag serializeNBT() {
 
-        return write(new CompoundNBT());
+        return write(new CompoundTag());
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
 
         read(nbt);
     }

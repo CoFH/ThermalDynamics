@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.grid.item.IItemGrid;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
@@ -41,7 +41,7 @@ public interface IGridType<G extends IGrid<?, ?>> extends IForgeRegistryEntry<IG
      * @param world The world of this grid.
      * @return The new grid.
      */
-    G createGrid(UUID id, World world);
+    G createGrid(UUID id, Level world);
 
     /**
      * Static factory for creating simple Implementations of {@link IGridType}.
@@ -50,13 +50,13 @@ public interface IGridType<G extends IGrid<?, ?>> extends IForgeRegistryEntry<IG
      * @param gridFactory The Factory used to create new instances of this {@link IGrid}.
      * @return The new {@link IGridType}.
      */
-    static <G extends IGrid<?, ?>> IGridType<G> of(Class<G> clazz, BiFunction<UUID, World, G> gridFactory) {
+    static <G extends IGrid<?, ?>> IGridType<G> of(Class<G> clazz, BiFunction<UUID, Level, G> gridFactory) {
 
         abstract class GridTypeImpl<G2 extends IGrid<?, ?>> extends ForgeRegistryEntry<IGridType<?>> implements IGridType<G2> {}
         return new GridTypeImpl<G>() {
             //@formatter:off
             @Override public Class<G> getGridType() { return clazz; }
-            @Override public G createGrid(UUID id, World world) { return gridFactory.apply(id, world); }
+            @Override public G createGrid(UUID id, Level world) { return gridFactory.apply(id, world); }
             //@formatter:on
         };
     }

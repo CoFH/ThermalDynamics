@@ -6,14 +6,11 @@ import cofh.thermal.dynamics.handler.GridContainer;
 import com.google.common.graph.*;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +28,7 @@ import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
  * @author covers1624
  */
 @SuppressWarnings ("UnstableApiUsage")
-public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> implements IGrid<G, N>, INBTSerializable<CompoundNBT> {
+public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> implements IGrid<G, N>, INBTSerializable<CompoundTag> {
 
     protected static final Logger LOGGER = LogManager.getLogger();
     protected static final boolean DEBUG = AbstractGrid.class.desiredAssertionStatus();
@@ -57,10 +54,10 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     protected final Set<BlockPos> updatableHosts = new HashSet<>();
     protected final IGridType<G> gridType;
     protected final UUID id;
-    protected final World world;
+    protected final Level world;
     public boolean isLoaded;
 
-    protected AbstractGrid(IGridType<G> gridType, UUID id, World world) {
+    protected AbstractGrid(IGridType<G> gridType, UUID id, Level world) {
 
         this.gridType = gridType;
         this.id = id;
@@ -181,24 +178,24 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
+    public CompoundTag serializeNBT() {
 
-        CompoundNBT tag = new CompoundNBT();
-        ListNBT nodes = new ListNBT();
+        CompoundTag tag = new CompoundTag();
+        ListTag nodes = new ListTag();
         for (AbstractGridNode<?> node : nodeGraph.nodes()) {
-            CompoundNBT nodeTag = new CompoundNBT();
+            CompoundTag nodeTag = new CompoundTag();
             nodeTag.put("pos", NBTUtil.writeBlockPos(node.getPos()));
             nodeTag.merge(node.serializeNBT());
             nodes.add(nodeTag);
         }
         tag.put("nodes", nodes);
 
-        ListNBT edges = new ListNBT();
+        ListTag edges = new ListTag();
         for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
-            CompoundNBT edgeTag = new CompoundNBT();
+            CompoundTag edgeTag = new CompoundTag();
             edgeTag.put("U", NBTUtil.writeBlockPos(edge.nodeU().getPos()));
             edgeTag.put("V", NBTUtil.writeBlockPos(edge.nodeV().getPos()));
-            ListNBT valueTag = new ListNBT();
+            ListTag valueTag = new ListTag();
             for (BlockPos pos : nodeGraph.edgeValue(edge.nodeU(), edge.nodeV())) {
                 valueTag.add(NBTUtil.writeBlockPos(pos));
             }
@@ -207,9 +204,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         }
         tag.put("edges", edges);
 
-        ListNBT updateable = new ListNBT();
+        ListTag updateable = new ListTag();
         for (BlockPos pos : updatableHosts) {
-            CompoundNBT updateTag = new CompoundNBT();
+            CompoundTag updateTag = new CompoundTag();
             updateTag.put("pos", NBTUtil.writeBlockPos(pos));
             updateable.add(updateTag);
         }
@@ -219,32 +216,32 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
 
-        ListNBT nodes = nbt.getList("nodes", 10);
+        ListTag nodes = nbt.getList("nodes", 10);
 
         for (int i = 0; i < nodes.size(); ++i) {
-            CompoundNBT nodeTag = nodes.getCompound(i);
+            CompoundTag nodeTag = nodes.getCompound(i);
             BlockPos pos = NBTUtil.readBlockPos(nodeTag.getCompound("pos"));
             AbstractGridNode<?> node = newNode(pos, false);
             node.deserializeNBT(nodeTag);
         }
 
-        ListNBT edges = nbt.getList("edges", 10);
+        ListTag edges = nbt.getList("edges", 10);
         for (int i = 0; i < edges.size(); ++i) {
-            CompoundNBT edgeTag = edges.getCompound(i);
+            CompoundTag edgeTag = edges.getCompound(i);
             BlockPos uPos = NBTUtil.readBlockPos(edgeTag.getCompound("U"));
             BlockPos vPos = NBTUtil.readBlockPos(edgeTag.getCompound("V"));
             Set<BlockPos> value = new HashSet<>();
-            ListNBT valueTag = edgeTag.getList("value", 10);
+            ListTag valueTag = edgeTag.getList("value", 10);
             for (int j = 0; j < valueTag.size(); ++j) {
                 value.add(NBTUtil.readBlockPos(valueTag.getCompound(j)));
             }
             nodeGraph.putEdgeValue(this.nodes.get(uPos), this.nodes.get(vPos), value);
         }
-        ListNBT updateable = nbt.getList("updateable", 10);
+        ListTag updateable = nbt.getList("updateable", 10);
         for (int i = 0; i < updateable.size(); ++i) {
-            CompoundNBT updateTag = updateable.getCompound(i);
+            CompoundTag updateTag = updateable.getCompound(i);
             BlockPos pos = NBTUtil.readBlockPos(updateTag.getCompound("pos"));
             updatableHosts.add(pos);
         }
@@ -396,7 +393,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         return newGrids;
     }
 
-    private static void updateGridHosts(World world, Long2ObjectMap<Set<BlockPos>> posMap, AbstractGrid<?, ?> grid) {
+    private static void updateGridHosts(Level world, Long2ObjectMap<Set<BlockPos>> posMap, AbstractGrid<?, ?> grid) {
 
         for (Long2ObjectMap.Entry<Set<BlockPos>> entry : posMap.long2ObjectEntrySet()) {
             long chunkPos = entry.getLongKey();
@@ -474,7 +471,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
     //@formatter:off
     @Override public final UUID getId() { return id; }
-    @Override public final World getWorld() { return world; }
+    @Override public final Level getWorld() { return world; }
     @Override public IGridType<G> getGridType() { return gridType; }
     @Override public final Map<BlockPos, N> getNodes() { return unsafeCast(nodes); }
     //@formatter:on
@@ -493,13 +490,13 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
         private static final LongFunction<Set<BlockPos>> FACTORY = e -> new HashSet<>();
 
-        private final World world;
+        private final Level world;
         private final Long2ObjectMap<Set<BlockPos>> chunkPositions = new Long2ObjectOpenHashMap<>();
 
         private final LongSet loadedChunks = new LongOpenHashSet();
         private final LongSet unloadedChunks = new LongOpenHashSet();
 
-        private PositionCollector(World world) {
+        private PositionCollector(Level world) {
 
             this.world = world;
         }

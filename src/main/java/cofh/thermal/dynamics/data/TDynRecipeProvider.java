@@ -1,13 +1,12 @@
 package cofh.thermal.dynamics.data;
 
 import cofh.lib.data.RecipeProviderCoFH;
-import cofh.lib.util.DeferredRegisterCoFH;
-import cofh.lib.util.references.ItemTagsCoFH;
+import cofh.lib.util.references.CoFHTags;
 import cofh.thermal.lib.common.ThermalFlags;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.data.ShapedRecipeBuilder;
-import net.minecraft.item.Item;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.common.Tags;
 
 import java.util.function.Consumer;
@@ -32,20 +31,20 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
     }
 
     @Override
-    protected void buildShapelessRecipes(Consumer<IFinishedRecipe> consumer) {
+    protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
 
         generateTileRecipes(consumer);
     }
 
-    private void generateTileRecipes(Consumer<IFinishedRecipe> consumer) {
+    private void generateTileRecipes(Consumer<FinishedRecipe> consumer) {
 
-        DeferredRegisterCoFH<Item> reg = ITEMS;
+        var reg = ITEMS;
 
         Item redstoneServo = reg.get("redstone_servo");
 
         ShapedRecipeBuilder.shaped(reg.get(ID_ITEM_BUFFER))
-                .define('C', ItemTagsCoFH.INGOTS_SIGNALUM)
-                .define('I', ItemTagsCoFH.INGOTS_TIN)
+                .define('C', CoFHTags.Items.INGOTS_SIGNALUM)
+                .define('I', CoFHTags.Items.INGOTS_TIN)
                 .define('Q', Tags.Items.GEMS_QUARTZ)
                 .define('R', reg.get("cured_rubber"))
                 .pattern("IQI")
@@ -56,12 +55,12 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
 
         ShapedRecipeBuilder.shaped(reg.get(ID_ENERGY_DUCT), 6)
                 .define('G', Tags.Items.GLASS)
-                .define('L', ItemTagsCoFH.INGOTS_LEAD)
+                .define('L', CoFHTags.Items.INGOTS_LEAD)
                 .define('R', Tags.Items.DUSTS_REDSTONE)
                 .pattern("RRR")
                 .pattern("LGL")
                 .pattern("RRR")
-                .unlockedBy("has_lead", has(ItemTagsCoFH.INGOTS_LEAD))
+                .unlockedBy("has_lead", has(CoFHTags.Items.INGOTS_LEAD))
                 .save(consumer);
 
         //        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT), 4)

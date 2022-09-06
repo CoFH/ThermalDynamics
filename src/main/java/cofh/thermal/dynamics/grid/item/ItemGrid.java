@@ -6,21 +6,18 @@ import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @author covers1624
- */
 public class ItemGrid extends AbstractGrid<IItemGrid, IItemGridNode> implements IItemGrid {
 
-    public ItemGrid(UUID id, World world) {
+    public ItemGrid(UUID id, Level world) {
 
         super(TDynReferences.ITEM_GRID, id, world);
     }
@@ -42,7 +39,7 @@ public class ItemGrid extends AbstractGrid<IItemGrid, IItemGridNode> implements 
     }
 
     @Override
-    public boolean canConnectOnSide(TileEntity tile, @Nullable Direction dir) {
+    public boolean canConnectOnSide(BlockEntity tile, @Nullable Direction dir) {
 
         if (GridHelper.getGridHost(tile).isPresent()) {
             return false; // We cannot externally connect to other grids.

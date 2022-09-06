@@ -1,6 +1,5 @@
 package cofh.thermal.dynamics;
 
-import cofh.lib.capability.NullCapabilityStorage;
 import cofh.lib.network.PacketHandler;
 import cofh.lib.util.DeferredRegisterCoFH;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
@@ -14,10 +13,10 @@ import cofh.thermal.dynamics.init.TDynGrids;
 import cofh.thermal.dynamics.init.TDynItems;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
 import net.covers1624.quack.util.SneakyUtils;
-import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -96,8 +95,8 @@ public class ThermalDynamics {
 
     private void clientSetup(final FMLClientSetupEvent event) {
 
-        this.registerGuiFactories();
-        this.registerRenderLayers();
+        event.enqueueWork(this::registerGuiFactories);
+        event.enqueueWork(this::registerRenderLayers);
         DebugRenderer.register();
     }
     // endregion
@@ -106,7 +105,7 @@ public class ThermalDynamics {
     private void registerGuiFactories() {
 
         // ScreenManager.register(ENERGY_DISTRIBUTOR_CONTAINER, EnergyDistributorScreen::new);
-        ScreenManager.register(ITEM_BUFFER_CONTAINER, ItemBufferScreen::new);
+        MenuScreens.register(ITEM_BUFFER_CONTAINER, ItemBufferScreen::new);
     }
 
     private void registerRenderLayers() {
@@ -117,12 +116,12 @@ public class ThermalDynamics {
 
         // RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_ENDER_TUNNEL), translucent);
 
-        //        RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_FLUID_BUFFER), cutout);
-        //        RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_ITEM_BUFFER), cutout);
+        // RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_FLUID_BUFFER), cutout);
+        // RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_ITEM_BUFFER), cutout);
 
-        RenderTypeLookup.setRenderLayer(ENERGY_DUCT_BLOCK, cutout);
-        RenderTypeLookup.setRenderLayer(FLUID_DUCT_BLOCK, cutout);
-        RenderTypeLookup.setRenderLayer(FLUID_DUCT_GLASS_BLOCK, cutout);
+        ItemBlockRenderTypes.setRenderLayer(ENERGY_DUCT_BLOCK, cutout);
+        ItemBlockRenderTypes.setRenderLayer(FLUID_DUCT_BLOCK, cutout);
+        ItemBlockRenderTypes.setRenderLayer(FLUID_DUCT_GLASS_BLOCK, cutout);
     }
     // endregion
 }

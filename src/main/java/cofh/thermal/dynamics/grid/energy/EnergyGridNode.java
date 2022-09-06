@@ -4,14 +4,11 @@ import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
 import cofh.thermal.dynamics.api.grid.energy.IEnergyGridNode;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-/**
- * @author covers1624
- */
 public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEnergyGridNode {
 
     protected Direction[] distArray = new Direction[0];
@@ -35,7 +32,7 @@ public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEn
     @Override
     public void tick() {
 
-        World world = getWorld();
+        Level world = getWorld();
         BlockPos pos = getPos();
 
         if (!cached) {
@@ -43,7 +40,7 @@ public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEn
         }
         if (distArray.length > 0) {
             for (int i = distIndex; i < distArray.length; ++i) {
-                TileEntity tile = world.getBlockEntity(pos.relative(distArray[i]));
+                BlockEntity tile = world.getBlockEntity(pos.relative(distArray[i]));
                 if (tile == null) {
                     continue; // Ignore non-tiles.
                 }
@@ -51,7 +48,7 @@ public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEn
                         .ifPresent(e -> grid.extractEnergy(e.receiveEnergy(grid.getEnergyStored(), false), false));
             }
             for (int i = 0; i < distIndex; ++i) {
-                TileEntity tile = world.getBlockEntity(pos.relative(distArray[i]));
+                BlockEntity tile = world.getBlockEntity(pos.relative(distArray[i]));
                 if (tile == null) {
                     continue; // Ignore non-tiles.
                 }

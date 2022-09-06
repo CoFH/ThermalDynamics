@@ -1,17 +1,14 @@
-package cofh.thermal.dynamics.tileentity;
+package cofh.thermal.dynamics.block.entity;
 
 import cofh.core.network.packet.client.TileStatePacket;
 import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.RenderHelper;
-import cofh.lib.tileentity.ITilePacketHandler;
+import cofh.lib.block.entity.ITilePacketHandler;
 import cofh.thermal.dynamics.api.grid.IGridHostUpdateable;
 import cofh.thermal.dynamics.grid.fluid.FluidGrid;
 import cofh.thermal.dynamics.init.TDynReferences;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -49,16 +46,16 @@ public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdate
 
     // region NBT
     @Override
-    public CompoundNBT save(CompoundNBT tag) {
+    public CompoundTag save(CompoundTag tag) {
 
         if (!renderFluid.isEmpty()) {
-            tag.put(TAG_RENDER_FLUID, renderFluid.writeToNBT(new CompoundNBT()));
+            tag.put(TAG_RENDER_FLUID, renderFluid.writeToNBT(new CompoundTag()));
         }
         return super.save(tag);
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT tag) {
+    public void load(BlockState state, CompoundTag tag) {
 
         super.load(state, tag);
 
@@ -75,9 +72,9 @@ public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdate
     }
 
     @Override
-    public CompoundNBT getUpdateTag() {
+    public CompoundTag getUpdateTag() {
 
-        return this.save(new CompoundNBT());
+        return this.save(new CompoundTag());
     }
 
     @Override

@@ -18,7 +18,7 @@ plugins {
 
 apply plugin: 'net.minecraftforge.gradle'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 sourceSets.main.resources.srcDirs += "src/main/generated"
 

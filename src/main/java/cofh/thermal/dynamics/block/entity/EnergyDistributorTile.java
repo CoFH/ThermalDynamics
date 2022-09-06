@@ -1,20 +1,19 @@
-package cofh.thermal.dynamics.tileentity;
+package cofh.thermal.dynamics.block.entity;
 
 import cofh.lib.energy.EnergyStorageCoFH;
 import cofh.thermal.dynamics.inventory.container.EnergyDistributorContainer;
 import cofh.thermal.lib.tileentity.ThermalTileAugmentable;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.tileentity.ITickableTileEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static cofh.thermal.core.config.ThermalCoreConfig.storageAugments;
 import static cofh.thermal.dynamics.init.TDynReferences.ENERGY_DISTRIBUTOR_TILE;
-import static cofh.thermal.lib.common.ThermalConfig.storageAugments;
 
 public class EnergyDistributorTile extends ThermalTileAugmentable implements ITickableTileEntity {
 
@@ -48,7 +47,7 @@ public class EnergyDistributorTile extends ThermalTileAugmentable implements ITi
 
     @Nullable
     @Override
-    public Container createMenu(int i, PlayerInventory inventory, PlayerEntity player) {
+    public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
         return new EnergyDistributorContainer(i, level, worldPosition, inventory, player);
     }

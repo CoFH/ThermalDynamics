@@ -1,8 +1,8 @@
 package cofh.thermal.dynamics.handler;
 
 import cofh.thermal.dynamics.api.TDynApi;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.ListTag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 /**
  * @author covers1624
  */
-public class GridContainerCapProvider implements ICapabilityProvider, INBTSerializable<ListNBT> {
+public class GridContainerCapProvider implements ICapabilityProvider, INBTSerializable<ListTag> {
 
     private final GridContainer instance;
     private final LazyOptional<GridContainer> instanceOpt;
@@ -36,13 +36,13 @@ public class GridContainerCapProvider implements ICapabilityProvider, INBTSerial
     }
 
     @Override
-    public ListNBT serializeNBT() {
+    public ListTag serializeNBT() {
 
         return instance.serializeNBT();
     }
 
     @Override
-    public void deserializeNBT(ListNBT nbt) {
+    public void deserializeNBT(ListTag nbt) {
 
         instance.deserializeNBT(nbt);
     }

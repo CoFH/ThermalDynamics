@@ -11,14 +11,11 @@ import com.google.common.graph.EndpointPair;
 import io.netty.buffer.Unpooled;
 import net.covers1624.quack.collection.ColUtils;
 import net.covers1624.quack.collection.StreamableIterable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.IChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
@@ -37,7 +34,7 @@ import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
  * @author covers1624
  */
 @SuppressWarnings ("UnstableApiUsage")
-public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> {
+public class GridContainer implements IGridContainer, INBTSerializable<ListTag> {
 
     private static final boolean DEBUG = GridContainer.class.desiredAssertionStatus();
 
@@ -659,12 +656,12 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     }
 
     @Override
-    public ListNBT serializeNBT() {
+    public ListTag serializeNBT() {
 
-        ListNBT grids = new ListNBT();
+        ListTag grids = new ListTag();
         for (Map.Entry<UUID, AbstractGrid<?, ?>> entry : this.grids.entrySet()) {
             AbstractGrid<?, ?> grid = entry.getValue();
-            CompoundNBT tag = new CompoundNBT();
+            CompoundTag tag = new CompoundTag();
             tag.putUUID("id", entry.getKey());
             tag.putString("type", grid.getGridType().getRegistryName().toString());
             tag.merge(grid.serializeNBT());
@@ -674,11 +671,11 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListNBT> 
     }
 
     @Override
-    public void deserializeNBT(ListNBT nbt) {
+    public void deserializeNBT(ListTag nbt) {
 
         assert grids.isEmpty();
         for (int i = 0; i < nbt.size(); ++i) {
-            CompoundNBT tag = nbt.getCompound(i);
+            CompoundTag tag = nbt.getCompound(i);
             UUID id = tag.getUUID("id");
             assert !grids.containsKey(id) : "Duplicate grid found.";
             ResourceLocation gridTypeName = new ResourceLocation(tag.getString("type"));

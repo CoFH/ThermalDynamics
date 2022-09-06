@@ -1,23 +1,19 @@
 package cofh.thermal.dynamics.client.renderer.model;
 
 import cofh.core.util.helpers.RenderHelper;
+import cofh.lib.client.renderer.model.BackfaceBakedQuad;
 import cofh.lib.client.renderer.model.RetexturedBakedQuad;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
-import cofh.thermal.dynamics.lib.BackfaceBakedQuad;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.block.BlockState;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ItemOverrideList;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
@@ -80,8 +76,7 @@ public class DuctBakedModel implements IBakedModel {
         if (isInventory) {
             extraData = INV_DATA;
         }
-        if (!(extraData instanceof DuctModelData)) return ImmutableList.of();
-        DuctModelData modelData = (DuctModelData) extraData;
+        if (!(extraData instanceof DuctModelData modelData)) return ImmutableList.of();
 
         return getModelFor(modelData);
     }

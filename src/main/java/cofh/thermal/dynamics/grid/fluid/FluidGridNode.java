@@ -3,17 +3,14 @@ package cofh.thermal.dynamics.grid.fluid;
 import cofh.thermal.dynamics.api.grid.fluid.IFluidGrid;
 import cofh.thermal.dynamics.api.grid.fluid.IFluidGridNode;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
 
-/**
- * @author King Lemming
- */
 public class FluidGridNode extends AbstractGridNode<IFluidGrid> implements IFluidGridNode {
 
     protected Direction[] distArray = new Direction[0];
@@ -37,7 +34,7 @@ public class FluidGridNode extends AbstractGridNode<IFluidGrid> implements IFlui
     @Override
     public void tick() {
 
-        World world = getWorld();
+        Level world = getWorld();
         BlockPos pos = getPos();
 
         if (!cached) {
@@ -45,7 +42,7 @@ public class FluidGridNode extends AbstractGridNode<IFluidGrid> implements IFlui
         }
         if (distArray.length > 0) {
             for (int i = distIndex; i < distArray.length; ++i) {
-                TileEntity tile = world.getBlockEntity(pos.relative(distArray[i]));
+                BlockEntity tile = world.getBlockEntity(pos.relative(distArray[i]));
                 if (tile == null) {
                     continue; // Ignore non-tiles.
                 }
@@ -53,7 +50,7 @@ public class FluidGridNode extends AbstractGridNode<IFluidGrid> implements IFlui
                         .ifPresent(e -> grid.drain(e.fill(grid.getFluid(), EXECUTE), EXECUTE));
             }
             for (int i = 0; i < distIndex; ++i) {
-                TileEntity tile = world.getBlockEntity(pos.relative(distArray[i]));
+                BlockEntity tile = world.getBlockEntity(pos.relative(distArray[i]));
                 if (tile == null) {
                     continue; // Ignore non-tiles.
                 }

@@ -4,15 +4,13 @@ import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.grid.IGridNode;
-import cofh.thermal.dynamics.api.grid.IGridType;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -31,28 +29,27 @@ public class GridHelper {
 
     /**
      * Optionally get a {@link IGridHost} at the given {@link BlockPos} within the
-     * given {@link IBlockReader}.
+     * given {@link BlockGetter}.
      *
      * @param reader The level.
      * @param pos    The {@link BlockPos}.
      * @return Optionally the {@link IGridHost}.
      */
-    public static Optional<IGridHost> getGridHost(IBlockReader reader, BlockPos pos) {
+    public static Optional<IGridHost> getGridHost(BlockGetter reader, BlockPos pos) {
 
-        if (reader instanceof IWorldReader) {
-            IWorldReader worldReader = (IWorldReader) reader;
+        if (reader instanceof LevelReader worldReader) {
             if (!worldReader.hasChunkAt(pos)) return Optional.empty();
         }
         return getGridHost(reader.getBlockEntity(pos));
     }
 
     /**
-     * Optionally get a {@link IGridHost} from the given {@link TileEntity}.
+     * Optionally get a {@link IGridHost} from the given {@link BlockEntity}.
      *
-     * @param tile The {@link TileEntity}.
+     * @param tile The {@link BlockEntity}.
      * @return Optionally the {@link IGridHost}.
      */
-    public static Optional<IGridHost> getGridHost(@Nullable TileEntity tile) {
+    public static Optional<IGridHost> getGridHost(@Nullable BlockEntity tile) {
 
         if (tile == null) return Optional.empty();
 
@@ -65,14 +62,14 @@ public class GridHelper {
     /**
      * Locate all {@link IGridNode GridNodes} attached to the given {@link BlockPos}.
      *
-     * @param world      The {@link World} to search in.
-     * @param start      The {@link BlockPos} to start scanning from.
-     * @param from       The {@link BlockPos} to ignore. Usually the adjacent block which is performing this check.
-     * @param origin     Found grid hosts must be connectable to this host.
+     * @param world  The {@link Level} to search in.
+     * @param start  The {@link BlockPos} to start scanning from.
+     * @param from   The {@link BlockPos} to ignore. Usually the adjacent block which is performing this check.
+     * @param origin Found grid hosts must be connectable to this host.
      * @return The attached {@link IGridNode GridNodes} and the {@link BlockPos positions} between <code>start</code>
      * and the found {@link IGridNode}.
      */
-    public static List<Pair<IGridNode<?>, Set<BlockPos>>> locateAttachedNodes(World world, BlockPos start, BlockPos from, IGridHost origin) {
+    public static List<Pair<IGridNode<?>, Set<BlockPos>>> locateAttachedNodes(Level world, BlockPos start, BlockPos from, IGridHost origin) {
 
         Set<BlockPos> visited = new HashSet<>();
         LinkedList<IGridHost> candidates = new LinkedList<>();
@@ -94,7 +91,7 @@ public class GridHelper {
         return builder.build();
     }
 
-    private static void addCandidates(World world, BlockPos pos, Set<BlockPos> visited, LinkedList<IGridHost> candidates) {
+    private static void addCandidates(Level world, BlockPos pos, Set<BlockPos> visited, LinkedList<IGridHost> candidates) {
 
         for (Direction dir : Direction.values()) {
             BlockPos adj = pos.relative(dir);

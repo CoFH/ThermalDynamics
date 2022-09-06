@@ -1,31 +1,37 @@
-package cofh.thermal.dynamics.tileentity;
+package cofh.thermal.dynamics.block.entity;
 
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.init.TDynReferences;
-import cofh.thermal.lib.util.ThermalEnergyHelper;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
-public class EnergyDuctTile extends DuctTileBase {
+public class FluidDuctTile extends DuctTileBase {
 
-    public EnergyDuctTile() {
+    public FluidDuctTile(BlockEntityType<?> type) {
 
-        super(TDynReferences.ENERGY_DUCT_TILE);
+        super(type);
+    }
+
+    public FluidDuctTile() {
+
+        super(TDynReferences.FLUID_DUCT_TILE);
     }
 
     @Override
     public Set<IGridType<?>> getExposedTypes() {
 
-        return Collections.singleton(TDynReferences.ENERGY_GRID);
+        return Collections.singleton(TDynReferences.FLUID_GRID);
     }
 
     @Nonnull
@@ -39,11 +45,11 @@ public class EnergyDuctTile extends DuctTileBase {
     @Override
     protected boolean canConnect(Direction dir) {
 
-        TileEntity tile = level.getBlockEntity(getBlockPos().relative(dir));
+        BlockEntity tile = level.getBlockEntity(getBlockPos().relative(dir));
         if (tile == null || GridHelper.getGridHost(tile).isPresent()) {
             return false;
         }
-        return tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), dir.getOpposite()).isPresent();
+        return tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir.getOpposite()).isPresent();
     }
 
 }

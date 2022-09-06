@@ -7,10 +7,10 @@ import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -32,7 +32,7 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     protected IEnergyGridNode[] distArray = new IEnergyGridNode[0];
     protected int distIndex = 0;
 
-    public EnergyGrid(UUID id, World world) {
+    public EnergyGrid(UUID id, Level world) {
 
         super(TDynReferences.ENERGY_GRID, id, world);
     }
@@ -129,22 +129,22 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
+    public CompoundTag serializeNBT() {
 
-        CompoundNBT tag = super.serializeNBT();
+        CompoundTag tag = super.serializeNBT();
         storage.write(tag);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
 
         super.deserializeNBT(nbt);
         storage.deserializeNBT(nbt);
     }
 
     @Override
-    public boolean canConnectOnSide(TileEntity tile, @Nullable Direction dir) {
+    public boolean canConnectOnSide(BlockEntity tile, @Nullable Direction dir) {
 
         if (GridHelper.getGridHost(tile).isPresent()) {
             return false; // We cannot externally connect to other grids.

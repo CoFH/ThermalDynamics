@@ -1,8 +1,8 @@
 package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.grid.node.INodeAttachment;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 
 import java.util.EnumMap;
 import java.util.EnumSet;

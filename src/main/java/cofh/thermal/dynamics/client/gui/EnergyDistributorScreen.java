@@ -1,12 +1,12 @@
 package cofh.thermal.dynamics.client.gui;
 
 import cofh.lib.util.helpers.StringHelper;
+import cofh.thermal.dynamics.block.entity.EnergyDistributorTile;
 import cofh.thermal.dynamics.inventory.container.EnergyDistributorContainer;
-import cofh.thermal.dynamics.tileentity.EnergyDistributorTile;
 import cofh.thermal.lib.client.gui.ThermalTileScreenBase;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
 
 import static cofh.core.util.helpers.GuiHelper.generatePanelInfo;
 import static cofh.lib.util.constants.Constants.ID_COFH_CORE;
@@ -25,7 +25,7 @@ public class EnergyDistributorScreen extends ThermalTileScreenBase<EnergyDistrib
 
     protected EnergyDistributorTile tile;
 
-    public EnergyDistributorScreen(EnergyDistributorContainer container, PlayerInventory inv, ITextComponent titleIn) {
+    public EnergyDistributorScreen(EnergyDistributorContainer container, Inventory inv, Component titleIn) {
 
         super(container, inv, container.tile, StringHelper.getTextComponent("block.thermal.energy_distributor"));
         tile = container.tile;

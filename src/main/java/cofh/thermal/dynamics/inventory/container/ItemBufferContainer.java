@@ -3,12 +3,12 @@ package cofh.thermal.dynamics.inventory.container;
 import cofh.core.inventory.container.TileContainer;
 import cofh.lib.inventory.container.slot.SlotCoFH;
 import cofh.lib.inventory.wrapper.InvWrapperCoFH;
+import cofh.thermal.dynamics.block.entity.ItemBufferTile;
 import cofh.thermal.dynamics.inventory.container.slot.SlotFalseBuffer;
-import cofh.thermal.dynamics.tileentity.ItemBufferTile;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_CONTAINER;
 
@@ -16,7 +16,7 @@ public class ItemBufferContainer extends TileContainer {
 
     public final ItemBufferTile tile;
 
-    public ItemBufferContainer(int windowId, World world, BlockPos pos, PlayerInventory inventory, PlayerEntity player) {
+    public ItemBufferContainer(int windowId, Level world, BlockPos pos, Inventory inventory, Player player) {
 
         super(ITEM_BUFFER_CONTAINER, windowId, world, pos, inventory, player);
         this.tile = (ItemBufferTile) world.getBlockEntity(pos);

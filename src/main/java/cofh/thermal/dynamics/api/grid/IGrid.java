@@ -1,11 +1,11 @@
 package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.grid.AbstractGrid;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -50,12 +50,12 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
      *
      * @return The world.
      */
-    World getWorld();
+    Level getWorld();
 
     /**
      * Gets the type of this grid.
      * <p>
-     * {@link IGridType} can be considered similar to {@link TileEntityType} where
+     * {@link IGridType} can be considered similar to {@link BlockEntityType} where
      * it is a unique key and Factory.
      *
      * @return The type of this grid.
@@ -88,8 +88,8 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
     }
 
     /**
-     * Checks if this {@link IGrid} can externally connect to the given {@link TileEntity}
-     * at the given {@link BlockPos} on the given face of the {@link TileEntity}.
+     * Checks if this {@link IGrid} can externally connect to the given {@link BlockEntity}
+     * at the given {@link BlockPos} on the given face of the {@link BlockEntity}.
      *
      * @param pos The {@link BlockPos}.
      * @param dir The face, <code>null</code> for the 'center' face.
@@ -97,7 +97,7 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
      */
     default boolean canConnectOnSide(BlockPos pos, @Nullable Direction dir) {
 
-        TileEntity tile = getWorld().getBlockEntity(pos);
+        BlockEntity tile = getWorld().getBlockEntity(pos);
         if (tile == null) {
             return false;
         }
@@ -105,14 +105,14 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
     }
 
     /**
-     * Checks if this {@link IGrid} can externally connect to the given {@link TileEntity}
-     * on the given face of the {@link TileEntity}.
+     * Checks if this {@link IGrid} can externally connect to the given {@link BlockEntity}
+     * on the given face of the {@link BlockEntity}.
      *
-     * @param tile The {@link TileEntity}.
+     * @param tile The {@link BlockEntity}.
      * @param dir  The face, <code>null</code> for the 'center' face.
      * @return If the {@link IGrid} can externally connect.
      */
-    boolean canConnectOnSide(TileEntity tile, @Nullable Direction dir);
+    boolean canConnectOnSide(BlockEntity tile, @Nullable Direction dir);
 
     default <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
 

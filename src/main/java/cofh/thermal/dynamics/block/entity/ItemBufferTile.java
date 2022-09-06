@@ -1,23 +1,16 @@
-package cofh.thermal.dynamics.tileentity;
+package cofh.thermal.dynamics.block.entity;
 
+import cofh.core.block.entity.TileCoFH;
 import cofh.core.network.packet.server.TileConfigPacket;
-import cofh.core.tileentity.TileCoFH;
 import cofh.lib.inventory.IOItemInv;
 import cofh.lib.inventory.ItemStorageCoFH;
 import cofh.lib.inventory.StackValidatedItemStorage;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import cofh.thermal.lib.tileentity.ThermalTileSecurable;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -90,7 +83,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
 
     @Nullable
     @Override
-    public Container createMenu(int i, PlayerInventory inventory, PlayerEntity player) {
+    public Container createMenu(int i, PlayerInventory inventory, Player player) {
 
         return new ItemBufferContainer(i, level, worldPosition, inventory, player);
     }
@@ -185,7 +178,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
 
     // region NBT
     @Override
-    public void load(BlockState state, CompoundNBT nbt) {
+    public void load(BlockState state, CompoundTag nbt) {
 
         super.load(state, nbt);
 
@@ -198,7 +191,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT nbt) {
+    public CompoundTag save(CompoundTag nbt) {
 
         super.save(nbt);
 

@@ -7,8 +7,6 @@ import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGridNode;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 
-import java.util.Optional;
-
 /**
  * @author covers1624
  */

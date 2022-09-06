@@ -1,10 +1,7 @@
 package cofh.thermal.dynamics.data;
 
 import cofh.lib.data.LootTableProviderCoFH;
-import cofh.lib.util.DeferredRegisterCoFH;
-import net.minecraft.block.Block;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.item.Item;
 
 import static cofh.thermal.core.ThermalCore.BLOCKS;
 import static cofh.thermal.core.ThermalCore.ITEMS;
@@ -27,8 +24,8 @@ public class TDynLootTableProvider extends LootTableProviderCoFH {
     @Override
     protected void addTables() {
 
-        DeferredRegisterCoFH<Block> regBlocks = BLOCKS;
-        DeferredRegisterCoFH<Item> regItems = ITEMS;
+        var regBlocks = BLOCKS;
+        var regItems = ITEMS;
 
         createSimpleDropTable(regBlocks.get(ID_ENERGY_DUCT));
 

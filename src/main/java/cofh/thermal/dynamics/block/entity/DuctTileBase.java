@@ -1,19 +1,19 @@
-package cofh.thermal.dynamics.tileentity;
+package cofh.thermal.dynamics.block.entity;
 
-import cofh.lib.tileentity.ITileLocation;
+import cofh.lib.block.entity.ITileLocation;
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
 
@@ -24,7 +24,7 @@ import java.util.Optional;
 import static java.util.Objects.requireNonNull;
 import static net.covers1624.quack.util.SneakyUtils.notPossible;
 
-public abstract class DuctTileBase extends TileEntity implements ITileLocation, IGridHost {
+public abstract class DuctTileBase extends BlockEntity implements ITileLocation, IGridHost {
 
     // Only available server side.
     @Nullable
@@ -33,25 +33,25 @@ public abstract class DuctTileBase extends TileEntity implements ITileLocation, 
     protected final DuctModelData modelData = new DuctModelData();
     protected boolean modelUpdate;
 
-    public DuctTileBase(TileEntityType<?> type) {
+    public DuctTileBase(BlockEntityType<?> type) {
 
         super(type);
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT tag) {
+    public CompoundTag save(CompoundTag tag) {
 
         return super.save(tag);
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT tag) {
+    public void load(BlockState state, CompoundTag tag) {
 
         super.load(state, tag);
     }
 
     @Override
-    public World getHostWorld() {
+    public Level getHostWorld() {
 
         return getLevel();
     }
@@ -132,7 +132,7 @@ public abstract class DuctTileBase extends TileEntity implements ITileLocation, 
     }
 
     @Override
-    public World world() {
+    public Level world() {
 
         return level;
     }

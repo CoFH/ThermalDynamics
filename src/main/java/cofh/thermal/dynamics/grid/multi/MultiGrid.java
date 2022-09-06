@@ -5,9 +5,9 @@ import cofh.thermal.dynamics.api.grid.multi.IMultiGridNode;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.UUID;
  */
 public class MultiGrid extends AbstractGrid<IMultiGrid, IMultiGridNode> implements IMultiGrid {
 
-    public MultiGrid(UUID id, World world) {
+    public MultiGrid(UUID id, Level world) {
 
         super(TDynReferences.MULTI_GRID, id, world);
     }
@@ -40,7 +40,7 @@ public class MultiGrid extends AbstractGrid<IMultiGrid, IMultiGridNode> implemen
     }
 
     @Override
-    public boolean canConnectOnSide(TileEntity tile, @Nullable Direction dir) {
+    public boolean canConnectOnSide(BlockEntity tile, @Nullable Direction dir) {
 
         return false;
     }

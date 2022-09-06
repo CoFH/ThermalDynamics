@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.lib;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * Implement this interface on Objects which can write some amount of data about themselves.
@@ -15,14 +15,14 @@ public interface IEnderData {
     /**
      * Read the data from a tag. The player object exists because this should always be called via player interaction!
      */
-    default void readEnderData(PlayerEntity player, CompoundNBT tag) {
+    default void readEnderData(Player player, CompoundTag tag) {
 
     }
 
     /**
      * Write the data to a tag. The player object exists because this should always be called via player interaction!
      */
-    default void writeEnderData(PlayerEntity player, CompoundNBT tag) {
+    default void writeEnderData(Player player, CompoundTag tag) {
 
     }
 
