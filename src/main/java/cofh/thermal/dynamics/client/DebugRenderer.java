@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -26,7 +27,7 @@ import static cofh.lib.util.constants.Constants.ID_THERMAL;
 @Mod.EventBusSubscriber (value = Dist.CLIENT, modid = ID_THERMAL)
 public class DebugRenderer {
 
-    private static final AxisAlignedBB smolBox = new AxisAlignedBB(0.25, 0.25, 0.25, 0.75, 0.75, 0.75);
+    private static final AABB smolBox = new AABB(0.25, 0.25, 0.25, 0.75, 0.75, 0.75);
     private static final RenderType laserBox = RenderType.create("td:laser", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, false, true, RenderType.State.builder()
             .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
             .setTextureState(RenderType.NO_TEXTURE)
@@ -111,7 +112,7 @@ public class DebugRenderer {
     }
 
     // region HELPERS
-    private static void bufferCuboidSolid(IVertexBuilder builder, Matrix4f matrix, AxisAlignedBB c, float r, float g, float b, float a) {
+    private static void bufferCuboidSolid(IVertexBuilder builder, Matrix4f matrix, AABB c, float r, float g, float b, float a) {
 
         builder.vertex(matrix, (float) c.minX, (float) c.maxY, (float) c.minZ).color(r, g, b, a).endVertex();
         builder.vertex(matrix, (float) c.maxX, (float) c.maxY, (float) c.minZ).color(r, g, b, a).endVertex();

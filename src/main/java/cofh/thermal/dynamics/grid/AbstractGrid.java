@@ -9,8 +9,10 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.common.util.INBTSerializable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -140,7 +142,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     }
 
     // returns true if this grid changes its loaded state to true.
-    public boolean onChunkLoad(IChunk chunk) {
+    public boolean onChunkLoad(ChunkAccess chunk) {
 
         long pos = chunk.getPos().toLong();
         List<AbstractGridNode<?>> nodes = nodesPerChunk.get(pos);
@@ -159,7 +161,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     }
 
     // returns true if this grid changes its loaded state to false.
-    public boolean onChunkUnload(IChunk chunk) {
+    public boolean onChunkUnload(ChunkAccess chunk) {
 
         long pos = chunk.getPos().toLong();
         List<AbstractGridNode<?>> nodes = nodesPerChunk.get(pos);
@@ -184,7 +186,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         ListTag nodes = new ListTag();
         for (AbstractGridNode<?> node : nodeGraph.nodes()) {
             CompoundTag nodeTag = new CompoundTag();
-            nodeTag.put("pos", NBTUtil.writeBlockPos(node.getPos()));
+            nodeTag.put("pos", NbtUtils.writeBlockPos(node.getPos()));
             nodeTag.merge(node.serializeNBT());
             nodes.add(nodeTag);
         }
@@ -193,11 +195,11 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         ListTag edges = new ListTag();
         for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
             CompoundTag edgeTag = new CompoundTag();
-            edgeTag.put("U", NBTUtil.writeBlockPos(edge.nodeU().getPos()));
-            edgeTag.put("V", NBTUtil.writeBlockPos(edge.nodeV().getPos()));
+            edgeTag.put("U", NbtUtils.writeBlockPos(edge.nodeU().getPos()));
+            edgeTag.put("V", NbtUtils.writeBlockPos(edge.nodeV().getPos()));
             ListTag valueTag = new ListTag();
             for (BlockPos pos : nodeGraph.edgeValue(edge.nodeU(), edge.nodeV())) {
-                valueTag.add(NBTUtil.writeBlockPos(pos));
+                valueTag.add(NbtUtils.writeBlockPos(pos));
             }
             edgeTag.put("value", valueTag);
             edges.add(edgeTag);
@@ -207,7 +209,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         ListTag updateable = new ListTag();
         for (BlockPos pos : updatableHosts) {
             CompoundTag updateTag = new CompoundTag();
-            updateTag.put("pos", NBTUtil.writeBlockPos(pos));
+            updateTag.put("pos", NbtUtils.writeBlockPos(pos));
             updateable.add(updateTag);
         }
         tag.put("updateable", updateable);
@@ -222,7 +224,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
         for (int i = 0; i < nodes.size(); ++i) {
             CompoundTag nodeTag = nodes.getCompound(i);
-            BlockPos pos = NBTUtil.readBlockPos(nodeTag.getCompound("pos"));
+            BlockPos pos = NbtUtils.readBlockPos(nodeTag.getCompound("pos"));
             AbstractGridNode<?> node = newNode(pos, false);
             node.deserializeNBT(nodeTag);
         }
@@ -230,19 +232,19 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         ListTag edges = nbt.getList("edges", 10);
         for (int i = 0; i < edges.size(); ++i) {
             CompoundTag edgeTag = edges.getCompound(i);
-            BlockPos uPos = NBTUtil.readBlockPos(edgeTag.getCompound("U"));
-            BlockPos vPos = NBTUtil.readBlockPos(edgeTag.getCompound("V"));
+            BlockPos uPos = NbtUtils.readBlockPos(edgeTag.getCompound("U"));
+            BlockPos vPos = NbtUtils.readBlockPos(edgeTag.getCompound("V"));
             Set<BlockPos> value = new HashSet<>();
             ListTag valueTag = edgeTag.getList("value", 10);
             for (int j = 0; j < valueTag.size(); ++j) {
-                value.add(NBTUtil.readBlockPos(valueTag.getCompound(j)));
+                value.add(NbtUtils.readBlockPos(valueTag.getCompound(j)));
             }
             nodeGraph.putEdgeValue(this.nodes.get(uPos), this.nodes.get(vPos), value);
         }
         ListTag updateable = nbt.getList("updateable", 10);
         for (int i = 0; i < updateable.size(); ++i) {
             CompoundTag updateTag = updateable.getCompound(i);
-            BlockPos pos = NBTUtil.readBlockPos(updateTag.getCompound("pos"));
+            BlockPos pos = NbtUtils.readBlockPos(updateTag.getCompound("pos"));
             updatableHosts.add(pos);
         }
         // Make sure no Node positions are identity match to BlockPos.ZERO

@@ -6,8 +6,10 @@ import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.block.entity.ITilePacketHandler;
 import cofh.thermal.dynamics.api.grid.IGridHostUpdateable;
 import cofh.thermal.dynamics.grid.fluid.FluidGrid;
-import cofh.thermal.dynamics.init.TDynReferences;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.fluids.FluidStack;
@@ -16,15 +18,16 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static cofh.lib.util.constants.NBTTags.TAG_RENDER_FLUID;
+import static cofh.thermal.dynamics.init.TDynReferences.FLUID_DUCT_GLASS_TILE;
 import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
 
 public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdateable, ITilePacketHandler {
 
     FluidStack renderFluid = FluidStack.EMPTY;
 
-    public FluidDuctGlassTile() {
+    public FluidDuctGlassTile(BlockPos pos, BlockState state) {
 
-        super(TDynReferences.FLUID_DUCT_GLASS_TILE);
+        super(FLUID_DUCT_GLASS_TILE, pos, state);
     }
 
     @Override
@@ -46,18 +49,18 @@ public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdate
 
     // region NBT
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public void saveAdditional(CompoundTag tag) {
 
         if (!renderFluid.isEmpty()) {
             tag.put(TAG_RENDER_FLUID, renderFluid.writeToNBT(new CompoundTag()));
         }
-        return super.save(tag);
+        super.saveAdditional(tag);
     }
 
     @Override
-    public void load(BlockState state, CompoundTag tag) {
+    public void load(CompoundTag tag) {
 
-        super.load(state, tag);
+        super.load(tag);
 
         renderFluid = FluidStack.loadFluidStackFromNBT(tag.getCompound(TAG_RENDER_FLUID));
     }
@@ -66,26 +69,20 @@ public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdate
     // region NETWORK
     @Nullable
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
 
-        return new SUpdateTileEntityPacket(worldPosition, 0, getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
 
-        return this.save(new CompoundTag());
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-
-        load(this.blockState, pkt.getTag());
+        return saveWithoutMetadata();
     }
 
     // STATE
     @Override
-    public PacketBuffer getStatePacket(PacketBuffer buffer) {
+    public FriendlyByteBuf getStatePacket(FriendlyByteBuf buffer) {
 
         renderFluid = ((FluidGrid) getGrid()).getRenderFluid();
         buffer.writeFluidStack(renderFluid);
@@ -94,7 +91,7 @@ public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdate
     }
 
     @Override
-    public void handleStatePacket(PacketBuffer buffer) {
+    public void handleStatePacket(FriendlyByteBuf buffer) {
 
         renderFluid = buffer.readFluidStack();
 

@@ -10,12 +10,16 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
 
 import javax.annotation.Nonnull;
@@ -24,7 +28,7 @@ import java.util.*;
 
 import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
 
-public class DuctBakedModel implements IBakedModel {
+public class DuctBakedModel implements IDynamicBakedModel {
 
     private static final boolean DEBUG = Boolean.getBoolean("DuctModel.debug");
 
@@ -161,7 +165,7 @@ public class DuctBakedModel implements IBakedModel {
             // Grab the sprite
             TextureAtlasSprite sprite = Minecraft.getInstance()
                     .getModelManager()
-                    .getAtlas(PlayerContainer.BLOCK_ATLAS)
+                    .getAtlas(InventoryMenu.BLOCK_ATLAS)
                     .getSprite(texture);
 
             // Retexture
@@ -207,7 +211,7 @@ public class DuctBakedModel implements IBakedModel {
             // Grab the sprite
             TextureAtlasSprite sprite = Minecraft.getInstance()
                     .getModelManager()
-                    .getAtlas(PlayerContainer.BLOCK_ATLAS)
+                    .getAtlas(InventoryMenu.BLOCK_ATLAS)
                     .getSprite(texture);
 
             // Retexture
@@ -244,10 +248,10 @@ public class DuctBakedModel implements IBakedModel {
     @Override public boolean useAmbientOcclusion() { return config.useSmoothLighting(); }
     @Override public boolean isGui3d() { return config.isShadedInGui(); }
     @Override public boolean usesBlockLight() { return config.isSideLit(); }
-    @Override public ItemCameraTransforms getTransforms() { return config.getCameraTransforms(); }
+    @Override public ItemTransforms getTransforms() { return config.getCameraTransforms(); }
     @Override public boolean isCustomRenderer() { return false; }
     @Override public TextureAtlasSprite getParticleIcon() { return particle; }
     @Override public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, Random rand) { return getQuads(state, side, rand, EmptyModelData.INSTANCE); }
-    @Override public ItemOverrideList getOverrides() { return ItemOverrideList.EMPTY; }
+    @Override public ItemOverrides getOverrides() { return ItemOverrides.EMPTY; }
     //@formatter:on
 }

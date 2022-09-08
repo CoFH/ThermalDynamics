@@ -15,7 +15,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
@@ -45,11 +48,11 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
     private final Map<UUID, AbstractGrid<?, ?>> grids = new HashMap<>();
     private final Map<UUID, AbstractGrid<?, ?>> loadedGrids = new HashMap<>();
-    private final World world;
+    private final Level world;
 
     private int tickCounter;
 
-    public GridContainer(World world) {
+    public GridContainer(Level world) {
 
         this.world = world;
     }
@@ -597,7 +600,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             value.tick();
         }
         if (DEBUG && tickCounter % 10 == 0 && !loadedGrids.isEmpty()) {
-            PacketBuffer buffer = new PacketBuffer(Unpooled.buffer());
+            FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             buffer.writeVarInt(loadedGrids.size());
             for (AbstractGrid<?, ?> value : loadedGrids.values()) {
                 Map<BlockPos, AbstractGridNode<?>> nodes = (Map<BlockPos, AbstractGridNode<?>>) value.getNodes();
@@ -619,7 +622,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         tickCounter++;
     }
 
-    public void onChunkLoad(IChunk chunk) {
+    public void onChunkLoad(ChunkAccess chunk) {
 
         for (AbstractGrid<?, ?> grid : grids.values()) {
             if (grid.onChunkLoad(chunk)) {
@@ -629,7 +632,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         }
     }
 
-    public void onChunkUnload(IChunk chunk) {
+    public void onChunkUnload(ChunkAccess chunk) {
 
         Set<UUID> rem = new HashSet<>(2);
         for (AbstractGrid<?, ?> grid : loadedGrids.values()) {

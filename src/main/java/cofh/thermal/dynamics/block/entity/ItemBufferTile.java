@@ -1,15 +1,22 @@
 package cofh.thermal.dynamics.block.entity;
 
-import cofh.core.block.entity.TileCoFH;
 import cofh.core.network.packet.server.TileConfigPacket;
 import cofh.lib.inventory.IOItemInv;
 import cofh.lib.inventory.ItemStorageCoFH;
 import cofh.lib.inventory.StackValidatedItemStorage;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import cofh.thermal.lib.tileentity.ThermalTileSecurable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -24,7 +31,7 @@ import static cofh.lib.util.constants.Constants.FACING_ALL;
 import static cofh.lib.util.constants.NBTTags.*;
 import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_TILE;
 
-public class ItemBufferTile extends ThermalTileSecurable implements INamedContainerProvider {
+public class ItemBufferTile extends ThermalTileSecurable implements MenuProvider {
 
     protected IOItemInv inventory = new IOItemInv(this, TAG_ITEM_INV);
 
@@ -34,9 +41,9 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     protected boolean inputLock;
     protected boolean outputLock;
 
-    public ItemBufferTile() {
+    public ItemBufferTile(BlockPos pos, BlockState state) {
 
-        super(ITEM_BUFFER_TILE);
+        super(ITEM_BUFFER_TILE, pos, state);
 
         StackValidatedItemStorage[] accessible = new StackValidatedItemStorage[9];
         ItemStorageCoFH[] internal = new ItemStorageCoFH[9];
@@ -56,21 +63,6 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     }
 
     @Override
-    public TileCoFH worldContext(BlockState state, IBlockReader world) {
-
-        updateHandlers();
-
-        return this;
-    }
-
-    @Override
-    public void clearCache() {
-
-        super.clearCache();
-        updateHandlers();
-    }
-
-    @Override
     public int invSize() {
 
         return inventory.getSlots();
@@ -81,9 +73,23 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
         return inventory;
     }
 
+    @Override
+    public void setLevel(Level level) {
+
+        super.setLevel(level);
+        updateHandlers();
+    }
+
+    @Override
+    public void setBlockState(BlockState state) {
+
+        super.setBlockState(state);
+        updateHandlers();
+    }
+
     @Nullable
     @Override
-    public Container createMenu(int i, PlayerInventory inventory, Player player) {
+    public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
         return new ItemBufferContainer(i, level, worldPosition, inventory, player);
     }
@@ -118,7 +124,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
 
     // CONFIG
     @Override
-    public PacketBuffer getConfigPacket(PacketBuffer buffer) {
+    public FriendlyByteBuf getConfigPacket(FriendlyByteBuf buffer) {
 
         super.getConfigPacket(buffer);
 
@@ -129,7 +135,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     }
 
     @Override
-    public void handleConfigPacket(PacketBuffer buffer) {
+    public void handleConfigPacket(FriendlyByteBuf buffer) {
 
         super.handleConfigPacket(buffer);
 
@@ -156,7 +162,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
 
     // GUI
     @Override
-    public PacketBuffer getGuiPacket(PacketBuffer buffer) {
+    public FriendlyByteBuf getGuiPacket(FriendlyByteBuf buffer) {
 
         super.getGuiPacket(buffer);
 
@@ -167,7 +173,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     }
 
     @Override
-    public void handleGuiPacket(PacketBuffer buffer) {
+    public void handleGuiPacket(FriendlyByteBuf buffer) {
 
         super.handleGuiPacket(buffer);
 
@@ -178,9 +184,9 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
 
     // region NBT
     @Override
-    public void load(BlockState state, CompoundTag nbt) {
+    public void load(CompoundTag nbt) {
 
-        super.load(state, nbt);
+        super.load(nbt);
 
         inventory.read(nbt);
 
@@ -191,24 +197,22 @@ public class ItemBufferTile extends ThermalTileSecurable implements INamedContai
     }
 
     @Override
-    public CompoundTag save(CompoundTag nbt) {
+    public void saveAdditional(CompoundTag nbt) {
 
-        super.save(nbt);
+        super.saveAdditional(nbt);
 
         inventory.write(nbt);
 
         nbt.putBoolean(TAG_MODE, latchMode);
         nbt.putBoolean(TAG_FILTER_OPT_NBT, checkNBT);
-
-        return nbt;
     }
     // endregion
 
     // region INamedContainerProvider
     @Override
-    public ITextComponent getDisplayName() {
+    public Component getDisplayName() {
 
-        return new TranslationTextComponent(this.getBlockState().getBlock().getDescriptionId());
+        return new TranslatableComponent(this.getBlockState().getBlock().getDescriptionId());
     }
     // endregion
 

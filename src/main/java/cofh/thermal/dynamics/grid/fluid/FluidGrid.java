@@ -7,7 +7,6 @@ import cofh.thermal.dynamics.api.grid.fluid.IFluidGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
-import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
@@ -23,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static cofh.lib.util.constants.Constants.BUCKET_VOLUME;
+import static cofh.thermal.dynamics.init.TDynReferences.FLUID_GRID;
 
 /**
  * @author King Lemming
@@ -44,7 +44,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
 
     public FluidGrid(UUID id, Level world) {
 
-        super(TDynReferences.FLUID_GRID, id, world);
+        super(FLUID_GRID, id, world);
     }
 
     @Override

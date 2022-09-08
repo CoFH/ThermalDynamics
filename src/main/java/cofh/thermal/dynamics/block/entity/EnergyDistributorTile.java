@@ -1,11 +1,14 @@
 package cofh.thermal.dynamics.block.entity;
 
+import cofh.lib.block.entity.ICoFHTickableTile;
 import cofh.lib.energy.EnergyStorageCoFH;
 import cofh.thermal.dynamics.inventory.container.EnergyDistributorContainer;
 import cofh.thermal.lib.tileentity.ThermalTileAugmentable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
@@ -15,7 +18,7 @@ import java.util.List;
 import static cofh.thermal.core.config.ThermalCoreConfig.storageAugments;
 import static cofh.thermal.dynamics.init.TDynReferences.ENERGY_DISTRIBUTOR_TILE;
 
-public class EnergyDistributorTile extends ThermalTileAugmentable implements ITickableTileEntity {
+public class EnergyDistributorTile extends ThermalTileAugmentable implements ICoFHTickableTile.IServerTickable {
 
     public static final int BASE_CAPACITY = 100000;
     public static final int BASE_XFER = 1000;
@@ -25,9 +28,9 @@ public class EnergyDistributorTile extends ThermalTileAugmentable implements ITi
     protected List<IEnergyStorage> distributionSet = new ArrayList<>(8);
     protected int distributionTracker;
 
-    public EnergyDistributorTile() {
+    public EnergyDistributorTile(BlockPos pos, BlockState state) {
 
-        super(ENERGY_DISTRIBUTOR_TILE);
+        super(ENERGY_DISTRIBUTOR_TILE, pos, state);
 
         energyStorage = new EnergyStorageCoFH(BASE_CAPACITY, BASE_XFER);
 
@@ -38,7 +41,7 @@ public class EnergyDistributorTile extends ThermalTileAugmentable implements ITi
     }
 
     @Override
-    public void tick() {
+    public void tickServer() {
 
         if (redstoneControl.getState()) {
 

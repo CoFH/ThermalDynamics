@@ -5,7 +5,6 @@ import cofh.thermal.dynamics.api.grid.item.IItemGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
-import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -15,11 +14,13 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
+import static cofh.thermal.dynamics.init.TDynReferences.ITEM_GRID;
+
 public class ItemGrid extends AbstractGrid<IItemGrid, IItemGridNode> implements IItemGrid {
 
     public ItemGrid(UUID id, Level world) {
 
-        super(TDynReferences.ITEM_GRID, id, world);
+        super(ITEM_GRID, id, world);
     }
 
     @Override

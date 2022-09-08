@@ -3,10 +3,11 @@ package cofh.thermal.dynamics.block.entity;
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.init.TDynReferences;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -15,17 +16,20 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
+import static cofh.thermal.dynamics.init.TDynReferences.ENERGY_DUCT_TILE;
+import static cofh.thermal.dynamics.init.TDynReferences.ENERGY_GRID;
+
 public class EnergyDuctTile extends DuctTileBase {
 
-    public EnergyDuctTile() {
+    public EnergyDuctTile(BlockPos pos, BlockState state) {
 
-        super(TDynReferences.ENERGY_DUCT_TILE);
+        super(ENERGY_DUCT_TILE, pos, state);
     }
 
     @Override
     public Set<IGridType<?>> getExposedTypes() {
 
-        return Collections.singleton(TDynReferences.ENERGY_GRID);
+        return Collections.singleton(ENERGY_GRID);
     }
 
     @Nonnull

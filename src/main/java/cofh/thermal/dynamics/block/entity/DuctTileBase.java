@@ -33,21 +33,21 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
     protected final DuctModelData modelData = new DuctModelData();
     protected boolean modelUpdate;
 
-    public DuctTileBase(BlockEntityType<?> type) {
+    public DuctTileBase(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 
-        super(type);
+        super(type, pos, state);
     }
 
+    //    @Override
+    //    public void saveAdditional(CompoundTag tag) {
+    //
+    //        super.saveAdditional(tag);
+    //    }
+
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public void load(CompoundTag tag) {
 
-        return super.save(tag);
-    }
-
-    @Override
-    public void load(BlockState state, CompoundTag tag) {
-
-        super.load(state, tag);
+        super.load(tag);
     }
 
     @Override

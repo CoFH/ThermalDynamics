@@ -5,7 +5,6 @@ import cofh.thermal.dynamics.api.grid.energy.IEnergyGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
-import cofh.thermal.dynamics.init.TDynReferences;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +17,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
+
+import static cofh.thermal.dynamics.init.TDynReferences.ENERGY_GRID;
 
 /**
  * @author covers1624
@@ -34,7 +35,7 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
 
     public EnergyGrid(UUID id, Level world) {
 
-        super(TDynReferences.ENERGY_GRID, id, world);
+        super(ENERGY_GRID, id, world);
     }
 
     @Override

@@ -6,12 +6,14 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.block.model.*;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.*;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.GsonHelper;
 import net.minecraftforge.client.model.IModelBuilder;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.IModelLoader;
@@ -25,7 +27,7 @@ import java.util.function.Supplier;
 
 public class DuctModel implements IModelGeometry<DuctModel> {
 
-    private final Map<String, Map<String, BlockPart>> parts;
+    private final Map<String, Map<String, BlockElement>> parts;
 
     protected static List<DuctBakedModel> bakedModels = new ArrayList<>();
 
@@ -36,13 +38,13 @@ public class DuctModel implements IModelGeometry<DuctModel> {
         }
     }
 
-    public DuctModel(Map<String, Map<String, BlockPart>> parts) {
+    public DuctModel(Map<String, Map<String, BlockElement>> parts) {
 
         this.parts = parts;
     }
 
     @Override
-    public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation) {
+    public BakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
 
         boolean isInventory = owner.getPartVisibility(INV, false);
         // Map<Face, List(FrontFace, BackFace)>
@@ -62,14 +64,14 @@ public class DuctModel implements IModelGeometry<DuctModel> {
     }
 
     @Override
-    public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
+    public Collection<Material> getTextures(IModelConfiguration owner, Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
 
-        List<RenderMaterial> materials = new LinkedList<>();
-        for (Map<String, BlockPart> namedPart : parts.values()) {
-            for (BlockPart part : namedPart.values()) {
-                for (BlockPartFace face : part.faces.values()) {
-                    RenderMaterial mat = owner.resolveTexture(face.texture);
-                    if (MissingTextureSprite.getLocation().equals(mat.texture())) {
+        List<Material> materials = new LinkedList<>();
+        for (Map<String, BlockElement> namedPart : parts.values()) {
+            for (BlockElement part : namedPart.values()) {
+                for (BlockElementFace face : part.faces.values()) {
+                    Material mat = owner.resolveTexture(face.texture);
+                    if (MissingTextureAtlasSprite.getLocation().equals(mat.texture())) {
                         missingTextureErrors.add(Pair.of(face.texture, owner.getModelName()));
                     }
                     materials.add(mat);
@@ -80,21 +82,21 @@ public class DuctModel implements IModelGeometry<DuctModel> {
     }
 
     // region HELPERS
-    private EnumMap<Direction, List<BakedQuad>> buildCenter(IModelConfiguration owner, Function<RenderMaterial, TextureAtlasSprite> spriteFunc, IModelTransform transform, ResourceLocation modelLoc) {
+    private EnumMap<Direction, List<BakedQuad>> buildCenter(IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
 
-        BlockPart front = getPart("center/duct", "frontface");
+        BlockElement front = getPart("center/duct", "frontface");
         if (front != null) {
             EnumMap<Direction, List<BakedQuad>> baked = bake(front, owner, spriteFunc, transform, modelLoc);
             merge(quads, baked);
         }
-        BlockPart frontFill = getPart("center/fill", "frontface");
+        BlockElement frontFill = getPart("center/fill", "frontface");
         if (frontFill != null) {
             EnumMap<Direction, List<BakedQuad>> baked = bake(frontFill, owner, spriteFunc, transform, modelLoc);
             merge(quads, baked);
         }
-        BlockPart back = getPart("center/duct", "backface");
+        BlockElement back = getPart("center/duct", "backface");
         if (back != null) {
             EnumMap<Direction, List<BakedQuad>> baked = bakeBack(back, owner, spriteFunc, transform, modelLoc);
             // These are inverse in the json.
@@ -104,10 +106,10 @@ public class DuctModel implements IModelGeometry<DuctModel> {
         return quads;
     }
 
-    private EnumMap<Direction, List<BakedQuad>> buildCenterFill(IModelConfiguration owner, Function<RenderMaterial, TextureAtlasSprite> spriteFunc, IModelTransform transform, ResourceLocation modelLoc) {
+    private EnumMap<Direction, List<BakedQuad>> buildCenterFill(IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
-        BlockPart frontFill = getPart("center/fill", "frontface");
+        BlockElement frontFill = getPart("center/fill", "frontface");
         if (frontFill != null) {
             EnumMap<Direction, List<BakedQuad>> baked = bake(frontFill, owner, spriteFunc, transform, modelLoc);
             merge(quads, baked);
@@ -115,18 +117,18 @@ public class DuctModel implements IModelGeometry<DuctModel> {
         return quads;
     }
 
-    private EnumMap<Direction, List<BakedQuad>> buildGroupParts(String groupPart, IModelConfiguration owner, Function<RenderMaterial, TextureAtlasSprite> spriteFunc, IModelTransform transform, ResourceLocation modelLoc) {
+    private EnumMap<Direction, List<BakedQuad>> buildGroupParts(String groupPart, IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
         fill(quads, Arrays.asList(Direction.values()), LinkedList::new);
 
         for (Direction dir : Direction.values()) {
             String group = dir.getName() + "/" + groupPart;
-            Map<String, BlockPart> groupParts = parts.get(group);
+            Map<String, BlockElement> groupParts = parts.get(group);
             if (groupParts == null) continue;
 
             List<BakedQuad> list = quads.get(dir);
-            for (BlockPart part : groupParts.values()) {
+            for (BlockElement part : groupParts.values()) {
                 Map<Direction, List<BakedQuad>> baked = bake(part, owner, spriteFunc, transform, modelLoc);
                 flatMerge(list, baked);
             }
@@ -135,28 +137,28 @@ public class DuctModel implements IModelGeometry<DuctModel> {
         return quads;
     }
 
-    private EnumMap<Direction, List<BakedQuad>> bake(BlockPart part, IModelConfiguration owner, Function<RenderMaterial, TextureAtlasSprite> spriteFunc, IModelTransform transform, ResourceLocation modelLoc) {
+    private EnumMap<Direction, List<BakedQuad>> bake(BlockElement part, IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
         fill(quads, part.faces.keySet(), LinkedList::new);
 
-        for (Map.Entry<Direction, BlockPartFace> entry : part.faces.entrySet()) {
+        for (Map.Entry<Direction, BlockElementFace> entry : part.faces.entrySet()) {
             Direction dir = entry.getKey();
-            BlockPartFace face = entry.getValue();
+            BlockElementFace face = entry.getValue();
             TextureAtlasSprite sprite = spriteFunc.apply(owner.resolveTexture(face.texture));
             quads.get(dir).add(BlockModel.makeBakedQuad(part, face, sprite, dir, transform, modelLoc));
         }
         return quads;
     }
 
-    private EnumMap<Direction, List<BakedQuad>> bakeBack(BlockPart part, IModelConfiguration owner, Function<RenderMaterial, TextureAtlasSprite> spriteFunc, IModelTransform transform, ResourceLocation modelLoc) {
+    private EnumMap<Direction, List<BakedQuad>> bakeBack(BlockElement part, IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
         fill(quads, part.faces.keySet(), LinkedList::new);
 
-        for (Map.Entry<Direction, BlockPartFace> entry : part.faces.entrySet()) {
+        for (Map.Entry<Direction, BlockElementFace> entry : part.faces.entrySet()) {
             Direction dir = entry.getKey();
-            BlockPartFace face = entry.getValue();
+            BlockElementFace face = entry.getValue();
             TextureAtlasSprite sprite = spriteFunc.apply(owner.resolveTexture(face.texture));
             quads.get(dir).add(BackfaceBakedQuad.from(BlockModel.makeBakedQuad(part, face, sprite, dir, transform, modelLoc)));
         }
@@ -164,9 +166,9 @@ public class DuctModel implements IModelGeometry<DuctModel> {
     }
 
     @Nullable
-    private BlockPart getPart(String group, String name) {
+    private BlockElement getPart(String group, String name) {
 
-        Map<String, BlockPart> namedParts = parts.get(group);
+        Map<String, BlockElement> namedParts = parts.get(group);
         if (namedParts == null) return null;
 
         return namedParts.get(name);
@@ -210,23 +212,23 @@ public class DuctModel implements IModelGeometry<DuctModel> {
     //@formatter:off
     private static final IModelGeometryPart INV = new IModelGeometryPart() {
         @Override public String name() { return "inv"; }
-        @Override public void addQuads(IModelConfiguration owner, IModelBuilder<?> modelBuilder, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ResourceLocation modelLocation) { }
+        @Override public void addQuads(IModelConfiguration owner, IModelBuilder<?> modelBuilder, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ResourceLocation modelLocation) { }
     };
     //@formatter:on
 
     // region LOADER
     public static class Loader implements IModelLoader<DuctModel> {
 
-        private Map<String, Map<String, BlockPart>> parseElements(JsonDeserializationContext ctx, JsonObject model) {
+        private Map<String, Map<String, BlockElement>> parseElements(JsonDeserializationContext ctx, JsonObject model) {
 
-            Map<String, Map<String, BlockPart>> parts = new HashMap<>();
+            Map<String, Map<String, BlockElement>> parts = new HashMap<>();
             if (model.has("elements")) {
-                for (JsonElement element : JSONUtils.getAsJsonArray(model, "elements")) {
+                for (JsonElement element : GsonHelper.getAsJsonArray(model, "elements")) {
                     JsonObject obj = element.getAsJsonObject();
-                    BlockPart part = ctx.deserialize(obj, BlockPart.class);
-                    String group = JSONUtils.getAsString(obj, "group", null);
-                    String name = JSONUtils.getAsString(obj, "name");
-                    Map<String, BlockPart> groupParts = parts.computeIfAbsent(group, e -> new HashMap<>());
+                    BlockElement part = ctx.deserialize(obj, BlockElement.class);
+                    String group = GsonHelper.getAsString(obj, "group", null);
+                    String name = GsonHelper.getAsString(obj, "name");
+                    Map<String, BlockElement> groupParts = parts.computeIfAbsent(group, e -> new HashMap<>());
                     groupParts.put(name, part);
                 }
             }
@@ -234,7 +236,7 @@ public class DuctModel implements IModelGeometry<DuctModel> {
         }
 
         @Override
-        public void onResourceManagerReload(IResourceManager resourceManager) {
+        public void onResourceManagerReload(ResourceManager resourceManager) {
 
         }
 

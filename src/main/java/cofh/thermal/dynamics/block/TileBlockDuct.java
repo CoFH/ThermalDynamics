@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -82,12 +83,12 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
         return retShape;
     }
 
-    protected final Supplier<? extends DuctTileBase> supplier;
+    protected final Supplier<BlockEntityType<? extends DuctTileBase>> blockEntityType;
 
-    public TileBlockDuct(Properties properties, Supplier<? extends DuctTileBase> supplier) {
+    public TileBlockDuct(Properties builder, Supplier<BlockEntityType<? extends DuctTileBase>> blockEntityType) {
 
-        super(properties);
-        this.supplier = supplier;
+        super(builder);
+        this.blockEntityType = blockEntityType;
     }
 
     @Override
@@ -100,20 +101,21 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 
-        return supplier.get();
+        return blockEntityType.get().create(pos, state);
     }
 
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
         if (Utils.isServerWorld(worldIn) && Utils.isWrench(player.getItemInHand(handIn))) {
-            if (hit.subHit == 0) {
-                // TODO: Attempt connection w/ adjacent duct OR block
-            } else if (hit.subHit < 7) {
-                // TODO: Sever connection w/ adjacent duct
-            } else {
-                // TODO: Sever connection w/ adjacent block
-            }
+            // TODO: Subhit logic :x
+            //            if (hit.subHit == 0) {
+            //                // TODO: Attempt connection w/ adjacent duct OR block
+            //            } else if (hit.subHit < 7) {
+            //                // TODO: Sever connection w/ adjacent duct
+            //            } else {
+            //                // TODO: Sever connection w/ adjacent block
+            //            }
         }
         return InteractionResult.PASS;
     }
