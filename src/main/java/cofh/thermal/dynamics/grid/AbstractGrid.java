@@ -13,6 +13,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.util.INBTSerializable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.function.LongFunction;
 
+import static java.util.Objects.requireNonNull;
 import static net.covers1624.quack.util.SneakyUtils.notPossible;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
@@ -97,7 +99,8 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             AbstractGridNode<?> u = edge.nodeU();
             AbstractGridNode<?> v = edge.nodeV();
             Set<BlockPos> between = GridHelper.getPositionsBetween(u.getPos(), v.getPos());
-            Set<BlockPos> value = nodeGraph.edgeValue(u, v);
+            Set<BlockPos> value = nodeGraph.edgeValueOrDefault(u, v, null);
+            assert value != null;
             assert value.size() == between.size();
             assert value.containsAll(between);
             for (BlockPos pos : between) {
@@ -198,7 +201,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             edgeTag.put("U", NbtUtils.writeBlockPos(edge.nodeU().getPos()));
             edgeTag.put("V", NbtUtils.writeBlockPos(edge.nodeV().getPos()));
             ListTag valueTag = new ListTag();
-            for (BlockPos pos : nodeGraph.edgeValue(edge.nodeU(), edge.nodeV())) {
+            for (BlockPos pos : requireNonNull(nodeGraph.edgeValueOrDefault(edge.nodeU(), edge.nodeV(), null))) {
                 valueTag.add(NbtUtils.writeBlockPos(pos));
             }
             edgeTag.put("value", valueTag);
@@ -327,7 +330,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                 positionCollector.collectPosition(pos.immutable());
             }
             // Insert edge and value.
-            nodeGraph.putEdgeValue(a, b, other.nodeGraph.edgeValue(a, b));
+            nodeGraph.putEdgeValue(a, b, other.nodeGraph.edgeValueOrDefault(a, b, null));
         }
         other.nodeGraph.nodes().forEach(e -> positionCollector.collectPosition(e.getPos()));
 
@@ -369,7 +372,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                         positionCollector.collectPosition(pos.immutable());
                     }
                     // Put edge value in new grid.
-                    newGrid.nodeGraph.putEdgeValue(node, adj, nodeGraph.edgeValue(node, adj));
+                    newGrid.nodeGraph.putEdgeValue(node, adj, requireNonNull(nodeGraph.edgeValueOrDefault(node, adj, null)));
                 }
             }
             // Update all hosts within the new grid of the change.
@@ -399,7 +402,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
         for (Long2ObjectMap.Entry<Set<BlockPos>> entry : posMap.long2ObjectEntrySet()) {
             long chunkPos = entry.getLongKey();
-            Chunk chunk = world.getChunk(ChunkPos.getX(chunkPos), ChunkPos.getZ(chunkPos));
+            LevelChunk chunk = world.getChunk(ChunkPos.getX(chunkPos), ChunkPos.getZ(chunkPos));
             for (BlockPos pos : entry.getValue()) {
                 Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(chunk.getBlockEntity(pos));
                 if (!gridHostOpt.isPresent()) {

@@ -1,6 +1,7 @@
 package cofh.thermal.dynamics.handler;
 
 import com.google.common.graph.Graph;
+import com.google.common.graph.ValueGraph;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -23,7 +24,7 @@ public class GraphHelper {
      * @param b     The second node.
      * @return If <code>a</code> and <code>b</code> are connected indirectly.
      */
-    public static <T> boolean hasConnectivity(Graph<T> graph, T a, T b) {
+    public static <T> boolean hasConnectivity(ValueGraph<T, ?> graph, T a, T b) {
 
         HashSet<T> seen = new HashSet<>();
         LinkedList<T> queue = new LinkedList<>();
@@ -54,7 +55,7 @@ public class GraphHelper {
      * @param graph The {@link Graph}
      * @return A list of isolated sub graphs.
      */
-    public static <T> List<Set<T>> separateGraphs(Graph<T> graph) {
+    public static <T> List<Set<T>> separateGraphs(ValueGraph<T, ?> graph) {
 
         Set<T> seen = new HashSet<>();
         LinkedList<T> stack = new LinkedList<>();

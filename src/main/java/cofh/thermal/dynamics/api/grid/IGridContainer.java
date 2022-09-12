@@ -3,6 +3,7 @@ package cofh.thermal.dynamics.api.grid;
 import cofh.thermal.dynamics.api.TDynApi;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -28,9 +29,10 @@ public interface IGridContainer {
 
     void onGridHostConnectabilityChanged(IGridHost host);
 
-    static Optional<IGridContainer> getCapability(Level world) {
+    static Optional<IGridContainer> getCapability(LevelAccessor la) {
 
-        return world.getCapability(TDynApi.GRID_CONTAINER_CAPABILITY).resolve();
+        if (!(la instanceof Level level)) return Optional.empty();
+        return level.getCapability(TDynApi.GRID_CONTAINER_CAPABILITY).resolve();
     }
 
 }

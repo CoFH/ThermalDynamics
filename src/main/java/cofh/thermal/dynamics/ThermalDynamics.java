@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -44,10 +45,10 @@ public class ThermalDynamics {
     public static final PacketHandler PACKET_HANDLER = new PacketHandler(new ResourceLocation(ID_THERMAL_DYNAMICS, "general"));
 
     public static final DeferredRegisterCoFH<IGridType<?>> GRIDS =
-            DeferredRegisterCoFH.create(SneakyUtils.<Class<IGridType<?>>>unsafeCast(IGridType.class), ID_THERMAL_DYNAMICS);
+            DeferredRegisterCoFH.create(new ResourceLocation(ID_THERMAL_DYNAMICS, ID_GRID_TYPE), ID_THERMAL_DYNAMICS);
 
     public static final Supplier<IForgeRegistry<IGridType<?>>> GRID_TYPE_REGISTRY =
-            GRIDS.makeRegistry(ID_GRID_TYPE, () -> new RegistryBuilder<IGridType<?>>()
+            GRIDS.makeRegistry(SneakyUtils.unsafeCast(IGridType.class), () -> new RegistryBuilder<IGridType<?>>()
                     .disableOverrides() // GridTypes can't be overriden.
                     .disableSaving()    // GridTypes don't need id's saved to disk.
             );
@@ -62,6 +63,7 @@ public class ThermalDynamics {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::clientSetup);
+        modEventBus.addListener(this::capSetup);
 
         GRIDS.register(modEventBus);
 
@@ -89,8 +91,6 @@ public class ThermalDynamics {
 
     // region INITIALIZATION
     private void commonSetup(final FMLCommonSetupEvent event) {
-
-        CapabilityManager.INSTANCE.register(IGridContainer.class, NullCapabilityStorage.instance(), nullC());
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
@@ -98,6 +98,11 @@ public class ThermalDynamics {
         event.enqueueWork(this::registerGuiFactories);
         event.enqueueWork(this::registerRenderLayers);
         DebugRenderer.register();
+    }
+
+    private void capSetup(RegisterCapabilitiesEvent event) {
+
+        event.register(IGridContainer.class);
     }
     // endregion
 

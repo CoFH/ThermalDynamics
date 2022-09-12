@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.client.model;
 
-import cofh.lib.client.renderer.model.BackfaceBakedQuad;
+//import cofh.lib.client.renderer.model.BackfaceBakedQuad;
 import cofh.thermal.dynamics.client.renderer.model.DuctBakedModel;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
@@ -160,7 +160,8 @@ public class DuctModel implements IModelGeometry<DuctModel> {
             Direction dir = entry.getKey();
             BlockElementFace face = entry.getValue();
             TextureAtlasSprite sprite = spriteFunc.apply(owner.resolveTexture(face.texture));
-            quads.get(dir).add(BackfaceBakedQuad.from(BlockModel.makeBakedQuad(part, face, sprite, dir, transform, modelLoc)));
+            // TODO: Lemming, This class was never pushed -covers
+//            quads.get(dir).add(BackfaceBakedQuad.from(BlockModel.makeBakedQuad(part, face, sprite, dir, transform, modelLoc)));
         }
         return quads;
     }

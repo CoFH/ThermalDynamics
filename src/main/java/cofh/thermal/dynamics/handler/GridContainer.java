@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.Objects.requireNonNull;
 import static net.covers1624.quack.collection.ColUtils.only;
 import static net.covers1624.quack.collection.ColUtils.onlyOrDefault;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
@@ -138,7 +139,8 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
             AbstractGridNode<?> edge = onlyOrDefault(edgeNodes, null);
             if (edge != null && isOnSameAxis(newNode.getPos(), edge.getPos()) && !adjacentGrid.canConnectExternally(adjacentNode.getPos())) {
-                Set<BlockPos> values = adjacentGrid.nodeGraph.edgeValue(adjacentNode, edge);
+                Set<BlockPos> values = adjacentGrid.nodeGraph.edgeValueOrDefault(adjacentNode, edge, null);
+                assert values != null;
                 int oldLen = values.size();
                 values.add(adjacentNode.getPos());
                 if (DEBUG) {
@@ -447,7 +449,8 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
             Set<AbstractGridNode<?>> edgeNodes = grid.nodeGraph.adjacentNodes(currNode);
             AbstractGridNode<?> edge = only(edgeNodes);
-            Set<BlockPos> edgeValue = grid.nodeGraph.edgeValue(edge, currNode);
+            Set<BlockPos> edgeValue = grid.nodeGraph.edgeValueOrDefault(edge, currNode, null);
+            assert edgeValue != null;
             int preLen = edgeValue.size();
             edgeValue.remove(adjacentNode.getPos());
             grid.nodeGraph.putEdgeValue(adjacentNode, edge, edgeValue);
@@ -550,8 +553,8 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             return;
         }
         HashSet<BlockPos> value = new HashSet<>();
-        value.addAll(grid.nodeGraph.edgeValue(node, edges[0]));
-        value.addAll(grid.nodeGraph.edgeValue(node, edges[1]));
+        value.addAll(requireNonNull(grid.nodeGraph.edgeValueOrDefault(node, edges[0], null)));
+        value.addAll(requireNonNull(grid.nodeGraph.edgeValueOrDefault(node, edges[1], null)));
         value.add(node.getPos());
 
         grid.removeNode(node);
@@ -694,7 +697,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
                 addGridLookup(grid, node.getPos());
             }
             for (EndpointPair<AbstractGridNode<?>> edge : grid.nodeGraph.edges()) {
-                addGridLookupEdge(grid, grid.nodeGraph.edgeValue(edge.nodeU(), edge.nodeV()));
+                addGridLookupEdge(grid, requireNonNull(grid.nodeGraph.edgeValueOrDefault(edge.nodeU(), edge.nodeV(), null)));
             }
         }
         if (DEBUG) {
@@ -757,7 +760,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             if (!containsU) {
                 continue; // Skip.
             }
-            replaceGridLookupEdge(newGrid, oldGrid, newGrid.nodeGraph.edgeValue(u, v));
+            replaceGridLookupEdge(newGrid, oldGrid, requireNonNull(newGrid.nodeGraph.edgeValueOrDefault(u, v, null)));
         }
     }
 
