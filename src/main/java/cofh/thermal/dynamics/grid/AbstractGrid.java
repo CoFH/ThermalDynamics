@@ -429,9 +429,8 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     protected void updateHosts() {
 
         for (BlockPos pos : updatableHosts) {
-            if (world.isLoaded(pos) && world.getBlockEntity(pos) instanceof IGridHostUpdateable) {
-                // TODO: replace with optimized version w/ J17
-                ((IGridHostUpdateable) world.getBlockEntity(pos)).update();
+            if (world.isLoaded(pos) && world.getBlockEntity(pos) instanceof IGridHostUpdateable host) {
+                host.update();
             }
         }
     }

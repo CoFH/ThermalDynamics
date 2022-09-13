@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.client.renderer.model;
 
 import cofh.core.util.helpers.RenderHelper;
-//import cofh.lib.client.renderer.model.BackfaceBakedQuad;
+import cofh.lib.client.renderer.model.BackfaceBakedQuad;
 import cofh.lib.client.renderer.model.RetexturedBakedQuad;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import com.google.common.collect.ImmutableList;
@@ -124,8 +124,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
 
         List<BakedQuad> newQuads = new ArrayList<>(quads.size());
         for (BakedQuad quad : quads) {
-            // TODO: Lemming, This class was never pushed -covers
-            if (/*cullBack && quad instanceof BackfaceBakedQuad ||*/ quad.getSprite().getName().equals(BLANK_TEXTURE)) {
+            if (cullBack && quad instanceof BackfaceBakedQuad || quad.getSprite().getName().equals(BLANK_TEXTURE)) {
                 // do nothing
             } else {
                 newQuads.add(quad);

@@ -4,6 +4,7 @@ import cofh.lib.block.IDismantleable;
 import cofh.lib.util.Utils;
 import cofh.lib.util.raytracer.IndexedVoxelShape;
 import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
+import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.block.entity.DuctTileBase;
@@ -107,15 +108,15 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
-        if (Utils.isServerWorld(worldIn) && Utils.isWrench(player.getItemInHand(handIn))) {
-            // TODO: Subhit logic :x
-            //            if (hit.subHit == 0) {
-            //                // TODO: Attempt connection w/ adjacent duct OR block
-            //            } else if (hit.subHit < 7) {
-            //                // TODO: Sever connection w/ adjacent duct
-            //            } else {
-            //                // TODO: Sever connection w/ adjacent block
-            //            }
+        if (Utils.isServerWorld(worldIn) && Utils.isWrench(player.getItemInHand(handIn)) && hit instanceof VoxelShapeBlockHitResult advHit && worldIn.getBlockEntity(pos) instanceof DuctTileBase duct) {
+
+            if (advHit.subHit == 0) {
+                duct.attemptConnect(advHit.getDirection());
+            } else if (advHit.subHit < 7) {
+                duct.attemptDisconnect(Direction.values()[advHit.subHit - 1]);
+            } else if (advHit.subHit < 13) {
+                duct.attemptDisconnect(Direction.values()[advHit.subHit - 7]);
+            }
         }
         return InteractionResult.PASS;
     }

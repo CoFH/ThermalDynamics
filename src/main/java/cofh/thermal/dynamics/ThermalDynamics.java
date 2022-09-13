@@ -17,7 +17,6 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -37,7 +36,6 @@ import static cofh.thermal.lib.common.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
 import static cofh.thermal.lib.common.ThermalFlags.setFlag;
 import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_COLLECTOR;
 import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_NULLIFIER;
-import static net.covers1624.quack.util.SneakyUtils.nullC;
 
 @Mod (ID_THERMAL_DYNAMICS)
 public class ThermalDynamics {
@@ -91,6 +89,7 @@ public class ThermalDynamics {
 
     // region INITIALIZATION
     private void commonSetup(final FMLCommonSetupEvent event) {
+
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {

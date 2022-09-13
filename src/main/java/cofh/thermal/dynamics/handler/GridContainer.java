@@ -355,7 +355,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             boolean canConnect = other.canConnectTo(host);
             if (nodesConnected == canConnect) continue; // Nothing to do.
 
-
             if (nodesConnected) {
                 // Disconnect
                 if (DEBUG) {
@@ -386,7 +385,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
                 if (!gridsConnected) {
                     mergeGrids(Arrays.asList(host, other));
                     aGrid = (AbstractGrid<?, ?>) a.getGrid();
-                    bGrid = (AbstractGrid<?, ?>) b.getGrid();
+                    // bGrid = (AbstractGrid<?, ?>) b.getGrid();
                 }
                 // Perform connection. (we know these are directly adjacent.)
                 aGrid.nodeGraph.putEdgeValue(a, b, new HashSet<>());
@@ -407,7 +406,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
                 simplifyNode(a);
                 simplifyNode(b);
             }
-
             aGrid.onModified();
         }
     }

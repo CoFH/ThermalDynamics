@@ -38,10 +38,35 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         super(type, pos, state);
     }
 
-    //    @Override
-    //    public void saveAdditional(CompoundTag tag) {
+    @Override
+    public void saveAdditional(CompoundTag tag) {
+
+        super.saveAdditional(tag);
+    }
+
+    public boolean attemptConnect(Direction dir) {
+
+        System.out.println("Attempt to connect to: " + dir);
+        return false;
+    }
+
+    public boolean attemptDisconnect(Direction dir) {
+
+        Optional<IGridHost> adjacentOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+        if (adjacentOpt.isPresent()) {
+            System.out.println("Attempt to sever DUCT connection on: " + dir);
+        } else {
+            System.out.println("Attempt to sever BLOCK connection on: " + dir);
+        }
+        return false;
+    }
+
+        protected void attemptInternalConnect(Direction dir) {
+
+        }
+
+    //    protected void attemptInternalDisconnect(Direction dir) {
     //
-    //        super.saveAdditional(tag);
     //    }
 
     @Override
@@ -65,7 +90,9 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
     @Override
     public IGrid<?, ?> getGrid() {
 
-        if (level.isClientSide) throw new UnsupportedOperationException("No grid representation on client.");
+        if (level.isClientSide) {
+            throw new UnsupportedOperationException("No grid representation on client.");
+        }
         if (grid == null) {
             IGridContainer gridContainer = IGridContainer.getCapability(level)
                     .orElseThrow(notPossible());
@@ -112,7 +139,6 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
     protected abstract boolean canConnect(Direction dir);
 
     // region ILocationAccess
-
     @Override
     public Block block() {
 
