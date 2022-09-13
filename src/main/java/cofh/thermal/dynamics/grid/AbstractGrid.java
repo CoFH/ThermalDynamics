@@ -460,9 +460,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
     public void onGridHostAdded(IGridHost host) {
 
-        if (host instanceof IGridHostUpdateable) {
+        if (host instanceof IGridHostUpdateable uHost) {
             updatableHosts.add(host.getHostPos());
-            ((IGridHostUpdateable) host).update();
+            uHost.update();
         }
     }
 

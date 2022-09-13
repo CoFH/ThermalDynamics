@@ -103,6 +103,9 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
         storage.setBaseCapacity(NODE_CAPACITY * getNodes().size());
         storage.setCapacity(this.getCapacity() + from.getCapacity());
         storage.setEnergy(storage.getEnergy() + from.getEnergy());
+
+        refreshCapabilities();
+        from.refreshCapabilities();
     }
 
     @Override
@@ -124,6 +127,7 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
         for (IEnergyGrid grid : others) {
             int gridNodes = grid.getNodes().size();
             grid.setEnergy(energyPerNode * gridNodes);
+            grid.refreshCapabilities();
         }
         // First grid gets the extra. Why? Because there's always a first grid.
         others.get(0).setEnergy(others.get(0).getEnergy() + remEnergy);

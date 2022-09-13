@@ -21,6 +21,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+import static cofh.lib.util.constants.NBTTags.TAG_SIDES;
+import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.ALLOWED;
 import static java.util.Objects.requireNonNull;
 import static net.covers1624.quack.util.SneakyUtils.notPossible;
 
@@ -30,18 +32,14 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
     @Nullable
     protected IGrid<?, ?> grid = null;
 
+    protected ConnectionType[] connections = {ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED};
+
     protected final DuctModelData modelData = new DuctModelData();
     protected boolean modelUpdate;
 
     public DuctTileBase(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 
         super(type, pos, state);
-    }
-
-    @Override
-    public void saveAdditional(CompoundTag tag) {
-
-        super.saveAdditional(tag);
     }
 
     public boolean attemptConnect(Direction dir) {
@@ -61,45 +59,15 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         return false;
     }
 
-        protected void attemptInternalConnect(Direction dir) {
+    protected void attemptConnectInternal(Direction dir) {
 
-        }
-
-    //    protected void attemptInternalDisconnect(Direction dir) {
-    //
-    //    }
-
-    @Override
-    public void load(CompoundTag tag) {
-
-        super.load(tag);
     }
 
-    @Override
-    public Level getHostWorld() {
+    protected void attemptDisconnectInternal(Direction dir) {
 
-        return getLevel();
     }
 
-    @Override
-    public BlockPos getHostPos() {
-
-        return getBlockPos();
-    }
-
-    @Override
-    public IGrid<?, ?> getGrid() {
-
-        if (level.isClientSide) {
-            throw new UnsupportedOperationException("No grid representation on client.");
-        }
-        if (grid == null) {
-            IGridContainer gridContainer = IGridContainer.getCapability(level)
-                    .orElseThrow(notPossible());
-            grid = requireNonNull(gridContainer.getGrid(getBlockPos()));
-        }
-        return grid;
-    }
+    protected abstract boolean canConnect(Direction dir);
 
     public void requestModelDataUpdate() {
 
@@ -129,14 +97,67 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         return modelData;
     }
 
+    // region NBT
+    @Override
+    public void load(CompoundTag tag) {
+
+        super.load(tag);
+
+        byte[] bConn = serializeNBT().getByteArray(TAG_SIDES);
+        if (bConn.length == 6) {
+            for (int i = 0; i < 6; ++i) {
+                connections[i] = ConnectionType.VALUES[bConn[i]];
+            }
+        }
+    }
+
+    @Override
+    public void saveAdditional(CompoundTag tag) {
+
+        super.saveAdditional(tag);
+
+        byte[] bConn = new byte[6];
+        for (int i = 0; i < 6; ++i) {
+            bConn[i] = (byte) connections[i].ordinal();
+        }
+        tag.putByteArray(TAG_SIDES, bConn);
+    }
+    // endregion
+
+    // region IGridHost
+    @Override
+    public Level getHostWorld() {
+
+        return getLevel();
+    }
+
+    @Override
+    public BlockPos getHostPos() {
+
+        return getBlockPos();
+    }
+
+    @Override
+    public IGrid<?, ?> getGrid() {
+
+        if (level.isClientSide) {
+            throw new UnsupportedOperationException("No grid representation on client.");
+        }
+        if (grid == null) {
+            IGridContainer gridContainer = IGridContainer.getCapability(level)
+                    .orElseThrow(notPossible());
+            grid = requireNonNull(gridContainer.getGrid(getBlockPos()));
+        }
+        return grid;
+    }
+
     @Override
     public void setGrid(IGrid<?, ?> grid) {
 
         if (level.isClientSide) throw new UnsupportedOperationException("No grid representation on client.");
         this.grid = grid;
     }
-
-    protected abstract boolean canConnect(Direction dir);
+    // endregion
 
     // region ILocationAccess
     @Override

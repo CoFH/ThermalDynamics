@@ -353,8 +353,9 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             boolean gridsConnected = aGrid == bGrid;
             boolean nodesConnected = gridsConnected && a != null && b != null && aGrid.nodeGraph.edgeValueOrDefault(a, b, null) != null;
             boolean canConnect = other.canConnectTo(host);
-            if (nodesConnected == canConnect) continue; // Nothing to do.
-
+            if (nodesConnected == canConnect) {
+                continue; // Nothing to do.
+            }
             if (nodesConnected) {
                 // Disconnect
                 if (DEBUG) {

@@ -51,8 +51,9 @@ public class GridHelper {
      */
     public static Optional<IGridHost> getGridHost(@Nullable BlockEntity tile) {
 
-        if (tile == null) return Optional.empty();
-
+        if (tile == null) {
+            return Optional.empty();
+        }
         if (tile instanceof IGridHost) {
             return Optional.of((IGridHost) tile);
         }
@@ -79,8 +80,9 @@ public class GridHelper {
         ImmutableList.Builder<Pair<IGridNode<?>, Set<BlockPos>>> builder = ImmutableList.builder();
         while (!candidates.isEmpty()) {
             IGridHost host = candidates.pop();
-            if (!host.canConnectTo(origin)) continue;
-
+            if (!host.canConnectTo(origin)) {
+                continue;
+            }
             IGridNode<?> node = host.getNode();
             if (node != null) {
                 builder.add(Pair.of(node, getPositionsBetween(start, host.getHostPos())));
@@ -95,7 +97,9 @@ public class GridHelper {
 
         for (Direction dir : Direction.values()) {
             BlockPos adj = pos.relative(dir);
-            if (!visited.add(adj)) continue;
+            if (!visited.add(adj)) {
+                continue;
+            }
             GridHelper.getGridHost(world, adj)
                     .ifPresent(candidates::add);
         }
@@ -109,7 +113,7 @@ public class GridHelper {
      * @param b The second position.
      * @return The contained blocks.
      */
-    // TODO More to Core, somewhere.
+    // TODO Move to Core, somewhere.
     public static Set<BlockPos> getPositionsBetween(BlockPos a, BlockPos b) {
 
         Set<BlockPos> positions = new HashSet<>();

@@ -5,6 +5,7 @@ import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
@@ -98,4 +99,47 @@ public interface IGridHost {
         return getExposedTypes().equals(other.getExposedTypes());
     }
 
+    // region CONNECTION TYPE
+    enum ConnectionType implements StringRepresentable {
+
+        ALLOWED("allowed", true, true),
+        DISABLED("disabled", false, false),
+        FORCED("forced", false, true);
+
+        public static final ConnectionType[] VALUES = values();
+
+        private final String name;
+        private final boolean allowDuctConnection;
+        private final boolean allowBlockConnection;
+
+        ConnectionType(String name, boolean allowDuctConnection, boolean allowBlockConnection) {
+
+            this.name = name;
+            this.allowDuctConnection = allowDuctConnection;
+            this.allowBlockConnection = allowBlockConnection;
+        }
+
+        public boolean allowDuctConnection() {
+
+            return allowDuctConnection;
+        }
+
+        public boolean allowBlockConnection() {
+
+            return allowBlockConnection;
+        }
+
+        @Override
+        public String toString() {
+
+            return this.getSerializedName();
+        }
+
+        @Override
+        public String getSerializedName() {
+
+            return this.name;
+        }
+    }
+    // endregion
 }

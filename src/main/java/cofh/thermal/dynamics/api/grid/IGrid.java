@@ -17,7 +17,7 @@ import java.util.UUID;
 /**
  * Represents a Grid of nodes in a World.
  * <p>
- * This may not be a complete grid as sub-sections may be unloaded/loaded
+ * This may not be a complete grid as subsections may be unloaded/loaded
  * as chunks load/unload.
  * In these cases, it acts as if these unloaded sections of the grid do not exist.
  * <p>

@@ -131,6 +131,9 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
         storage.setFluid(new FluidStack(storage.getFluid(), this.getFluidAmount() + from.getFluidAmount()));
 
         updateHosts();
+
+        refreshCapabilities();
+        from.refreshCapabilities();
     }
 
     @Override
@@ -152,6 +155,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
         for (IFluidGrid grid : others) {
             int gridNodes = grid.getNodes().size();
             grid.setFluid(new FluidStack(getFluid(), (fluidPerNode * gridNodes)));
+            grid.refreshCapabilities();
         }
         // First grid gets the extra. Why? Because there's always a first grid.
         others.get(0).setFluid(new FluidStack(getFluid(), others.get(0).getFluid().getAmount() + remFluid));
