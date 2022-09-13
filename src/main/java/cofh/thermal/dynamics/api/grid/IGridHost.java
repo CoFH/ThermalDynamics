@@ -5,6 +5,7 @@ import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGridNode;
 import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -83,6 +84,8 @@ public interface IGridHost {
     /**
      * Checks if {@code other} can connect to this grid host.
      * <p>
+     * These 2 hosts are guaranteed to be adjacent to each other.
+     * <p>
      * Standard {@code equals} semantics apply, reversing the inputs
      * should result in the same output.
      * <p>
@@ -92,9 +95,10 @@ public interface IGridHost {
      * NOTE: {@code other} may not be connected to the same grid!
      *
      * @param other The other host.
+     * @param dir   The direction from this host, to the other host.
      * @return If they can connect.
      */
-    default boolean canConnectTo(IGridHost other) {
+    default boolean canConnectTo(IGridHost other, Direction dir) {
 
         return getExposedTypes().equals(other.getExposedTypes());
     }

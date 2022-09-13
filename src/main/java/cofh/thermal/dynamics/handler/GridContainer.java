@@ -337,6 +337,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
         EnumMap<Direction, IGridHost> adjacentHosts = getAllAdjacentGrids(host);
         for (Map.Entry<Direction, IGridHost> entry : adjacentHosts.entrySet()) {
+            Direction dir = entry.getKey();
             IGridHost other = entry.getValue();
 
             // In here as merge/split could change it.
@@ -352,7 +353,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
             boolean gridsConnected = aGrid == bGrid;
             boolean nodesConnected = gridsConnected && a != null && b != null && aGrid.nodeGraph.edgeValueOrDefault(a, b, null) != null;
-            boolean canConnect = other.canConnectTo(host);
+            boolean canConnect = other.canConnectTo(host, dir);
             if (nodesConnected == canConnect) {
                 continue; // Nothing to do.
             }
@@ -771,7 +772,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             if (otherOpt.isPresent()) {
                 IGridHost other = otherOpt.get();
                 // Ignore grids which don't expose any of our types.
-                if (host.canConnectTo(other)) {
+                if (host.canConnectTo(other, dir)) {
                     adjacentGrids.put(dir, other);
                 }
             }

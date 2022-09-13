@@ -76,31 +76,28 @@ public class GridHelper {
         LinkedList<IGridHost> candidates = new LinkedList<>();
         visited.add(start);
         visited.add(from);
-        addCandidates(world, start, visited, candidates);
+        addCandidates(world, origin, visited, candidates);
         ImmutableList.Builder<Pair<IGridNode<?>, Set<BlockPos>>> builder = ImmutableList.builder();
         while (!candidates.isEmpty()) {
             IGridHost host = candidates.pop();
-            if (!host.canConnectTo(origin)) {
-                continue;
-            }
+
             IGridNode<?> node = host.getNode();
             if (node != null) {
                 builder.add(Pair.of(node, getPositionsBetween(start, host.getHostPos())));
             } else {
-                addCandidates(world, host.getHostPos(), visited, candidates);
+                addCandidates(world, host, visited, candidates);
             }
         }
         return builder.build();
     }
 
-    private static void addCandidates(Level world, BlockPos pos, Set<BlockPos> visited, LinkedList<IGridHost> candidates) {
+    private static void addCandidates(Level world, IGridHost origin, Set<BlockPos> visited, LinkedList<IGridHost> candidates) {
 
         for (Direction dir : Direction.values()) {
-            BlockPos adj = pos.relative(dir);
-            if (!visited.add(adj)) {
-                continue;
-            }
+            BlockPos adj = origin.getHostPos().relative(dir);
+            if (!visited.add(adj)) continue;
             GridHelper.getGridHost(world, adj)
+                    .filter(other -> origin.canConnectTo(other, dir))
                     .ifPresent(candidates::add);
         }
     }
