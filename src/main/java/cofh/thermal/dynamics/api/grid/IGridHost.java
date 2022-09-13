@@ -86,13 +86,13 @@ public interface IGridHost {
      * <p>
      * These 2 hosts are guaranteed to be adjacent to each other.
      * <p>
-     * Standard {@code equals} semantics apply, reversing the inputs
-     * should result in the same output.
+     * This method should be called bidirectionally whenever used, e.g.
+     * host.canConnectTo(other, dir) && other.canConnectTo(host, dir.getOpposite())
      * <p>
      * If this method is called with the current host, it
      * should always return true.
      * <p>
-     * NOTE: {@code other} may not be connected to the same grid!
+     * NOTE: {@code other} and {@code this} might not be attached to the same underlying grid.
      *
      * @param other The other host.
      * @param dir   The direction from this host, to the other host.

@@ -119,8 +119,6 @@ public interface IGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> {
         return LazyOptional.empty();
     }
 
-    default void refreshCapabilities() {
-
-    }
+    void refreshCapabilities();
 
 }

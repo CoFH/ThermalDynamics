@@ -52,4 +52,9 @@ public class ItemGrid extends AbstractGrid<IItemGrid, IItemGridNode> implements 
         // return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent();
     }
 
+    @Override
+    public void refreshCapabilities() {
+
+    }
+
 }

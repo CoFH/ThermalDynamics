@@ -353,7 +353,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
             boolean gridsConnected = aGrid == bGrid;
             boolean nodesConnected = gridsConnected && a != null && b != null && aGrid.nodeGraph.edgeValueOrDefault(a, b, null) != null;
-            boolean canConnect = other.canConnectTo(host, dir);
+            boolean canConnect = host.canConnectTo(other, dir) && other.canConnectTo(host, dir.getOpposite());
             if (nodesConnected == canConnect) {
                 continue; // Nothing to do.
             }
@@ -772,7 +772,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             if (otherOpt.isPresent()) {
                 IGridHost other = otherOpt.get();
                 // Ignore grids which don't expose any of our types.
-                if (host.canConnectTo(other, dir)) {
+                if (host.canConnectTo(other, dir) && other.canConnectTo(host, dir.getOpposite())) {
                     adjacentGrids.put(dir, other);
                 }
             }

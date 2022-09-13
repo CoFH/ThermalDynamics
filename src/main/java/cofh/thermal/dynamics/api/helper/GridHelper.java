@@ -97,7 +97,7 @@ public class GridHelper {
             BlockPos adj = origin.getHostPos().relative(dir);
             if (!visited.add(adj)) continue;
             GridHelper.getGridHost(world, adj)
-                    .filter(other -> origin.canConnectTo(other, dir))
+                    .filter(other -> origin.canConnectTo(other, dir) && other.canConnectTo(origin, dir.getOpposite()))
                     .ifPresent(candidates::add);
         }
     }

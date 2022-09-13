@@ -46,4 +46,9 @@ public class MultiGrid extends AbstractGrid<IMultiGrid, IMultiGridNode> implemen
         return false;
     }
 
+    @Override
+    public void refreshCapabilities() {
+
+    }
+
 }

@@ -37,7 +37,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterloggedBlock, IDismantleable {
@@ -129,8 +128,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
         }
         BlockEntity tile = world.getBlockEntity(pos);
         if (tile instanceof IGridHost host) {
-            Optional<IGridContainer> gridContainer = IGridContainer.getCapability(world);
-            gridContainer.ifPresent(e -> e.onGridHostNeighborChanged(host));
+            IGridContainer.getCapability(world).ifPresent(e -> e.onGridHostNeighborChanged(host));
         }
     }
 
@@ -142,8 +140,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
         }
         BlockEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof IGridHost host) {
-            Optional<IGridContainer> gridContainer = IGridContainer.getCapability(worldIn);
-            gridContainer.ifPresent(e -> e.onGridHostPlaced(host));
+            IGridContainer.getCapability(worldIn).ifPresent(e -> e.onGridHostPlaced(host));
         }
     }
 
@@ -153,8 +150,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity tile = worldIn.getBlockEntity(pos);
             if (tile instanceof IGridHost host) {
-                Optional<IGridContainer> gridContainer = IGridContainer.getCapability(worldIn);
-                gridContainer.ifPresent(e -> e.onGridHostRemoved(host));
+                IGridContainer.getCapability(worldIn).ifPresent(e -> e.onGridHostRemoved(host));
             }
             super.onRemove(state, worldIn, pos, newState, isMoving);
         }
