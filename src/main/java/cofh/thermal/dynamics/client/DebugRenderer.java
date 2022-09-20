@@ -22,7 +22,11 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.*;
 
+import static cofh.core.client.CoreRenderType.THICK_LINES;
+import static cofh.core.util.helpers.vfx.RenderTypes.OVERLAY_LINES;
 import static cofh.lib.util.constants.Constants.ID_THERMAL;
+import static net.minecraft.client.renderer.RenderStateShard.COLOR_DEPTH_WRITE;
+import static net.minecraft.client.renderer.RenderStateShard.NO_DEPTH_TEST;
 
 /**
  * Created by covers1624 on 12/12/21.
@@ -32,6 +36,7 @@ public class DebugRenderer {
 
     private static final AABB smolBox = new AABB(0.25, 0.25, 0.25, 0.75, 0.75, 0.75);
     private static final RenderType laserBox = RenderType.create("td:laser", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 256, false, true, RenderType.CompositeState.builder()
+            .setShaderState(RenderType.POSITION_COLOR_SHADER)
             .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
             .setTextureState(RenderType.NO_TEXTURE)
             .setCullState(RenderType.NO_CULL)
@@ -39,12 +44,15 @@ public class DebugRenderer {
             .createCompositeState(false)
     );
     private static final RenderType laserLine = RenderType.create("td:laser", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.LINES, 256, false, true, RenderType.CompositeState.builder()
-            .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(2.5D)))
+            .setShaderState(RenderType.RENDERTYPE_LINES_SHADER)
+            .setLineState(THICK_LINES)
             .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
             .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
             .setTextureState(RenderType.NO_TEXTURE)
+            .setDepthTestState(NO_DEPTH_TEST)
             .setCullState(RenderType.NO_CULL)
             .setLightmapState(RenderType.NO_LIGHTMAP)
+            .setWriteMaskState(COLOR_DEPTH_WRITE)
             .createCompositeState(false)
     );
     private static final MultiBufferSource.BufferSource BUFFERS = MultiBufferSource.immediateWithBuffers(Util.make(new HashMap<>(), map -> {
