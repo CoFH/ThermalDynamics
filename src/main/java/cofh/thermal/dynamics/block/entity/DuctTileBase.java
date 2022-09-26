@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.block.entity;
 
-import cofh.lib.block.entity.ITileLocation;
+import cofh.lib.api.block.entity.ITileLocation;
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHost;

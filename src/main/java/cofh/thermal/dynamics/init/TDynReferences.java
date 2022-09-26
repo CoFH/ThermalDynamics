@@ -13,8 +13,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.ObjectHolder;
 
-import static cofh.lib.util.constants.Constants.ID_THERMAL;
-import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
+import static cofh.lib.util.constants.ModIds.ID_THERMAL;
+import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.dynamics.init.TDynIDs.*;
 
 @ObjectHolder (ID_THERMAL)

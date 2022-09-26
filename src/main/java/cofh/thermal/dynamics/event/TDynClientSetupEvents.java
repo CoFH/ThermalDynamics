@@ -9,7 +9,7 @@ import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
+import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 
 @Mod.EventBusSubscriber (value = Dist.CLIENT, modid = ID_THERMAL_DYNAMICS, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class TDynClientSetupEvents {

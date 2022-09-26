@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.block.entity;
 
-import cofh.lib.block.entity.ICoFHTickableTile;
+import cofh.lib.api.block.entity.ITickableTile;
 import cofh.lib.energy.EnergyStorageCoFH;
 import cofh.thermal.dynamics.inventory.container.EnergyDistributorContainer;
 import cofh.thermal.lib.tileentity.ThermalTileAugmentable;
@@ -18,7 +18,7 @@ import java.util.List;
 import static cofh.thermal.core.config.ThermalCoreConfig.storageAugments;
 import static cofh.thermal.dynamics.init.TDynReferences.ENERGY_DISTRIBUTOR_TILE;
 
-public class EnergyDistributorTile extends ThermalTileAugmentable implements ICoFHTickableTile.IServerTickable {
+public class EnergyDistributorTile extends ThermalTileAugmentable implements ITickableTile.IServerTickable {
 
     public static final int BASE_CAPACITY = 100000;
     public static final int BASE_XFER = 1000;

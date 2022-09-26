@@ -3,7 +3,7 @@ package cofh.thermal.dynamics.block.entity;
 import cofh.core.network.packet.client.TileStatePacket;
 import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.RenderHelper;
-import cofh.lib.block.entity.ITilePacketHandler;
+import cofh.lib.api.block.entity.IPacketHandlerTile;
 import cofh.thermal.dynamics.api.grid.IGridHostUpdateable;
 import cofh.thermal.dynamics.grid.fluid.FluidGrid;
 import net.minecraft.core.BlockPos;
@@ -21,7 +21,7 @@ import static cofh.lib.util.constants.NBTTags.TAG_RENDER_FLUID;
 import static cofh.thermal.dynamics.init.TDynReferences.FLUID_DUCT_GLASS_TILE;
 import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
 
-public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdateable, ITilePacketHandler {
+public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdateable, IPacketHandlerTile {
 
     FluidStack renderFluid = FluidStack.EMPTY;
 

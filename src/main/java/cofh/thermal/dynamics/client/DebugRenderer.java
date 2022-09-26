@@ -8,7 +8,6 @@ import com.mojang.math.Vector3f;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -23,8 +22,7 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.*;
 
 import static cofh.core.client.CoreRenderType.THICK_LINES;
-import static cofh.core.util.helpers.vfx.RenderTypes.OVERLAY_LINES;
-import static cofh.lib.util.constants.Constants.ID_THERMAL;
+import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static net.minecraft.client.renderer.RenderStateShard.COLOR_DEPTH_WRITE;
 import static net.minecraft.client.renderer.RenderStateShard.NO_DEPTH_TEST;
 

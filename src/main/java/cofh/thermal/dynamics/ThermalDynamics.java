@@ -28,7 +28,7 @@ import net.minecraftforge.registries.RegistryBuilder;
 
 import java.util.function.Supplier;
 
-import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
+import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_GRID_TYPE;
 import static cofh.thermal.dynamics.init.TDynReferences.*;
 import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;

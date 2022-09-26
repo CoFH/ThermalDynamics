@@ -8,7 +8,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 
-import static cofh.lib.util.constants.Constants.MAX_CAPACITY;
+import static cofh.lib.util.Constants.MAX_CAPACITY;
 import static cofh.lib.util.constants.NBTTags.TAG_CAPACITY;
 import static cofh.lib.util.constants.NBTTags.TAG_TRACK_OUT;
 

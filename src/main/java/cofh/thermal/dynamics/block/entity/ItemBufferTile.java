@@ -26,8 +26,8 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static cofh.lib.util.StorageGroup.*;
-import static cofh.lib.util.constants.Constants.FACING_ALL;
+import static cofh.lib.api.StorageGroup.*;
+import static cofh.lib.util.constants.BlockStatePropertiesCoFH.FACING_ALL;
 import static cofh.lib.util.constants.NBTTags.*;
 import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_TILE;
 

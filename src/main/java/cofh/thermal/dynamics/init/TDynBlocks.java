@@ -13,7 +13,7 @@ import net.minecraft.world.level.material.Material;
 
 import java.util.function.IntSupplier;
 
-import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
+import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.core.ThermalCore.TILE_ENTITIES;
 import static cofh.thermal.core.util.RegistrationHelper.registerBlock;
 import static cofh.thermal.dynamics.init.TDynIDs.*;

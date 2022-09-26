@@ -8,7 +8,7 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 
-import static cofh.lib.util.constants.Constants.ID_THERMAL_DYNAMICS;
+import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 
 public class GridEvents {
 

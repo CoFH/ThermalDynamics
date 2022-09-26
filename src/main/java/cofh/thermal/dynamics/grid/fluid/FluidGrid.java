@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-import static cofh.lib.util.constants.Constants.BUCKET_VOLUME;
+import static cofh.lib.util.Constants.BUCKET_VOLUME;
 import static cofh.thermal.dynamics.init.TDynReferences.FLUID_GRID;
 
 /**

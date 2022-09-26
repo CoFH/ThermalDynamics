@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.block;
 
-import cofh.lib.block.IDismantleable;
+import cofh.lib.api.block.IDismantleable;
 import cofh.lib.util.Utils;
 import cofh.lib.util.raytracer.IndexedVoxelShape;
 import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
