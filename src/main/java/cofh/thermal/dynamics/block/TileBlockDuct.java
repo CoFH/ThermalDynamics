@@ -83,9 +83,9 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
         return retShape;
     }
 
-    protected final Supplier<BlockEntityType<? extends DuctTileBase>> blockEntityType;
+    protected final Supplier<BlockEntityType<?>> blockEntityType;
 
-    public TileBlockDuct(Properties builder, Supplier<BlockEntityType<? extends DuctTileBase>> blockEntityType) {
+    public TileBlockDuct(Properties builder, Supplier<BlockEntityType<?>> blockEntityType) {
 
         super(builder);
         this.blockEntityType = blockEntityType;

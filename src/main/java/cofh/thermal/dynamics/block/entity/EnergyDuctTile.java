@@ -16,20 +16,20 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
-import static cofh.thermal.dynamics.init.TDynReferences.ENERGY_DUCT_TILE;
-import static cofh.thermal.dynamics.init.TDynReferences.ENERGY_GRID;
+import static cofh.thermal.dynamics.init.TDynGrids.GRID_ENERGY;
+import static cofh.thermal.dynamics.init.TDynTileEntities.DUCT_ENERGY_TILE;
 
 public class EnergyDuctTile extends DuctTileBase {
 
     public EnergyDuctTile(BlockPos pos, BlockState state) {
 
-        super(ENERGY_DUCT_TILE, pos, state);
+        super(DUCT_ENERGY_TILE.get(), pos, state);
     }
 
     @Override
     public Set<IGridType<?>> getExposedTypes() {
 
-        return Collections.singleton(ENERGY_GRID);
+        return Collections.singleton(GRID_ENERGY.get());
     }
 
     @Nonnull

@@ -17,8 +17,8 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
-import static cofh.thermal.dynamics.init.TDynReferences.FLUID_DUCT_TILE;
-import static cofh.thermal.dynamics.init.TDynReferences.FLUID_GRID;
+import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;
+import static cofh.thermal.dynamics.init.TDynTileEntities.DUCT_FLUID_TILE;
 
 public class FluidDuctTile extends DuctTileBase {
 
@@ -29,13 +29,13 @@ public class FluidDuctTile extends DuctTileBase {
 
     public FluidDuctTile(BlockPos pos, BlockState state) {
 
-        super(FLUID_DUCT_TILE, pos, state);
+        super(DUCT_FLUID_TILE.get(), pos, state);
     }
 
     @Override
     public Set<IGridType<?>> getExposedTypes() {
 
-        return Collections.singleton(FLUID_GRID);
+        return Collections.singleton(GRID_FLUID.get());
     }
 
     @Nonnull

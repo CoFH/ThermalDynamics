@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static cofh.lib.util.constants.NBTTags.TAG_RENDER_FLUID;
-import static cofh.thermal.dynamics.init.TDynReferences.FLUID_DUCT_GLASS_TILE;
+import static cofh.thermal.dynamics.init.TDynTileEntities.DUCT_FLUID_GLASS_TILE;
 import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
 
 public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdateable, IPacketHandlerTile {
@@ -27,7 +27,7 @@ public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdate
 
     public FluidDuctGlassTile(BlockPos pos, BlockState state) {
 
-        super(FLUID_DUCT_GLASS_TILE, pos, state);
+        super(DUCT_FLUID_GLASS_TILE.get(), pos, state);
     }
 
     @Override

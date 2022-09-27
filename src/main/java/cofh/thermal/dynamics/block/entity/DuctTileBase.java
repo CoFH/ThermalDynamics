@@ -23,7 +23,6 @@ import java.util.Optional;
 
 import static cofh.lib.util.constants.NBTTags.TAG_SIDES;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.ALLOWED;
-import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
 import static java.util.Objects.requireNonNull;
 import static net.covers1624.quack.util.SneakyUtils.notPossible;
 
@@ -48,7 +47,8 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         Optional<IGridHost> adjacentOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
         if (adjacentOpt.isPresent()) {
             System.out.println("Attempt to connect to DUCT on: " + dir);
-            connections[dir.ordinal()] = ALLOWED;
+            // TODO: Enable
+            // connections[dir.ordinal()] = ALLOWED;
             // TODO: Enable other
 
             IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostConnectabilityChanged(this));
@@ -63,7 +63,8 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         Optional<IGridHost> adjacentOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
         if (adjacentOpt.isPresent()) {
             System.out.println("Attempt to sever DUCT connection on: " + dir);
-            connections[dir.ordinal()] = DISABLED;
+            // TODO: Disable
+            // connections[dir.ordinal()] = DISABLED;
             // TODO: Disable other
 
             IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostConnectabilityChanged(this));

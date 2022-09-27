@@ -3,7 +3,6 @@ package cofh.thermal.dynamics.api.grid;
 import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
 import cofh.thermal.dynamics.api.grid.multi.IMultiGridNode;
-import cofh.thermal.dynamics.init.TDynReferences;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
@@ -69,15 +68,17 @@ public interface IGridHost {
     default <G extends IGrid<?, ?>> IGridNode<G> getNode(IGridType<G> gridType) {
 
         IGridNode<?> node = getNode();
-        if (node == null) return null;
-
-        if (node.getGrid().getGridType() == TDynReferences.MULTI_GRID) {
-            IMultiGridNode multiGridNode = (IMultiGridNode) node;
-            return multiGridNode.getSubGrid(gridType);
+        if (node == null) {
+            return null;
         }
-        if (node.getGrid().getGridType() != gridType) return null;
-
-        //noinspection unchecked
+        //        if (node.getGrid().getGridType() == TDynReferences.MULTI_GRID) {
+        //            IMultiGridNode multiGridNode = (IMultiGridNode) node;
+        //            return multiGridNode.getSubGrid(gridType);
+        //        }
+        if (node.getGrid().getGridType() != gridType) {
+            return null;
+        }
+        // noinspection unchecked
         return (IGridNode<G>) node;
     }
 

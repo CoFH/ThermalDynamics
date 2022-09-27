@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
 import static cofh.lib.api.StorageGroup.*;
 import static cofh.lib.util.constants.BlockStatePropertiesCoFH.FACING_ALL;
 import static cofh.lib.util.constants.NBTTags.*;
-import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_TILE;
+import static cofh.thermal.dynamics.init.TDynTileEntities.ITEM_BUFFER_TILE;
 
 public class ItemBufferTile extends ThermalTileSecurable implements MenuProvider {
 
@@ -43,7 +43,7 @@ public class ItemBufferTile extends ThermalTileSecurable implements MenuProvider
 
     public ItemBufferTile(BlockPos pos, BlockState state) {
 
-        super(ITEM_BUFFER_TILE, pos, state);
+        super(ITEM_BUFFER_TILE.get(), pos, state);
 
         StackValidatedItemStorage[] accessible = new StackValidatedItemStorage[9];
         ItemStorageCoFH[] internal = new ItemStorageCoFH[9];

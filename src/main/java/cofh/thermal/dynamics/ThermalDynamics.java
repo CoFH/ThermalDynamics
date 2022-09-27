@@ -7,10 +7,7 @@ import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.client.DebugRenderer;
 import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
 import cofh.thermal.dynamics.handler.GridEvents;
-import cofh.thermal.dynamics.init.TDynBlocks;
-import cofh.thermal.dynamics.init.TDynContainers;
-import cofh.thermal.dynamics.init.TDynGrids;
-import cofh.thermal.dynamics.init.TDynItems;
+import cofh.thermal.dynamics.init.*;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
 import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -29,8 +26,9 @@ import net.minecraftforge.registries.RegistryBuilder;
 import java.util.function.Supplier;
 
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_GRID_TYPE;
-import static cofh.thermal.dynamics.init.TDynReferences.*;
+import static cofh.thermal.core.ThermalCore.BLOCKS;
+import static cofh.thermal.dynamics.init.TDynContainers.ITEM_BUFFER_CONTAINER;
+import static cofh.thermal.dynamics.init.TDynIDs.*;
 import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;
 import static cofh.thermal.lib.common.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
 import static cofh.thermal.lib.common.ThermalFlags.setFlag;
@@ -70,6 +68,7 @@ public class ThermalDynamics {
         TDynGrids.register();
 
         TDynContainers.register();
+        TDynTileEntities.register();
 
         GridEvents.register();
     }
@@ -109,7 +108,7 @@ public class ThermalDynamics {
     private void registerGuiFactories() {
 
         // ScreenManager.register(ENERGY_DISTRIBUTOR_CONTAINER, EnergyDistributorScreen::new);
-        MenuScreens.register(ITEM_BUFFER_CONTAINER, ItemBufferScreen::new);
+        MenuScreens.register(ITEM_BUFFER_CONTAINER.get(), ItemBufferScreen::new);
     }
 
     private void registerRenderLayers() {
@@ -123,9 +122,9 @@ public class ThermalDynamics {
         // RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_FLUID_BUFFER), cutout);
         // RenderTypeLookup.setRenderLayer(BLOCKS.get(ID_DEVICE_ITEM_BUFFER), cutout);
 
-        ItemBlockRenderTypes.setRenderLayer(ENERGY_DUCT_BLOCK, cutout);
-        ItemBlockRenderTypes.setRenderLayer(FLUID_DUCT_BLOCK, cutout);
-        ItemBlockRenderTypes.setRenderLayer(FLUID_DUCT_GLASS_BLOCK, cutout);
+        ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_ENERGY_DUCT), cutout);
+        ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_FLUID_DUCT), cutout);
+        ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_FLUID_DUCT_GLASS), cutout);
     }
     // endregion
 }

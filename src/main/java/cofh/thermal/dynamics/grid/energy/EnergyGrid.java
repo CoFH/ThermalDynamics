@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-import static cofh.thermal.dynamics.init.TDynReferences.ENERGY_GRID;
+import static cofh.thermal.dynamics.init.TDynGrids.GRID_ENERGY;
 
 /**
  * @author covers1624
@@ -35,7 +35,7 @@ public class EnergyGrid extends AbstractGrid<IEnergyGrid, IEnergyGridNode> imple
 
     public EnergyGrid(UUID id, Level world) {
 
-        super(ENERGY_GRID, id, world);
+        super(GRID_ENERGY.get(), id, world);
     }
 
     @Override

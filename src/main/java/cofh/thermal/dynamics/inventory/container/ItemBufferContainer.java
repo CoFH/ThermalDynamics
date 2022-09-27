@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-import static cofh.thermal.dynamics.init.TDynReferences.ITEM_BUFFER_CONTAINER;
+import static cofh.thermal.dynamics.init.TDynContainers.ITEM_BUFFER_CONTAINER;
 
 public class ItemBufferContainer extends TileContainer {
 
@@ -18,7 +18,7 @@ public class ItemBufferContainer extends TileContainer {
 
     public ItemBufferContainer(int windowId, Level world, BlockPos pos, Inventory inventory, Player player) {
 
-        super(ITEM_BUFFER_CONTAINER, windowId, world, pos, inventory, player);
+        super(ITEM_BUFFER_CONTAINER.get(), windowId, world, pos, inventory, player);
         this.tile = (ItemBufferTile) world.getBlockEntity(pos);
         InvWrapperCoFH tileInv = new InvWrapperCoFH(this.tile.getItemInv());
 
