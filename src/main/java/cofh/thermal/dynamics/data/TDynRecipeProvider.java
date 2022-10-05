@@ -65,16 +65,16 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
 
         //        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT), 4)
         //                .define('L', ItemTagsCoFH.INGOTS_LEAD)
-        //                .define('C', ItemTagsCoFH.INGOTS_COPPER)
+        //                .define('C', ItemTagsCoFH.INGOTS_BRONZE)
         //                .pattern("CLC")
-        //                .unlockedBy("has_copper", has(ItemTagsCoFH.INGOTS_COPPER))
+        //                .unlockedBy("has_copper", has(ItemTagsCoFH.INGOTS_BRONZE))
         //                .save(consumer);
         //
         //        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT_GLASS), 4)
         //                .define('G', ItemTagsCoFH.HARDENED_GLASS)
-        //                .define('C', ItemTagsCoFH.INGOTS_COPPER)
+        //                .define('C', ItemTagsCoFH.INGOTS_BRONZE)
         //                .pattern("CGC")
-        //                .unlockedBy("has_copper", has(ItemTagsCoFH.INGOTS_COPPER))
+        //                .unlockedBy("has_copper", has(ItemTagsCoFH.INGOTS_BRONZE))
         //                .save(consumer);
     }
 
