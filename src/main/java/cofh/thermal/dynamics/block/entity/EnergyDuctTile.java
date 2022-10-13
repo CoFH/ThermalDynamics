@@ -1,6 +1,5 @@
 package cofh.thermal.dynamics.block.entity;
 
-import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
@@ -36,8 +35,7 @@ public class EnergyDuctTile extends DuctTileBase {
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
 
-        IGrid<?, ?> grid = getGrid();
-        return grid != null ? grid.getCapability(cap) : LazyOptional.empty();
+        return level.isClientSide ? LazyOptional.empty() : getGrid().getCapability(cap);
     }
 
     @Override

@@ -1,12 +1,17 @@
 package cofh.thermal.dynamics.handler;
 
 import cofh.core.network.packet.client.ModelUpdatePacket;
+import cofh.lib.util.helpers.BlockHelper;
 import cofh.thermal.dynamics.ThermalDynamics;
-import cofh.thermal.dynamics.api.grid.*;
+import cofh.thermal.dynamics.api.grid.IGrid;
+import cofh.thermal.dynamics.api.grid.IGridContainer;
+import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.AbstractGrid;
 import cofh.thermal.dynamics.grid.AbstractGridNode;
 import cofh.thermal.dynamics.network.client.GridDebugPacket;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.EndpointPair;
 import io.netty.buffer.Unpooled;
 import net.covers1624.quack.collection.ColUtils;
@@ -21,7 +26,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -107,8 +111,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         AbstractGridNode<?> adjacentNode = (AbstractGridNode<?>) adjacent.getNode();
         AbstractGrid<?, ?> adjacentGrid = (AbstractGrid<?, ?>) adjacent.getGrid();
 
-        assert adjacentGrid != null; // All adjacent nodes should have a Grid when this method is called.
-
         // Set the GridHost's grid.
         host.setGrid(adjacentGrid);
 
@@ -120,7 +122,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             // - Generate a new node at the adjacent position.
             // - Unlink the 'a/b' nodes from each other and re-link with the adjacent node.
             // - Add link to the node we just placed.
-            AbstractGridNode<?> abMiddle = insertNode(adjacentGrid, adjacent.getHostPos(), host.getHostPos(), host);
+            AbstractGridNode<?> abMiddle = getNodeOrSplitEdgeAndInsertNode(adjacentGrid, adjacent.getHostPos());
             adjacentGrid.nodeGraph.putEdgeValue(abMiddle, newNode, new HashSet<>());
 
             if (DEBUG) {
@@ -169,32 +171,27 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     /**
      * Inserts a node in the middle of an edge.
      * <p>
-     * This method assumes there is not already a node at <code>pos</code>.
+     * If a node already exists at {@code pos}, it will be returned instead.
      *
-     * @param grid   The grid to add the node to.
-     * @param pos    The position in the grid to generate the node.
-     * @param from   The position next to <code>pos</code> which triggered this insertion.
-     *               May be <code>pos</code> if no adjacent position exist. This position will
-     *               be ignored when searching for adjacent grid hosts to build the new node.
-     * @param origin When locating adjacent grids, they must be connectable to this host.
-     * @return The new node at the position.
+     * @param grid The grid to add the node to.
+     * @param pos  The position in the grid to generate the node.
+     * @return The existing node, or the new node at the position.
      */
-    private AbstractGridNode<?> insertNode(AbstractGrid<?, ?> grid, BlockPos pos, BlockPos from, IGridHost origin) {
+    private AbstractGridNode<?> getNodeOrSplitEdgeAndInsertNode(AbstractGrid<?, ?> grid, BlockPos pos) {
+        AbstractGridNode<?> existing = (AbstractGridNode<?>) grid.getNodes().get(pos);
+        if (existing != null) return existing;
+
         // We are adding a duct, next to an existing duct that does not have a node.
         // There is only one valid case for this, where there are 2 nodes directly attached.
 
-        assert grid.getNodes().get(pos) == null;
+        // Find the edge which pos lies on.
+        EndpointPair<AbstractGridNode<?>> foundEdge = grid.findEdge(pos);
+        assert foundEdge != null;
 
-        // Find the 2 aforementioned existing nodes.
-        List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, pos, from, origin);
-        assert attached.size() == 2;
-
-        Pair<IGridNode<?>, Set<BlockPos>> a = attached.get(0);
-        Pair<IGridNode<?>, Set<BlockPos>> b = attached.get(1);
-        AbstractGridNode<?> attachedA = (AbstractGridNode<?>) a.getLeft();
-        Set<BlockPos> attachedAValue = a.getRight();
-        AbstractGridNode<?> attachedB = (AbstractGridNode<?>) b.getLeft();
-        Set<BlockPos> attachedBValue = b.getRight();
+        AbstractGridNode<?> attachedA = foundEdge.nodeU();
+        Set<BlockPos> attachedAValue = GridHelper.getPositionsBetween(pos, attachedA.getPos());
+        AbstractGridNode<?> attachedB = foundEdge.nodeV();
+        Set<BlockPos> attachedBValue = GridHelper.getPositionsBetween(pos, attachedB.getPos());
 
         // Make sure these 2 nodes are actually connected.
         assert grid.nodeGraph.edgeValueOrDefault(attachedA, attachedB, null) != null;
@@ -222,7 +219,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         assert branches.size() != 1;
 
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) branches.get(0).getGrid();
-        assert grid != null;
 
         host.setGrid(grid);
         // More than 2 branches, or the 2 adjacent branches aren't on the same axis as us. We must generate a node.
@@ -232,7 +228,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             AbstractGridNode<?> adj = (AbstractGridNode<?>) branch.getNode();
             if (adj == null) {
                 // Adjacent isn't present, just generate node.
-                AbstractGridNode<?> abMiddle = insertNode(grid, branch.getHostPos(), node.getPos(), host);
+                AbstractGridNode<?> abMiddle = getNodeOrSplitEdgeAndInsertNode(grid, branch.getHostPos());
                 if (DEBUG) {
                     LOGGER.info(" T intersection creation. New Node: {}, Adjacent: {}",
                             node.getPos(),
@@ -258,7 +254,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         Set<AbstractGrid<?, ?>> grids = new HashSet<>();
         for (IGridHost branch : branches) {
             AbstractGrid<?, ?> abstractGrid = (AbstractGrid<?, ?>) branch.getGrid();
-            assert abstractGrid != null;
 
             grids.add(abstractGrid);
         }
@@ -279,18 +274,62 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     @Override
     public void onGridHostRemoved(IGridHost host) {
 
-        EnumMap<Direction, IGridHost> adjacentHosts = getAdjacentGrids(host);
-        if (adjacentHosts.isEmpty()) {
-            // No adjacent grids, just remove the grid.
-            removeSingleGrid(host);
-            return;
+        // - Disconnect any edges.
+        // - Remove current node.
+        // - Try and split the grid if nodes exist.
+        // - Delete grid if no more nodes exist.
+        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
+        BlockPos hostPos = host.getHostPos();
+
+        AbstractGridNode<?> removing = (AbstractGridNode<?>) host.getNode();
+
+        removeGridLookup(grid, host.getHostPos());
+        if (removing != null) {
+            // All we need to do is remove the node.
+
+            List<AbstractGridNode<?>> adjacentNodes = new LinkedList<>();
+            // We must copy this otherwise, we get Concurrent modification exception modifying the grid with 'splitEdgeAndInsertNode'
+            Set<EndpointPair<AbstractGridNode<?>>> allEdges = ImmutableSet.copyOf(grid.nodeGraph.incidentEdges(removing));
+            for (EndpointPair<AbstractGridNode<?>> edge : allEdges) {
+                AbstractGridNode<?> other = edge.nodeU() == removing ? edge.nodeV() : edge.nodeU();
+                adjacentNodes.add(getNodeOrSplitEdgeAndInsertNode(grid, stepTowards(hostPos, other.getPos())));
+            }
+
+            if (DEBUG) {
+                LOGGER.info("Removing node: {}", removing.getPos());
+            }
+            grid.removeNode(removing);
+            // Might be redundant, safe to do anyway.
+            for (AbstractGridNode<?> adjacentNode : adjacentNodes) {
+                simplifyNode(adjacentNode);
+            }
+        } else {
+            // We are a host without a node, on an edge.
+            EndpointPair<AbstractGridNode<?>> edge = grid.findEdge(hostPos);
+            assert edge != null : "Block does not lie on an edge.";
+            AbstractGridNode<?> a = getNodeOrSplitEdgeAndInsertNode(grid, stepTowards(hostPos, edge.nodeU().getPos()));
+            AbstractGridNode<?> b = getNodeOrSplitEdgeAndInsertNode(grid, stepTowards(hostPos, edge.nodeV().getPos()));
+            grid.nodeGraph.removeEdge(a, b); // Yeet edge.
+            if (DEBUG) {
+                LOGGER.info("Removing edge between: {} and {}", a.getPos(), b.getPos());
+            }
+
+            // Might be redundant, safe to do anyway.
+            simplifyNode(a);
+            simplifyNode(b);
         }
 
-        if (adjacentHosts.size() == 1) {
-            shrinkGrid(host, only(adjacentHosts.values()));
+        if (!grid.getNodes().isEmpty()) {
+            grid.onGridHostRemoved(host);
+            grid.onModified();
+            separateGrids(grid);
         } else {
-            removeNode(host, adjacentHosts);
-            separateGrids(host);
+            if (DEBUG) {
+                LOGGER.info("Removing grid for {}", host.getHostPos());
+            }
+
+            grids.remove(grid.getId());
+            loadedGrids.remove(grid.getId());
         }
     }
 
@@ -298,7 +337,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     public void onGridHostNeighborChanged(IGridHost host) {
 
         AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
-        assert grid != null;
 
         AbstractGridNode<?> node = (AbstractGridNode<?>) host.getNode();
         boolean canExternallyConnect = grid.canConnectExternally(host.getHostPos());
@@ -310,225 +348,110 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
         } else {
             if (canExternallyConnect) {
-                insertNode(grid, host.getHostPos(), host.getHostPos(), host);
+                getNodeOrSplitEdgeAndInsertNode(grid, host.getHostPos());
                 ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
             }
         }
     }
 
     @Override
-    public void onGridHostConnectabilityChanged(IGridHost host) {
-        // For each adjacent grid host:
-        // - If we are connected
-        //  - Can we stay connected?
-        //    - Disconnect
-        //      - Attempt to simplify both nodes.
-        //       - Does this split the grid?
-        //         - Perform grid split
-        // - If we aren't connected
-        //  - Can we connect?
-        //    - Connect
-        //     - Do we both have nodes?
-        //       - Generate
-        //     - Are we on the same grid?
-        //       - Merge grids
-        //     - Make connections
-        //     - Attempt to simplify nodes adjacent to each node.
+    public void onGridHostSideConnected(IGridHost host, Direction side) {
+        onSideConnectionChanged(host, side, false);
+    }
 
-        EnumMap<Direction, IGridHost> adjacentHosts = getAllAdjacentGrids(host);
-        for (Map.Entry<Direction, IGridHost> entry : adjacentHosts.entrySet()) {
-            Direction dir = entry.getKey();
-            IGridHost other = entry.getValue();
+    @Override
+    public void onGridHostSideDisconnecting(IGridHost host, Direction side) {
+        onSideConnectionChanged(host, side, true);
+    }
 
-            // In here as merge/split could change it.
-            AbstractGrid<?, ?> aGrid = (AbstractGrid<?, ?>) host.getGrid();
-            assert aGrid != null;
+    private void onSideConnectionChanged(IGridHost host, Direction changed, boolean disconnect) {
+        // Connection attempt:
+        // - Already connected?
+        //  - Yes? return.
+        // - Can hosts connect?
+        //  - No? return.
+        // - Connect:
+        //  - Split edges if required.
+        //  - Merge grids if they are different.
+        //  - Connect nodes.
 
-            AbstractGridNode<?> a = (AbstractGridNode<?>) host.getNode();
+        // Disconnection attempt:
+        // - Already disconnected?
+        //  - Yes? return.
+        // - Disconnect:
+        //  - Split edges if required.
+        //  - Disconnect nodes.
+        //  - Try splitting the grid.
 
-            AbstractGrid<?, ?> bGrid = (AbstractGrid<?, ?>) other.getGrid();
-            assert bGrid != null;
+        // Try and find adjacent grid host.
+        IGridHost other = getAllAdjacentGrids(host).get(changed);
+        if (other == null) return;
 
-            AbstractGridNode<?> b = (AbstractGridNode<?>) other.getNode();
+        // Grab grid and nodes either side of the split/join.
+        // If nodes don't exist, insert temporary nodes, these will be cleaned up later.
+        AbstractGrid<?, ?> aGrid = (AbstractGrid<?, ?>) host.getGrid();
+        AbstractGrid<?, ?> bGrid = (AbstractGrid<?, ?>) other.getGrid();
 
-            boolean gridsConnected = aGrid == bGrid;
-            boolean nodesConnected = gridsConnected && a != null && b != null && aGrid.nodeGraph.edgeValueOrDefault(a, b, null) != null;
-            boolean canConnect = host.canConnectTo(other, dir) && other.canConnectTo(host, dir.getOpposite());
-            if (nodesConnected == canConnect) {
-                continue; // Nothing to do.
+        // If edge being updated is already part of the grid
+        boolean connecting = !disconnect;
+        boolean nodesConnected = aGrid == bGrid && aGrid.isConnectedTo(host.getHostPos(), other.getHostPos());
+        if (connecting == nodesConnected) {
+            return; // Nothing to do.
+        }
+
+        if (connecting && (!host.canConnectTo(other, changed) || !other.canConnectTo(host, changed.getOpposite()))) {
+            return; // can't connect anyway
+        }
+
+        AbstractGridNode<?> a = getNodeOrSplitEdgeAndInsertNode(aGrid, host.getHostPos());
+        AbstractGridNode<?> b = getNodeOrSplitEdgeAndInsertNode(bGrid, other.getHostPos());
+
+        if (connecting) {
+            // Connect
+            if (DEBUG) {
+                LOGGER.info("Connecting nodes due to connectability change. A {}, B {}.", a.getPos(), b.getPos());
             }
-            if (nodesConnected) {
-                // Disconnect
-                if (DEBUG) {
-                    LOGGER.info("Disconnecting nodes due to connectability change. A {}, B {}.", a.getPos(), b.getPos());
-                }
-                aGrid.nodeGraph.removeEdge(a, b);
-                // Try and simplify both nodes.
-                simplifyNode(a);
-                simplifyNode(b);
-                // Try splitting.
-                separateGrids(host);
-            } else {
-                // Connect
-                if (DEBUG) {
-                    LOGGER.info("Connecting nodes due to connectability change. A {}, B {}.", a.getPos(), b.getPos());
-                }
 
-                // Try and create nodes for, if they don't exist. We may end up deleting these
-                // if the grids are different and merge, but, it's a worthy trade-off for now.
-                if (a == null) {
-                    a = insertNode(aGrid, host.getHostPos(), host.getHostPos(), host);
-                }
-                if (b == null) {
-                    b = insertNode(bGrid, other.getHostPos(), other.getHostPos(), other);
-                }
-
-                // Perform grid merge.
-                if (!gridsConnected) {
-                    mergeGrids(Arrays.asList(host, other));
-                    aGrid = (AbstractGrid<?, ?>) a.getGrid();
-                    // bGrid = (AbstractGrid<?, ?>) b.getGrid();
-                }
-                // Perform connection. (we know these are directly adjacent.)
-                aGrid.nodeGraph.putEdgeValue(a, b, new HashSet<>());
-
-                // Simplify all directly adjacent (in world) nodes of a (excluding b).
-                for (AbstractGridNode<?> adj : aGrid.nodeGraph.adjacentNodes(a)) {
-                    if (adj == b) continue;
-                    if (!aGrid.nodeGraph.edgeValue(a, adj).isEmpty()) continue;
-                    simplifyNode(adj);
-                }
-                // Simplify all directly adjacent (in world) nodes of b (excluding a)
-                for (AbstractGridNode<?> adj : aGrid.nodeGraph.adjacentNodes(b)) {
-                    if (adj == a) continue;
-                    if (!aGrid.nodeGraph.edgeValue(b, adj).isEmpty()) continue;
-                    simplifyNode(adj);
-                }
-                // Try and simplify A and B.
-                simplifyNode(a);
-                simplifyNode(b);
+            // Perform grid merge.
+            if (aGrid != bGrid) {
+                mergeGrids(Arrays.asList(host, other));
+                aGrid = (AbstractGrid<?, ?>) a.getGrid();
             }
+
+            // Perform connection. (we know these are directly adjacent.)
+            aGrid.nodeGraph.putEdgeValue(a, b, new HashSet<>());
+
+            // Simplify all directly adjacent (in world) nodes of a (excluding b).
+            for (AbstractGridNode<?> adj : aGrid.nodeGraph.adjacentNodes(a)) {
+                if (adj == b) continue;
+                if (aGrid.nodeGraph.edgeValue(a, adj).isPresent()) continue;
+                simplifyNode(adj);
+            }
+            // Simplify all directly adjacent (in world) nodes of b (excluding a)
+            for (AbstractGridNode<?> adj : aGrid.nodeGraph.adjacentNodes(b)) {
+                if (adj == a) continue;
+                if (aGrid.nodeGraph.edgeValue(b, adj).isPresent()) continue;
+                simplifyNode(adj);
+            }
+            // Try and simplify A and B.
+            simplifyNode(a);
+            simplifyNode(b);
             aGrid.onModified();
-        }
-    }
-
-    private void removeSingleGrid(IGridHost host) {
-
-        if (DEBUG) {
-            LOGGER.info("Removing grid for {}", host.getHostPos());
-        }
-        assert host.getExposedTypes().size() == 1; // TODO, multi grids.
-
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
-        assert grid != null;
-
-        assert grid.getNodes().size() == 1;
-        assert grid.getNodes().containsKey(host.getHostPos());
-        grids.remove(grid.getId());
-        loadedGrids.remove(grid.getId());
-        removeGridLookup(grid, host.getHostPos());
-    }
-
-    private void shrinkGrid(IGridHost host, IGridHost adjacent) {
-
-        AbstractGridNode<?> adjacentNode = (AbstractGridNode<?>) adjacent.getNode();
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) adjacent.getGrid();
-
-        assert grid != null; // All adjacent nodes should have a Grid when this method is called.
-        assert host.getGrid() == host.getGrid();
-
-        AbstractGridNode<?> currNode = (AbstractGridNode<?>) host.getNode();
-
-        removeGridLookup(grid, currNode.getPos());
-        if (adjacentNode == null) {
-            // We are removing a node which is not adjacent to another node.
-            // We must do the following:
-            // - Remove the current node.
-            // - Create a new node for our adjacent with path length decremented by one.
-            adjacentNode = grid.newNode(adjacent.getHostPos());
-
-            Set<AbstractGridNode<?>> edgeNodes = grid.nodeGraph.adjacentNodes(currNode);
-            AbstractGridNode<?> edge = only(edgeNodes);
-            Set<BlockPos> edgeValue = grid.nodeGraph.edgeValueOrDefault(edge, currNode, null);
-            assert edgeValue != null;
-            int preLen = edgeValue.size();
-            edgeValue.remove(adjacentNode.getPos());
-            grid.nodeGraph.putEdgeValue(adjacentNode, edge, edgeValue);
-            if (DEBUG) {
-                LOGGER.info("Removing dead end: Curr node: {}, Adjacent: {}, Edge: {}, Len: {}, New len: {}",
-                        currNode.getPos(),
-                        adjacentNode.getPos(),
-                        edge.getPos(),
-                        preLen,
-                        edgeValue.size()
-                );
-            }
-            grid.removeNode(currNode);
         } else {
-            // Nuke the current node
-            grid.removeNode(currNode);
-
-            // Attempt simplification on our single adjacent node.
-            simplifyNode(adjacentNode);
-        }
-        grid.onGridHostRemoved(host);
-        grid.onModified();
-    }
-
-    private void removeNode(IGridHost host, EnumMap<Direction, IGridHost> adjacentHosts) {
-        // We are removing a host which has a node, we need to:
-        // - Disconnect all connected edges.
-        // - Iterate all adjacent hosts
-        //  - If adjacent host has a node
-        //   - Check if the node can be removed simplifying the grid.
-        //  - If the adjacent host does not have a node.
-        //   - Always create a new node.
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
-        assert grid != null;
-
-        AbstractGridNode<?> removing = (AbstractGridNode<?>) host.getNode();
-
-        removeGridLookup(grid, host.getHostPos());
-        if (removing != null) {
-            // All we need to do is remove the node.
-
-            grid.removeNode(removing);
+            // Disconnect
             if (DEBUG) {
-                LOGGER.info("Removing node: {}", removing.getPos());
+                LOGGER.info("Disconnecting nodes due to connectability change. A {}, B {}.", a.getPos(), b.getPos());
             }
-        } else {
-            // We are a host without a node, between 2 nodes.
-            List<Pair<IGridNode<?>, Set<BlockPos>>> attached = GridHelper.locateAttachedNodes(world, host.getHostPos(), host.getHostPos(), host);
-            assert attached.size() == 2;
-            AbstractGridNode<?> a = (AbstractGridNode<?>) attached.get(0).getLeft();
-            AbstractGridNode<?> b = (AbstractGridNode<?>) attached.get(1).getLeft();
-            grid.nodeGraph.removeEdge(a, b); // Yeet edge.
-            if (DEBUG) {
-                LOGGER.info("Removing edge between: {} and {}", a.getPos(), b.getPos());
-            }
-        }
-
-        // Create/delete adjacent nodes if required
-        for (IGridHost adjHost : adjacentHosts.values()) {
-            AbstractGridNode<?> adjNode = (AbstractGridNode<?>) adjHost.getNode();
-            if (adjNode == null) {
-                // We always need to create a new node here.
-                Pair<IGridNode<?>, Set<BlockPos>> foundEdge = only(GridHelper.locateAttachedNodes(world, adjHost.getHostPos(), host.getHostPos(), host));
-                assert foundEdge != null;
-                AbstractGridNode<?> newNode = grid.newNode(adjHost.getHostPos());
-                AbstractGridNode<?> foundNode = (AbstractGridNode<?>) foundEdge.getLeft();
-                Set<BlockPos> foundNodeValue = foundEdge.getRight();
-                grid.nodeGraph.putEdgeValue(newNode, foundNode, foundNodeValue);
-                if (DEBUG) {
-                    LOGGER.info("Generating new node at {} with edge {} len {}", newNode.getPos(), foundNode.getPos(), foundNodeValue);
-                }
-            } else {
-                // Attempt to simplify the node.
-                simplifyNode(adjNode);
+            aGrid.nodeGraph.removeEdge(a, b);
+            // Try and simplify both nodes.
+            simplifyNode(a);
+            simplifyNode(b);
+            // Try splitting.
+            if (!separateGrids(aGrid)) {
+                // We didn't split, must fire grid events.
+                aGrid.onModified();
             }
         }
-        grid.onGridHostRemoved(host);
-        grid.onModified();
     }
 
     private void simplifyNode(AbstractGridNode<?> node) {
@@ -571,14 +494,11 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         }
     }
 
-    private void separateGrids(IGridHost host) {
-
-        AbstractGrid<?, ?> grid = (AbstractGrid<?, ?>) host.getGrid();
-        assert grid != null;
+    private boolean separateGrids(AbstractGrid<?, ?> grid) {
 
         // Generate the grid nodes isolated from each other.
         List<Set<AbstractGridNode<?>>> splitGraphs = GraphHelper.separateGraphs(grid.nodeGraph);
-        if (splitGraphs.size() <= 1) return;
+        if (splitGraphs.size() <= 1) return false;
 
         if (DEBUG) {
             LOGGER.info("Splitting grid into {} segments.", splitGraphs.size());
@@ -591,6 +511,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         }
         grids.remove(grid.getId());
         loadedGrids.remove(grid.getId());
+        return true;
     }
 
     // region EVENT CALLBACKS
@@ -821,6 +742,15 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         if (x && z) return true; // Y axis
         if (y && z) return true; // X axis
         return x && y && z; // Handle no match, or same block.
+    }
+
+    private static BlockPos stepTowards(BlockPos from, BlockPos towards) {
+
+        assert isOnSameAxis(from, towards) : "Not on the same axis";
+        Direction dir = BlockHelper.getSide(towards.subtract(from));
+        assert dir != null : "Not on the same axis??";
+
+        return from.relative(dir);
     }
     // endregion
 

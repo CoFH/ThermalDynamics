@@ -84,6 +84,8 @@ public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdate
     @Override
     public FriendlyByteBuf getStatePacket(FriendlyByteBuf buffer) {
 
+        super.getStatePacket(buffer);
+
         renderFluid = ((FluidGrid) getGrid()).getRenderFluid();
         buffer.writeFluidStack(renderFluid);
 
@@ -92,6 +94,8 @@ public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdate
 
     @Override
     public void handleStatePacket(FriendlyByteBuf buffer) {
+
+        super.handleStatePacket(buffer);
 
         renderFluid = buffer.readFluidStack();
 

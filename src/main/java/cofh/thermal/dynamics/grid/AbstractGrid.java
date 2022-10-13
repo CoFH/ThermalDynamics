@@ -17,6 +17,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.util.INBTSerializable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.LongFunction;
@@ -330,7 +331,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                 positionCollector.collectPosition(pos.immutable());
             }
             // Insert edge and value.
-            nodeGraph.putEdgeValue(a, b, other.nodeGraph.edgeValueOrDefault(a, b, null));
+            nodeGraph.putEdgeValue(a, b, requireNonNull(other.nodeGraph.edgeValueOrDefault(a, b, null)));
         }
         other.nodeGraph.nodes().forEach(e -> positionCollector.collectPosition(e.getPos()));
 
@@ -471,6 +472,35 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         if (host instanceof IGridHostUpdateable) {
             updatableHosts.remove(host.getHostPos());
         }
+    }
+
+    @Nullable
+    public final EndpointPair<AbstractGridNode<?>> findEdge(BlockPos pos) {
+        for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
+            if (nodeGraph.edgeValueOrDefault(edge, null).contains(pos)) {
+                return edge;
+            }
+        }
+        return null;
+    }
+
+    public final boolean isConnectedTo(BlockPos a, BlockPos b) {
+        AbstractGridNode<?> aNode = nodes.get(a);
+        AbstractGridNode<?> bNode = nodes.get(b);
+        if (aNode != null && bNode != null) {
+            return nodeGraph.hasEdgeConnecting(aNode, bNode);
+        }
+        if (aNode == null && bNode == null) {
+            return nodeGraph.edgeValueOrDefault(requireNonNull(findEdge(a)), null).contains(b);
+        }
+        AbstractGridNode<?> node = aNode != null ? aNode : bNode;
+        BlockPos pos = aNode != null ? b : a;
+        for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.incidentEdges(node)) {
+            if (nodeGraph.edgeValueOrDefault(edge, null).contains(pos)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //@formatter:off

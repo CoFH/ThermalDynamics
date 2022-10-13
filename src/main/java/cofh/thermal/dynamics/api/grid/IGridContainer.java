@@ -2,6 +2,7 @@ package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.TDynApi;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
@@ -27,7 +28,25 @@ public interface IGridContainer {
 
     void onGridHostNeighborChanged(IGridHost host);
 
-    void onGridHostConnectabilityChanged(IGridHost host);
+    /**
+     * Connect the grid host side.
+     * <p>
+     * Requires that any modifications to exposed connection state happen before this call.
+     *
+     * @param host The host to connect.
+     * @param side The side to connect.
+     */
+    void onGridHostSideConnected(IGridHost host, Direction side);
+
+    /**
+     * Disconnect the grid host side.
+     * <p>
+     * Requires that any modifications to exposed connection state happens after this call.
+     *
+     * @param host The host to disconnect.
+     * @param side The side to disconnect.
+     */
+    void onGridHostSideDisconnecting(IGridHost host, Direction side);
 
     static Optional<IGridContainer> getCapability(LevelAccessor la) {
 

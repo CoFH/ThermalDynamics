@@ -1,5 +1,7 @@
 package cofh.thermal.dynamics.block.entity;
 
+import cofh.core.network.packet.client.TileStatePacket;
+import cofh.lib.api.block.entity.IPacketHandlerTile;
 import cofh.lib.api.block.entity.ITileLocation;
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
@@ -9,6 +11,7 @@ import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,10 +26,11 @@ import java.util.Optional;
 
 import static cofh.lib.util.constants.NBTTags.TAG_SIDES;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.ALLOWED;
+import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
 import static java.util.Objects.requireNonNull;
 import static net.covers1624.quack.util.SneakyUtils.notPossible;
 
-public abstract class DuctTileBase extends BlockEntity implements ITileLocation, IGridHost {
+public abstract class DuctTileBase extends BlockEntity implements ITileLocation, IGridHost, IPacketHandlerTile {
 
     // Only available server side.
     @Nullable
@@ -48,10 +52,16 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         if (adjacentOpt.isPresent()) {
             System.out.println("Attempt to connect to DUCT on: " + dir);
             // TODO: Enable
-            // connections[dir.ordinal()] = ALLOWED;
+             connections[dir.ordinal()] = ALLOWED;
             // TODO: Enable other
 
-            IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostConnectabilityChanged(this));
+            IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostSideConnected(this, dir));
+
+            setChanged();
+
+            TileStatePacket.sendToClient(this);
+            // TODO we can probably do this in the packet handler, adjacent ducts dont disconnect otherwise.
+            TileStatePacket.sendToClient((IPacketHandlerTile) adjacentOpt.get());
         } else {
             System.out.println("Attempt to connect to BLOCK on: " + dir);
         }
@@ -63,11 +73,17 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         Optional<IGridHost> adjacentOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
         if (adjacentOpt.isPresent()) {
             System.out.println("Attempt to sever DUCT connection on: " + dir);
+
+            IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostSideDisconnecting(this, dir));
+
             // TODO: Disable
-            // connections[dir.ordinal()] = DISABLED;
+            connections[dir.ordinal()] = DISABLED;
+            setChanged();
             // TODO: Disable other
 
-            IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostConnectabilityChanged(this));
+            TileStatePacket.sendToClient(this);
+            // TODO we can probably do this in the packet handler, adjacent ducts dont disconnect otherwise.
+            TileStatePacket.sendToClient((IPacketHandlerTile) adjacentOpt.get());
         } else {
             System.out.println("Attempt to sever BLOCK connection on: " + dir);
         }
@@ -113,12 +129,18 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
     }
 
     // region NBT
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        return saveWithoutMetadata();
+    }
+
     @Override
     public void load(CompoundTag tag) {
 
         super.load(tag);
 
-        byte[] bConn = serializeNBT().getByteArray(TAG_SIDES);
+        byte[] bConn = tag.getByteArray(TAG_SIDES);
         if (bConn.length == 6) {
             for (int i = 0; i < 6; ++i) {
                 connections[i] = ConnectionType.VALUES[bConn[i]];
@@ -161,8 +183,9 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         if (grid == null) {
             IGridContainer gridContainer = IGridContainer.getCapability(level)
                     .orElseThrow(notPossible());
-            grid = requireNonNull(gridContainer.getGrid(getBlockPos()));
+            grid = gridContainer.getGrid(getBlockPos());
         }
+        assert grid != null;
         return grid;
     }
 
@@ -207,4 +230,25 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         return level;
     }
     // endregion
+
+    // region STATE
+
+    @Override
+    public FriendlyByteBuf getStatePacket(FriendlyByteBuf buffer) {
+
+        for (ConnectionType connection : connections) {
+            buffer.writeByte(connection.ordinal());
+        }
+
+        return buffer;
+    }
+
+    @Override
+    public void handleStatePacket(FriendlyByteBuf buffer) {
+
+        for (int i = 0; i < 6; i++) {
+            connections[i] = ConnectionType.VALUES[buffer.readByte()];
+        }
+        requestModelDataUpdate();
+    }
 }

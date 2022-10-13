@@ -9,9 +9,11 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Represents an object capable of hosting a {@link IGrid}.
@@ -35,7 +37,6 @@ public interface IGridHost {
      *
      * @return The raw grid.
      */
-    @Nullable
     IGrid<?, ?> getGrid();
 
     void setGrid(IGrid<?, ?> grid);
@@ -50,9 +51,7 @@ public interface IGridHost {
     @Nullable
     default IGridNode<?> getNode() {
 
-        IGrid<?, ?> grid = getGrid();
-        if (grid == null) return null;
-        return grid.getNodes().get(getHostPos());
+        return getGrid().getNodes().get(getHostPos());
     }
 
     /**
