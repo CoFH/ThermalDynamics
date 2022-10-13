@@ -43,7 +43,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
      * <p>
      * The value object being the path length.
      */
-    public final MutableValueGraph<AbstractGridNode<?>, Set<BlockPos>> nodeGraph = ValueGraphBuilder
+    public final MutableGraph<AbstractGridNode<?>> nodeGraph = GraphBuilder
             .undirected()
             .nodeOrder(ElementOrder.unordered())
             .build();
@@ -99,12 +99,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
             AbstractGridNode<?> u = edge.nodeU();
             AbstractGridNode<?> v = edge.nodeV();
-            Set<BlockPos> between = GridHelper.getPositionsBetween(u.getPos(), v.getPos());
-            Set<BlockPos> value = nodeGraph.edgeValueOrDefault(u, v, null);
-            assert value != null;
-            assert value.size() == between.size();
-            assert value.containsAll(between);
-            for (BlockPos pos : between) {
+            for (BlockPos pos : GridHelper.positionsBetween(u.getPos(), v.getPos())) {
                 checkPos(pos, gridContainer);
             }
         }
@@ -201,11 +196,6 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             CompoundTag edgeTag = new CompoundTag();
             edgeTag.put("U", NbtUtils.writeBlockPos(edge.nodeU().getPos()));
             edgeTag.put("V", NbtUtils.writeBlockPos(edge.nodeV().getPos()));
-            ListTag valueTag = new ListTag();
-            for (BlockPos pos : requireNonNull(nodeGraph.edgeValueOrDefault(edge.nodeU(), edge.nodeV(), null))) {
-                valueTag.add(NbtUtils.writeBlockPos(pos));
-            }
-            edgeTag.put("value", valueTag);
             edges.add(edgeTag);
         }
         tag.put("edges", edges);
@@ -238,12 +228,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             CompoundTag edgeTag = edges.getCompound(i);
             BlockPos uPos = NbtUtils.readBlockPos(edgeTag.getCompound("U"));
             BlockPos vPos = NbtUtils.readBlockPos(edgeTag.getCompound("V"));
-            Set<BlockPos> value = new HashSet<>();
-            ListTag valueTag = edgeTag.getList("value", 10);
-            for (int j = 0; j < valueTag.size(); ++j) {
-                value.add(NbtUtils.readBlockPos(valueTag.getCompound(j)));
-            }
-            nodeGraph.putEdgeValue(this.nodes.get(uPos), this.nodes.get(vPos), value);
+            nodeGraph.putEdge(this.nodes.get(uPos), this.nodes.get(vPos));
         }
         ListTag updateable = nbt.getList("updateable", 10);
         for (int i = 0; i < updateable.size(); ++i) {
@@ -331,7 +316,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                 positionCollector.collectPosition(pos.immutable());
             }
             // Insert edge and value.
-            nodeGraph.putEdgeValue(a, b, requireNonNull(other.nodeGraph.edgeValueOrDefault(a, b, null)));
+            nodeGraph.putEdge(a, b);
         }
         other.nodeGraph.nodes().forEach(e -> positionCollector.collectPosition(e.getPos()));
 
@@ -373,7 +358,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                         positionCollector.collectPosition(pos.immutable());
                     }
                     // Put edge value in new grid.
-                    newGrid.nodeGraph.putEdgeValue(node, adj, requireNonNull(nodeGraph.edgeValueOrDefault(node, adj, null)));
+                    newGrid.nodeGraph.putEdge(node, adj);
                 }
             }
             // Update all hosts within the new grid of the change.
@@ -477,7 +462,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     @Nullable
     public final EndpointPair<AbstractGridNode<?>> findEdge(BlockPos pos) {
         for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
-            if (nodeGraph.edgeValueOrDefault(edge, null).contains(pos)) {
+            if (isOnEdge(pos, edge)) {
                 return edge;
             }
         }
@@ -491,12 +476,12 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             return nodeGraph.hasEdgeConnecting(aNode, bNode);
         }
         if (aNode == null && bNode == null) {
-            return nodeGraph.edgeValueOrDefault(requireNonNull(findEdge(a)), null).contains(b);
+            return isOnEdge(b, requireNonNull(findEdge(a)));
         }
         AbstractGridNode<?> node = aNode != null ? aNode : bNode;
         BlockPos pos = aNode != null ? b : a;
         for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.incidentEdges(node)) {
-            if (nodeGraph.edgeValueOrDefault(edge, null).contains(pos)) {
+            if (isOnEdge(pos, edge)) {
                 return true;
             }
         }
@@ -509,6 +494,10 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     @Override public IGridType<G> getGridType() { return gridType; }
     @Override public final Map<BlockPos, N> getNodes() { return unsafeCast(nodes); }
     //@formatter:on
+
+    private static boolean isOnEdge(BlockPos pos, EndpointPair<AbstractGridNode<?>> edge) {
+        return GridHelper.isOnEdge(pos, edge.nodeU().getPos(), edge.nodeV().getPos());
+    }
 
     private List<AbstractGridNode<?>> getNodesForChunk(BlockPos pos) {
 

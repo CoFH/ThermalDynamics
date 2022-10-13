@@ -15,38 +15,6 @@ import java.util.Set;
 public class GraphHelper {
 
     /**
-     * Checks if <code>a</code> and <code>b</code> have indirect connectivity through the {@link Graph}.
-     * <p>
-     * This function will use object identity in order to identify <code>b</code> node.
-     *
-     * @param graph The graph to check.
-     * @param a     The first node.
-     * @param b     The second node.
-     * @return If <code>a</code> and <code>b</code> are connected indirectly.
-     */
-    public static <T> boolean hasConnectivity(ValueGraph<T, ?> graph, T a, T b) {
-
-        HashSet<T> seen = new HashSet<>();
-        LinkedList<T> queue = new LinkedList<>();
-        for (T adj : graph.adjacentNodes(a)) {
-            // Ignore direct edge between a - b.
-            if (adj == b || !seen.add(adj)) continue;
-            queue.add(adj);
-        }
-        while (!queue.isEmpty()) {
-            T t = queue.poll();
-            // We found the edge!
-            if (t == b) return true;
-            for (T adj : graph.adjacentNodes(t)) {
-                if (seen.add(adj)) {
-                    queue.add(adj);
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Extracts a list of sub graphs from the given {@link Graph}.
      * <p>
      * A sub-graph is identified by a set of nodes which don't have any edges
@@ -55,7 +23,7 @@ public class GraphHelper {
      * @param graph The {@link Graph}
      * @return A list of isolated sub graphs.
      */
-    public static <T> List<Set<T>> separateGraphs(ValueGraph<T, ?> graph) {
+    public static <T> List<Set<T>> separateGraphs(Graph<T> graph) {
 
         Set<T> seen = new HashSet<>();
         LinkedList<T> stack = new LinkedList<>();

@@ -1,17 +1,14 @@
 package cofh.thermal.dynamics.api.helper;
 
+import cofh.lib.util.helpers.BlockHelper;
 import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridHost;
-import cofh.thermal.dynamics.api.grid.IGridNode;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -61,66 +58,76 @@ public class GridHelper {
     }
 
     /**
-     * Locate all {@link IGridNode GridNodes} attached to the given {@link BlockPos}.
-     *
-     * @param world  The {@link Level} to search in.
-     * @param start  The {@link BlockPos} to start scanning from.
-     * @param from   The {@link BlockPos} to ignore. Usually the adjacent block which is performing this check.
-     * @param origin Found grid hosts must be connectable to this host.
-     * @return The attached {@link IGridNode GridNodes} and the {@link BlockPos positions} between <code>start</code>
-     * and the found {@link IGridNode}.
+     * Returns an exclusive iterator which iterates all positions between {@code a} and {@code b}.
      */
-    public static List<Pair<IGridNode<?>, Set<BlockPos>>> locateAttachedNodes(Level world, BlockPos start, BlockPos from, IGridHost origin) {
+    public static Iterable<BlockPos> positionsBetween(BlockPos a, BlockPos b) {
+        assert isOnSameAxis(a, b);
+        Direction dir = BlockHelper.getSide(b.subtract(a));
+        assert dir != null : "Not on the same axis??";
 
-        Set<BlockPos> visited = new HashSet<>();
-        LinkedList<IGridHost> candidates = new LinkedList<>();
-        visited.add(start);
-        visited.add(from);
-        addCandidates(world, start, origin, visited, candidates);
-        ImmutableList.Builder<Pair<IGridNode<?>, Set<BlockPos>>> builder = ImmutableList.builder();
-        while (!candidates.isEmpty()) {
-            IGridHost host = candidates.pop();
+        return () -> new Iterator<>() {
+            BlockPos curr = a.relative(dir);
 
-            IGridNode<?> node = host.getNode();
-            if (node != null) {
-                builder.add(Pair.of(node, getPositionsBetween(start, host.getHostPos())));
-            } else {
-                addCandidates(world, host.getHostPos(), host, visited, candidates);
+            @Override
+            public boolean hasNext() {
+                return !curr.equals(b);
             }
-        }
-        return builder.build();
-    }
 
-    private static void addCandidates(Level world, BlockPos pos, IGridHost origin, Set<BlockPos> visited, LinkedList<IGridHost> candidates) {
-
-        for (Direction dir : Direction.values()) {
-            BlockPos adj = pos.relative(dir);
-            if (!visited.add(adj)) continue;
-            GridHelper.getGridHost(world, adj)
-                    .filter(other -> origin.canConnectTo(other, dir) && other.canConnectTo(origin, dir.getOpposite()))
-                    .ifPresent(candidates::add);
-        }
+            @Override
+            public BlockPos next() {
+                BlockPos ret = curr;
+                curr = curr.relative(dir);
+                return ret;
+            }
+        };
     }
 
     /**
-     * Gets all BlockPositions between <code>a</code> and <code>b</code>
-     * excluding <code>a</code> and <code>b</code>.
-     *
-     * @param a The first position.
-     * @param b The second position.
-     * @return The contained blocks.
+     * @return The number of blocks between the 2 positions. If a and b are adjacent, 0
      */
-    // TODO Move to Core, somewhere.
-    public static Set<BlockPos> getPositionsBetween(BlockPos a, BlockPos b) {
+    public static int numBetween(BlockPos a, BlockPos b) {
+        assert isOnSameAxis(a, b);
 
-        Set<BlockPos> positions = new HashSet<>();
-        for (BlockPos pos : BlockPos.betweenClosed(a, b)) {
-            positions.add(pos.immutable());
-        }
-        positions.remove(a);
-        positions.remove(b);
+        return Math.abs(a.getX() - b.getX()) + Math.abs(a.getY() - b.getY()) + Math.abs(a.getZ() - b.getZ()) - 1;
+    }
 
-        return positions;
+    /**
+     * @return If {@code middle} is between {@code a} and {@code b} on the same axis.
+     */
+    public static boolean isOnEdge(BlockPos middle, BlockPos a, BlockPos b) {
+
+        // Check if middle is between a and b.
+        assert isOnSameAxis(a, b);
+        if (a.getX() != b.getX()) return middle.getY() == a.getY() && middle.getZ() == a.getZ() && betweenExclusive(middle.getX(), a.getX(), b.getX());
+        if (a.getY() != b.getY()) return middle.getZ() == a.getZ() && middle.getX() == a.getX() && betweenExclusive(middle.getY(), a.getY(), b.getY());
+        if (a.getZ() != b.getZ()) return middle.getX() == a.getX() && middle.getY() == a.getY() && betweenExclusive(middle.getZ(), a.getZ(), b.getZ());
+
+        throw new IllegalArgumentException("A == B");
+    }
+
+    private static boolean betweenExclusive(int v, int a, int b) {
+
+        return a < b ? a < v && v < b : b < v && v < a;
+    }
+
+    public static boolean isOnSameAxis(BlockPos a, BlockPos b) {
+
+        boolean x = a.getX() == b.getX();
+        boolean y = a.getY() == b.getY();
+        boolean z = a.getZ() == b.getZ();
+        if (x && y) return true; // Z axis or same block
+        if (x && z) return true; // Y axis
+        if (y && z) return true; // X axis
+        return false; // no axis
+    }
+
+    public static BlockPos stepTowards(BlockPos from, BlockPos towards) {
+
+        assert isOnSameAxis(from, towards) : "Not on the same axis";
+        Direction dir = BlockHelper.getSide(towards.subtract(from));
+        assert dir != null : "Not on the same axis??";
+
+        return from.relative(dir);
     }
 
 }
