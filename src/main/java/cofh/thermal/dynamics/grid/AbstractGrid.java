@@ -461,6 +461,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
     @Nullable
     public final EndpointPair<AbstractGridNode<?>> findEdge(BlockPos pos) {
+
         for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
             if (isOnEdge(pos, edge)) {
                 return edge;
@@ -470,6 +471,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     }
 
     public final boolean isConnectedTo(BlockPos a, BlockPos b) {
+
         AbstractGridNode<?> aNode = nodes.get(a);
         AbstractGridNode<?> bNode = nodes.get(b);
         if (aNode != null && bNode != null) {
@@ -496,6 +498,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     //@formatter:on
 
     private static boolean isOnEdge(BlockPos pos, EndpointPair<AbstractGridNode<?>> edge) {
+
         return GridHelper.isOnEdge(pos, edge.nodeU().getPos(), edge.nodeV().getPos());
     }
 

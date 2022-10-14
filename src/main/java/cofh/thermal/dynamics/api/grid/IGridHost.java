@@ -13,8 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Represents an object capable of hosting a {@link IGrid}.
  * <p>

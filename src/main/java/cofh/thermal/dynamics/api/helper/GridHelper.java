@@ -11,7 +11,8 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * Contains helper methods for interacting with {@link IGrid Grids} in world.
@@ -61,6 +62,7 @@ public class GridHelper {
      * Returns an exclusive iterator which iterates all positions between {@code a} and {@code b}.
      */
     public static Iterable<BlockPos> positionsBetween(BlockPos a, BlockPos b) {
+
         assert isOnSameAxis(a, b);
         Direction dir = BlockHelper.getSide(b.subtract(a));
         assert dir != null : "Not on the same axis??";
@@ -70,11 +72,13 @@ public class GridHelper {
 
             @Override
             public boolean hasNext() {
+
                 return !curr.equals(b);
             }
 
             @Override
             public BlockPos next() {
+
                 BlockPos ret = curr;
                 curr = curr.relative(dir);
                 return ret;
@@ -86,6 +90,7 @@ public class GridHelper {
      * @return The number of blocks between the 2 positions. If a and b are adjacent, 0
      */
     public static int numBetween(BlockPos a, BlockPos b) {
+
         assert isOnSameAxis(a, b);
 
         return Math.abs(a.getX() - b.getX()) + Math.abs(a.getY() - b.getY()) + Math.abs(a.getZ() - b.getZ()) - 1;
@@ -98,9 +103,12 @@ public class GridHelper {
 
         // Check if middle is between a and b.
         assert isOnSameAxis(a, b);
-        if (a.getX() != b.getX()) return middle.getY() == a.getY() && middle.getZ() == a.getZ() && betweenExclusive(middle.getX(), a.getX(), b.getX());
-        if (a.getY() != b.getY()) return middle.getZ() == a.getZ() && middle.getX() == a.getX() && betweenExclusive(middle.getY(), a.getY(), b.getY());
-        if (a.getZ() != b.getZ()) return middle.getX() == a.getX() && middle.getY() == a.getY() && betweenExclusive(middle.getZ(), a.getZ(), b.getZ());
+        if (a.getX() != b.getX())
+            return middle.getY() == a.getY() && middle.getZ() == a.getZ() && betweenExclusive(middle.getX(), a.getX(), b.getX());
+        if (a.getY() != b.getY())
+            return middle.getZ() == a.getZ() && middle.getX() == a.getX() && betweenExclusive(middle.getY(), a.getY(), b.getY());
+        if (a.getZ() != b.getZ())
+            return middle.getX() == a.getX() && middle.getY() == a.getY() && betweenExclusive(middle.getZ(), a.getZ(), b.getZ());
 
         throw new IllegalArgumentException("A == B");
     }

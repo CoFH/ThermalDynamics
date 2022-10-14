@@ -1,7 +1,6 @@
 package cofh.thermal.dynamics.handler;
 
 import com.google.common.graph.Graph;
-import com.google.common.graph.ValueGraph;
 
 import java.util.HashSet;
 import java.util.LinkedList;

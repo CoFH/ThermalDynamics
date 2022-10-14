@@ -27,7 +27,6 @@ import java.util.Optional;
 import static cofh.lib.util.constants.NBTTags.TAG_SIDES;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.ALLOWED;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
-import static java.util.Objects.requireNonNull;
 import static net.covers1624.quack.util.SneakyUtils.notPossible;
 
 public abstract class DuctTileBase extends BlockEntity implements ITileLocation, IGridHost, IPacketHandlerTile {
@@ -49,21 +48,23 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
     public boolean attemptConnect(Direction dir) {
 
         Optional<IGridHost> adjacentOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
-        if (adjacentOpt.isPresent()) {
-            System.out.println("Attempt to connect to DUCT on: " + dir);
-            // TODO: Enable
-             connections[dir.ordinal()] = ALLOWED;
-            // TODO: Enable other
+        if (adjacentOpt.isPresent() && adjacentOpt.get() instanceof DuctTileBase other) {
+            connections[dir.ordinal()] = ALLOWED;
+            other.connections[dir.getOpposite().ordinal()] = ALLOWED;
 
             IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostSideConnected(this, dir));
 
             setChanged();
+            other.setChanged();
 
             TileStatePacket.sendToClient(this);
-            // TODO we can probably do this in the packet handler, adjacent ducts dont disconnect otherwise.
-            TileStatePacket.sendToClient((IPacketHandlerTile) adjacentOpt.get());
+            TileStatePacket.sendToClient(other);
         } else {
             System.out.println("Attempt to connect to BLOCK on: " + dir);
+            connections[dir.ordinal()] = ALLOWED;
+            setChanged();
+            callNeighborStateChange();
+            TileStatePacket.sendToClient(this);
         }
         return false;
     }
@@ -71,34 +72,36 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
     public boolean attemptDisconnect(Direction dir) {
 
         Optional<IGridHost> adjacentOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
-        if (adjacentOpt.isPresent()) {
-            System.out.println("Attempt to sever DUCT connection on: " + dir);
-
+        if (adjacentOpt.isPresent() && adjacentOpt.get() instanceof DuctTileBase other) {
             IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostSideDisconnecting(this, dir));
 
-            // TODO: Disable
             connections[dir.ordinal()] = DISABLED;
+            other.connections[dir.getOpposite().ordinal()] = DISABLED;
+
             setChanged();
-            // TODO: Disable other
+            other.setChanged();
 
             TileStatePacket.sendToClient(this);
-            // TODO we can probably do this in the packet handler, adjacent ducts dont disconnect otherwise.
-            TileStatePacket.sendToClient((IPacketHandlerTile) adjacentOpt.get());
+            TileStatePacket.sendToClient(other);
         } else {
             System.out.println("Attempt to sever BLOCK connection on: " + dir);
+            connections[dir.ordinal()] = DISABLED;
+            setChanged();
+            callNeighborStateChange();
+            TileStatePacket.sendToClient(this);
         }
         return false;
     }
 
-    protected void attemptConnectInternal(Direction dir) {
+    protected void callNeighborStateChange() {
 
+        if (level == null) {
+            return;
+        }
+        level.updateNeighborsAt(pos(), block());
     }
 
-    protected void attemptDisconnectInternal(Direction dir) {
-
-    }
-
-    protected abstract boolean canConnect(Direction dir);
+    protected abstract boolean canConnectToBlock(Direction dir);
 
     public void requestModelDataUpdate() {
 
@@ -121,7 +124,7 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
                 } else {
                     modelData.setInternalConnection(dir, false);
                 }
-                modelData.setExternalConnection(dir, canConnect(dir));
+                modelData.setExternalConnection(dir, canConnectToBlock(dir));
             }
             modelUpdate = false;
         }
@@ -132,6 +135,7 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
 
     @Override
     public CompoundTag getUpdateTag() {
+
         return saveWithoutMetadata();
     }
 
@@ -251,4 +255,5 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         }
         requestModelDataUpdate();
     }
+
 }

@@ -1,7 +1,6 @@
 package cofh.thermal.dynamics.handler;
 
 import cofh.core.network.packet.client.ModelUpdatePacket;
-import cofh.lib.util.helpers.BlockHelper;
 import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
@@ -34,7 +33,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static cofh.thermal.dynamics.api.helper.GridHelper.*;
-import static java.util.Objects.requireNonNull;
 import static net.covers1624.quack.collection.ColUtils.onlyOrDefault;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
@@ -174,6 +172,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
      * @return The existing node, or the new node at the position.
      */
     private AbstractGridNode<?> getNodeOrSplitEdgeAndInsertNode(AbstractGrid<?, ?> grid, BlockPos pos) {
+
         AbstractGridNode<?> existing = (AbstractGridNode<?>) grid.getNodes().get(pos);
         if (existing != null) return existing;
 
@@ -350,11 +349,13 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
     @Override
     public void onGridHostSideConnected(IGridHost host, Direction side) {
+
         onSideConnectionChanged(host, side, false);
     }
 
     @Override
     public void onGridHostSideDisconnecting(IGridHost host, Direction side) {
+
         onSideConnectionChanged(host, side, true);
     }
 
