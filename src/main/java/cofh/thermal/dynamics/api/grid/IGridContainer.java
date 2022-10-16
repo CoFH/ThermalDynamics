@@ -1,6 +1,7 @@
 package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.TDynApi;
+import cofh.thermal.dynamics.grid.Grid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -17,10 +18,10 @@ import java.util.UUID;
 public interface IGridContainer {
 
     @Nullable
-    IGrid<?, ?> getGrid(UUID id);
+    Grid<?, ?> getGrid(UUID id);
 
     @Nullable
-    IGrid<?, ?> getGrid(BlockPos pos);
+    Grid<?, ?> getGrid(BlockPos pos);
 
     void onGridHostPlaced(IGridHost host);
 

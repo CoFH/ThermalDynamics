@@ -2,8 +2,8 @@ package cofh.thermal.dynamics.api.helper;
 
 import cofh.lib.util.helpers.BlockHelper;
 import cofh.thermal.dynamics.api.TDynApi;
-import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.grid.Grid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.Optional;
 
 /**
- * Contains helper methods for interacting with {@link IGrid Grids} in world.
+ * Contains helper methods for interacting with {@link Grid Grids} in world.
  *
  * @author covers1624
  */

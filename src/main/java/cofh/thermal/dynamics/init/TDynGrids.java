@@ -1,8 +1,6 @@
 package cofh.thermal.dynamics.init;
 
 import cofh.thermal.dynamics.api.grid.IGridType;
-import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
-import cofh.thermal.dynamics.api.grid.fluid.IFluidGrid;
 import cofh.thermal.dynamics.grid.energy.EnergyGrid;
 import cofh.thermal.dynamics.grid.fluid.FluidGrid;
 import net.minecraftforge.registries.RegistryObject;
@@ -21,7 +19,7 @@ public class TDynGrids {
 
     }
 
-    public static final RegistryObject<IGridType<IEnergyGrid>> GRID_ENERGY = GRIDS.register(ID_ENERGY_GRID, () -> IGridType.of(IEnergyGrid.class, EnergyGrid::new));
-    public static final RegistryObject<IGridType<IFluidGrid>> GRID_FLUID = GRIDS.register(ID_FLUID_GRID, () -> IGridType.of(IFluidGrid.class, FluidGrid::new));
+    public static final RegistryObject<IGridType<EnergyGrid>> GRID_ENERGY = GRIDS.register(ID_ENERGY_GRID, () -> IGridType.of(EnergyGrid::new));
+    public static final RegistryObject<IGridType<FluidGrid>> GRID_FLUID = GRIDS.register(ID_FLUID_GRID, () -> IGridType.of(FluidGrid::new));
 
 }

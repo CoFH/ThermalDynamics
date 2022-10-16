@@ -3,11 +3,11 @@ package cofh.thermal.dynamics.block.entity;
 import cofh.core.network.packet.client.TileStatePacket;
 import cofh.lib.api.block.entity.IPacketHandlerTile;
 import cofh.lib.api.block.entity.ITileLocation;
-import cofh.thermal.dynamics.api.grid.IGrid;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
+import cofh.thermal.dynamics.grid.Grid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -33,7 +33,7 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
 
     // Only available server side.
     @Nullable
-    protected IGrid<?, ?> grid = null;
+    protected Grid<?, ?> grid = null;
 
     protected ConnectionType[] connections = {ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED};
 
@@ -179,7 +179,7 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
     }
 
     @Override
-    public IGrid<?, ?> getGrid() {
+    public Grid<?, ?> getGrid() {
 
         if (level.isClientSide) {
             throw new UnsupportedOperationException("No grid representation on client.");
@@ -194,7 +194,7 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
     }
 
     @Override
-    public void setGrid(IGrid<?, ?> grid) {
+    public void setGrid(Grid<?, ?> grid) {
 
         if (level.isClientSide) {
             throw new UnsupportedOperationException("No grid representation on client.");

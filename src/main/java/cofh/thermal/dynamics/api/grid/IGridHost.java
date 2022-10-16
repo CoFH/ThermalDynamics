@@ -1,8 +1,8 @@
 package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.TDynApi;
-import cofh.thermal.dynamics.api.grid.multi.IMultiGrid;
-import cofh.thermal.dynamics.api.grid.multi.IMultiGridNode;
+import cofh.thermal.dynamics.grid.Grid;
+import cofh.thermal.dynamics.grid.GridNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 /**
- * Represents an object capable of hosting a {@link IGrid}.
+ * Represents an object capable of hosting a {@link Grid}.
  * <p>
  * These are usually {@link BlockEntity} instances.
  * <p>
@@ -31,40 +31,38 @@ public interface IGridHost {
     BlockPos getHostPos();
 
     /**
-     * Gets the raw {@link IGrid} hosted by this {@link IGridHost}.
+     * Gets the raw {@link Grid} hosted by this {@link IGridHost}.
      *
      * @return The raw grid.
      */
-    IGrid<?, ?> getGrid();
+    Grid<?, ?> getGrid();
 
-    void setGrid(IGrid<?, ?> grid);
+    void setGrid(Grid<?, ?> grid);
 
     Set<IGridType<?>> getExposedTypes();
 
     /**
-     * Gets the {@link IGridNode} hosted by this grid host.
+     * Gets the {@link GridNode} hosted by this grid host.
      *
-     * @return The {@link IGridNode}.
+     * @return The {@link GridNode}.
      */
     @Nullable
-    default IGridNode<?> getNode() {
+    default GridNode<?> getNode() {
 
         return getGrid().getNodes().get(getHostPos());
     }
 
     /**
-     * Tries to get the {@link IGridNode} hosted by this {@link IGridHost} of the given type.
+     * Tries to get the {@link GridNode} hosted by this {@link IGridHost} of the given type.
      * <p>
-     * If the hosted grid is a {@link IMultiGrid}, the {@link IMultiGridNode} will be queried
-     * for a grid of the given type.
      *
      * @param gridType The {@link IGridType}
-     * @return The {@link IGridNode}
+     * @return The {@link GridNode}
      */
     @Nullable
-    default <G extends IGrid<?, ?>> IGridNode<G> getNode(IGridType<G> gridType) {
+    default <G extends Grid<G, ?>> GridNode<G> getNode(IGridType<G> gridType) {
 
-        IGridNode<?> node = getNode();
+        GridNode<?> node = getNode();
         if (node == null) {
             return null;
         }
@@ -76,7 +74,7 @@ public interface IGridHost {
             return null;
         }
         // noinspection unchecked
-        return (IGridNode<G>) node;
+        return (GridNode<G>) node;
     }
 
     /**

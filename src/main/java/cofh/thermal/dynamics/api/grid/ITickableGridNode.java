@@ -1,11 +1,13 @@
 package cofh.thermal.dynamics.api.grid;
 
+import cofh.thermal.dynamics.grid.GridNode;
+
 /**
- * Represents a {@link IGridNode} capable of receiving world ticks.
+ * Represents a {@link GridNode} capable of receiving world ticks.
  *
  * @author covers1624
  */
-public interface ITickableGridNode<G extends IGrid<?, ?>> extends IGridNode<G> {
+public interface ITickableGridNode {
 
     void tick();
 

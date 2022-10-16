@@ -7,18 +7,24 @@ import com.google.common.graph.*;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.LazyOptional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.LongFunction;
 
@@ -27,34 +33,41 @@ import static net.covers1624.quack.util.SneakyUtils.notPossible;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
 /**
- * Abstract base class for all {@link IGrid} implementations.
+ * Represents a Grid of nodes in a World.
+ * <p>
+ * This may not be a complete grid as subsections may be unloaded/loaded
+ * as chunks load/unload.
+ * In these cases, it acts as if these unloaded sections of the grid do not exist.
+ * <p>
+ * Modifications of the Grid system outside well-defined methods on this interface or {@link GridContainer} are forbidden.
+ * Any such modifications may cause the Grid to explode.
  * <p>
  *
  * @author covers1624
  */
 @SuppressWarnings ("UnstableApiUsage")
-public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>> implements IGrid<G, N>, INBTSerializable<CompoundTag> {
+public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implements INBTSerializable<CompoundTag> {
 
     protected static final Logger LOGGER = LogManager.getLogger();
-    protected static final boolean DEBUG = AbstractGrid.class.desiredAssertionStatus();
+    protected static final boolean DEBUG = Grid.class.desiredAssertionStatus();
 
     /**
      * The {@link ValueGraph} of nodes stored in this grid.
      * <p>
      * The value object being the path length.
      */
-    public final MutableGraph<AbstractGridNode<?>> nodeGraph = GraphBuilder
+    public final MutableGraph<GridNode<?>> nodeGraph = GraphBuilder
             .undirected()
             .nodeOrder(ElementOrder.unordered())
             .build();
     /**
      * The same list of nodes, indexed by BlockPos.
      */
-    protected final Map<BlockPos, AbstractGridNode<?>> nodes = new Object2ObjectRBTreeMap<>();
+    protected final Map<BlockPos, GridNode<?>> nodes = new Object2ObjectRBTreeMap<>();
     /**
      * The same list of nodes, indexed by ChunkPos.
      */
-    protected final Long2ObjectMap<List<AbstractGridNode<?>>> nodesPerChunk = new Long2ObjectRBTreeMap<>();
+    protected final Long2ObjectMap<List<GridNode<?>>> nodesPerChunk = new Long2ObjectRBTreeMap<>();
     protected final LongSet loadedChunks = new LongOpenHashSet();
     protected final Set<BlockPos> updatableHosts = new HashSet<>();
     protected final IGridType<G> gridType;
@@ -62,7 +75,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     protected final Level world;
     public boolean isLoaded;
 
-    protected AbstractGrid(IGridType<G> gridType, UUID id, Level world) {
+    protected Grid(IGridType<G> gridType, UUID id, Level world) {
 
         this.gridType = gridType;
         this.id = id;
@@ -73,14 +86,14 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
         for (LongIterator iterator = loadedChunks.iterator(); iterator.hasNext(); ) {
             long loadedChunk = iterator.nextLong();
-            List<AbstractGridNode<?>> nodes = nodesPerChunk.get(loadedChunk);
+            List<GridNode<?>> nodes = nodesPerChunk.get(loadedChunk);
             if (nodes == null) {
                 continue;
             }
-            for (AbstractGridNode<?> node : nodes) {
+            for (GridNode<?> node : nodes) {
                 assert node.isLoaded();
                 if (node instanceof ITickableGridNode) {
-                    ((ITickableGridNode<?>) node).tick();
+                    ((ITickableGridNode) node).tick();
                 }
             }
         }
@@ -96,16 +109,16 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
                 .orElseThrow(notPossible()));
 
         // Check all blocks on edges.
-        for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
-            AbstractGridNode<?> u = edge.nodeU();
-            AbstractGridNode<?> v = edge.nodeV();
+        for (EndpointPair<GridNode<?>> edge : nodeGraph.edges()) {
+            GridNode<?> u = edge.nodeU();
+            GridNode<?> v = edge.nodeV();
             for (BlockPos pos : GridHelper.positionsBetween(u.getPos(), v.getPos())) {
                 checkPos(pos, gridContainer);
             }
         }
 
         // Check nodes.
-        for (AbstractGridNode<?> node : nodeGraph.nodes()) {
+        for (GridNode<?> node : nodeGraph.nodes()) {
 
             long chunkPos = asChunkLong(node.getPos());
             checkPos(node.getPos(), gridContainer);
@@ -144,14 +157,14 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     public boolean onChunkLoad(ChunkAccess chunk) {
 
         long pos = chunk.getPos().toLong();
-        List<AbstractGridNode<?>> nodes = nodesPerChunk.get(pos);
+        List<GridNode<?>> nodes = nodesPerChunk.get(pos);
         if (nodes == null || nodes.isEmpty()) {
             return false;
         }
         assert !loadedChunks.contains(pos);
         loadedChunks.add(pos);
 
-        for (AbstractGridNode<?> node : nodes) {
+        for (GridNode<?> node : nodes) {
             node.setLoaded(true);
         }
         boolean wasLoaded = !isLoaded;
@@ -163,17 +176,17 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     public boolean onChunkUnload(ChunkAccess chunk) {
 
         long pos = chunk.getPos().toLong();
-        List<AbstractGridNode<?>> nodes = nodesPerChunk.get(pos);
+        List<GridNode<?>> nodes = nodesPerChunk.get(pos);
         if (nodes == null || nodes.isEmpty()) {
             return false;
         }
         assert loadedChunks.contains(pos);
         boolean wasLoaded = loadedChunks.size() == 1;
         loadedChunks.remove(pos);
-        for (AbstractGridNode<?> node : nodes) {
+        for (GridNode<?> node : nodes) {
             node.setLoaded(false);
         }
-        assert !wasLoaded || this.nodes.values().stream().noneMatch(AbstractGridNode::isLoaded);
+        assert !wasLoaded || this.nodes.values().stream().noneMatch(GridNode::isLoaded);
         isLoaded = !wasLoaded;
         return wasLoaded;
     }
@@ -183,7 +196,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
         CompoundTag tag = new CompoundTag();
         ListTag nodes = new ListTag();
-        for (AbstractGridNode<?> node : nodeGraph.nodes()) {
+        for (GridNode<?> node : nodeGraph.nodes()) {
             CompoundTag nodeTag = new CompoundTag();
             nodeTag.put("pos", NbtUtils.writeBlockPos(node.getPos()));
             nodeTag.merge(node.serializeNBT());
@@ -192,7 +205,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         tag.put("nodes", nodes);
 
         ListTag edges = new ListTag();
-        for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
+        for (EndpointPair<GridNode<?>> edge : nodeGraph.edges()) {
             CompoundTag edgeTag = new CompoundTag();
             edgeTag.put("U", NbtUtils.writeBlockPos(edge.nodeU().getPos()));
             edgeTag.put("V", NbtUtils.writeBlockPos(edge.nodeV().getPos()));
@@ -219,7 +232,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         for (int i = 0; i < nodes.size(); ++i) {
             CompoundTag nodeTag = nodes.getCompound(i);
             BlockPos pos = NbtUtils.readBlockPos(nodeTag.getCompound("pos"));
-            AbstractGridNode<?> node = newNode(pos, false);
+            GridNode<?> node = newNode(pos, false);
             node.deserializeNBT(nodeTag);
         }
 
@@ -240,21 +253,21 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         assert !DEBUG || this.nodes.values().stream().noneMatch(e -> e.getPos() == BlockPos.ZERO);
     }
 
-    public abstract AbstractGridNode<G> newNode();
+    public abstract GridNode<G> newNode();
 
-    public final AbstractGridNode<?> newNode(BlockPos pos) {
+    public final GridNode<?> newNode(BlockPos pos) {
 
         return newNode(pos, true);
     }
 
-    public final AbstractGridNode<?> newNode(BlockPos pos, boolean load) {
+    public final GridNode<?> newNode(BlockPos pos, boolean load) {
         // We should never be adding a node for a position that already exists.
         assert !nodes.containsKey(pos);
 
         // Generate new node for position, set node internal pos, add to nodes map.
-        AbstractGridNode<?> node = newNode();
+        GridNode<?> node = newNode();
         node.setPos(pos);
-        AbstractGridNode<?> existing = nodes.put(pos, node);
+        GridNode<?> existing = nodes.put(pos, node);
         assert existing == null; // double check.
 
         // Add node to graph and chunk map.
@@ -269,7 +282,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         return node;
     }
 
-    public final void removeNode(AbstractGridNode<?> toRemove) {
+    public final void removeNode(GridNode<?> toRemove) {
 
         boolean ret;
 
@@ -283,9 +296,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         assert ret;
     }
 
-    public final void insertExistingNode(AbstractGridNode<?> toAdd) {
+    public final void insertExistingNode(GridNode<?> toAdd) {
 
-        AbstractGridNode<?> existingNode = nodes.get(toAdd.getPos());
+        GridNode<?> existingNode = nodes.get(toAdd.getPos());
         if (existingNode == toAdd) return;
 
         assert existingNode == null;
@@ -299,7 +312,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         }
     }
 
-    public final void mergeFrom(AbstractGrid<?, ?> other) {
+    public final void mergeFrom(Grid<?, ?> other) {
 
         assert gridType == other.gridType;
         if (DEBUG) {
@@ -307,9 +320,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         }
         // Loop all edges in other grid.
         PositionCollector positionCollector = new PositionCollector(world);
-        for (EndpointPair<AbstractGridNode<?>> edge : other.nodeGraph.edges()) {
-            AbstractGridNode<?> a = edge.nodeU();
-            AbstractGridNode<?> b = edge.nodeV();
+        for (EndpointPair<GridNode<?>> edge : other.nodeGraph.edges()) {
+            GridNode<?> a = edge.nodeU();
+            GridNode<?> b = edge.nodeV();
 
             // Collect all positions between node edges. 'betweenClosed' returns a and b.
             for (BlockPos pos : BlockPos.betweenClosed(a.getPos(), b.getPos())) {
@@ -324,7 +337,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         updateGridHosts(world, positionCollector.getChunkPositions(), this);
 
         // Insert all nodes into the Grid's lookup maps and update the node about the grid change.
-        for (AbstractGridNode<?> node : other.nodeGraph.nodes()) {
+        for (GridNode<?> node : other.nodeGraph.nodes()) {
             insertExistingNode(node);
             nodeGraph.addNode(node);
             node.setGrid(unsafeCast(this));
@@ -335,23 +348,23 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     }
 
     // Called to split the current grid into the specified partitions.
-    public final List<AbstractGrid<?, ?>> splitInto(List<Set<AbstractGridNode<?>>> splitGraphs) {
+    public final List<Grid<?, ?>> splitInto(List<Set<GridNode<?>>> splitGraphs) {
 
         GridContainer gridContainer = ((GridContainer) IGridContainer.getCapability(world)
                 .orElseThrow(notPossible()));
-        List<AbstractGrid<?, ?>> newGrids = new LinkedList<>();
+        List<Grid<?, ?>> newGrids = new LinkedList<>();
 
-        for (Set<AbstractGridNode<?>> splitGraph : splitGraphs) {
+        for (Set<GridNode<?>> splitGraph : splitGraphs) {
             PositionCollector positionCollector = new PositionCollector(world);
 
             // Create new grid.
-            AbstractGrid<?, ?> newGrid = gridContainer.createAndAddGrid(gridContainer.nextUUID(), gridType, true);
-            for (AbstractGridNode<?> node : splitGraph) {
+            Grid<?, ?> newGrid = gridContainer.createAndAddGrid(gridContainer.nextUUID(), gridType, true);
+            for (GridNode<?> node : splitGraph) {
                 positionCollector.collectPosition(node.getPos());
                 newGrid.insertExistingNode(node);
 
                 // Iterate all edges connected to this node.
-                for (AbstractGridNode<?> adj : nodeGraph.adjacentNodes(node)) {
+                for (GridNode<?> adj : nodeGraph.adjacentNodes(node)) {
                     newGrid.insertExistingNode(adj);
 
                     for (BlockPos pos : BlockPos.betweenClosed(node.getPos(), adj.getPos())) {
@@ -372,7 +385,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
             }
 
             // Insert all nodes into the Grid's lookup maps and update the node about the grid change.
-            for (AbstractGridNode<?> node : splitGraph) {
+            for (GridNode<?> node : splitGraph) {
                 node.setGrid(unsafeCast(newGrid));
                 node.onGridChange(unsafeCast(this));
             }
@@ -384,7 +397,7 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         return newGrids;
     }
 
-    private static void updateGridHosts(Level world, Long2ObjectMap<Set<BlockPos>> posMap, AbstractGrid<?, ?> grid) {
+    private static void updateGridHosts(Level world, Long2ObjectMap<Set<BlockPos>> posMap, Grid<?, ?> grid) {
 
         for (Long2ObjectMap.Entry<Set<BlockPos>> entry : posMap.long2ObjectEntrySet()) {
             long chunkPos = entry.getLongKey();
@@ -460,9 +473,9 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
     }
 
     @Nullable
-    public final EndpointPair<AbstractGridNode<?>> findEdge(BlockPos pos) {
+    public final EndpointPair<GridNode<?>> findEdge(BlockPos pos) {
 
-        for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.edges()) {
+        for (EndpointPair<GridNode<?>> edge : nodeGraph.edges()) {
             if (isOnEdge(pos, edge)) {
                 return edge;
             }
@@ -472,17 +485,17 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
 
     public final boolean isConnectedTo(BlockPos a, BlockPos b) {
 
-        AbstractGridNode<?> aNode = nodes.get(a);
-        AbstractGridNode<?> bNode = nodes.get(b);
+        GridNode<?> aNode = nodes.get(a);
+        GridNode<?> bNode = nodes.get(b);
         if (aNode != null && bNode != null) {
             return nodeGraph.hasEdgeConnecting(aNode, bNode);
         }
         if (aNode == null && bNode == null) {
             return isOnEdge(b, requireNonNull(findEdge(a)));
         }
-        AbstractGridNode<?> node = aNode != null ? aNode : bNode;
+        GridNode<?> node = aNode != null ? aNode : bNode;
         BlockPos pos = aNode != null ? b : a;
-        for (EndpointPair<AbstractGridNode<?>> edge : nodeGraph.incidentEdges(node)) {
+        for (EndpointPair<GridNode<?>> edge : nodeGraph.incidentEdges(node)) {
             if (isOnEdge(pos, edge)) {
                 return true;
             }
@@ -490,19 +503,109 @@ public abstract class AbstractGrid<G extends IGrid<?, ?>, N extends IGridNode<?>
         return false;
     }
 
-    //@formatter:off
-    @Override public final UUID getId() { return id; }
-    @Override public final Level getWorld() { return world; }
-    @Override public IGridType<G> getGridType() { return gridType; }
-    @Override public final Map<BlockPos, N> getNodes() { return unsafeCast(nodes); }
-    //@formatter:on
+    /**
+     * Gets the UUID that represents this Grid.
+     * <p>
+     * The primary use for this is to uniquely identify this grid for client <-> server communication.
+     * <p>
+     * Guaranteed to be unique over the lifetime of the grid object.
+     * Guaranteed to be unique over a single play-session.
+     * No other guarantees are made.
+     *
+     * @return The Grid id.
+     */
+    public final UUID getId() {
+        return id;
+    }
 
-    private static boolean isOnEdge(BlockPos pos, EndpointPair<AbstractGridNode<?>> edge) {
+    /**
+     * Gets the level this grid is a prt of.
+     *
+     * @return The world.
+     */
+    public final Level getLevel() {
+        return world;
+    }
+
+    /**
+     * Gets the type of this grid.
+     * <p>
+     * {@link IGridType} can be considered similar to {@link BlockEntityType} where
+     * it is a unique key and Factory.
+     *
+     * @return The type of this grid.
+     * @see IGridType
+     */
+    public IGridType<G> getGridType() {
+        return gridType;
+    }
+
+    /**
+     * Returns a Map of all nodes in the Grid.
+     *
+     * @return The nodes.
+     */
+    public final Map<BlockPos, N> getNodes() {
+        return unsafeCast(nodes);
+    }
+
+    /**
+     * Checks if this {@link Grid} can externally connect to
+     * any adjacent blocks at the given position.
+     *
+     * @param pos The position.
+     * @return If the grid can connect to any adjacent blocks.
+     */
+    public boolean canConnectExternally(BlockPos pos) {
+
+        for (Direction dir : Direction.values()) {
+            if (canConnectOnSide(pos.relative(dir), dir.getOpposite())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if this {@link Grid} can externally connect to the given {@link BlockEntity}
+     * on the given face of the {@link BlockEntity}.
+     *
+     * @param tile The {@link BlockEntity}.
+     * @param dir  The face, <code>null</code> for the 'center' face.
+     * @return If the {@link Grid} can externally connect.
+     */
+    public abstract boolean canConnectOnSide(BlockEntity tile, @javax.annotation.Nullable Direction dir);
+
+    /**
+     * Checks if this {@link Grid} can externally connect to the given {@link BlockEntity}
+     * at the given {@link BlockPos} on the given face of the {@link BlockEntity}.
+     *
+     * @param pos The {@link BlockPos}.
+     * @param dir The face, <code>null</code> for the 'center' face.
+     * @return If the {@link Grid} can externally connect.
+     */
+    public boolean canConnectOnSide(BlockPos pos, @javax.annotation.Nullable Direction dir) {
+
+        BlockEntity tile = getLevel().getBlockEntity(pos);
+        if (tile == null) {
+            return false;
+        }
+        return canConnectOnSide(tile, dir);
+    }
+
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+
+        return LazyOptional.empty();
+    }
+
+    public abstract void refreshCapabilities();
+
+    private static boolean isOnEdge(BlockPos pos, EndpointPair<GridNode<?>> edge) {
 
         return GridHelper.isOnEdge(pos, edge.nodeU().getPos(), edge.nodeV().getPos());
     }
 
-    private List<AbstractGridNode<?>> getNodesForChunk(BlockPos pos) {
+    private List<GridNode<?>> getNodesForChunk(BlockPos pos) {
 
         return nodesPerChunk.computeIfAbsent(asChunkLong(pos), e -> new LinkedList<>());
     }

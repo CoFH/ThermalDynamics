@@ -2,11 +2,9 @@ package cofh.thermal.dynamics.grid.fluid;
 
 import cofh.core.util.helpers.FluidHelper;
 import cofh.lib.util.TimeTracker;
-import cofh.thermal.dynamics.api.grid.fluid.IFluidGrid;
-import cofh.thermal.dynamics.api.grid.fluid.IFluidGridNode;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.grid.AbstractGrid;
-import cofh.thermal.dynamics.grid.AbstractGridNode;
+import cofh.thermal.dynamics.grid.Grid;
+import cofh.thermal.dynamics.grid.GridNode;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
@@ -15,6 +13,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,7 +26,7 @@ import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;
 /**
  * @author King Lemming
  */
-public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implements IFluidGrid {
+public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidHandler {
 
     protected final int NODE_CAPACITY = 100;
 
@@ -39,7 +38,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     protected TimeTracker timeTracker = new TimeTracker();
     protected boolean wasFilled;
 
-    protected IFluidGridNode[] distArray = new IFluidGridNode[0];
+    protected FluidGridNode[] distArray = new FluidGridNode[0];
     protected int distIndex = 0;
 
     public FluidGrid(UUID id, Level world) {
@@ -48,7 +47,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     }
 
     @Override
-    public AbstractGridNode<IFluidGrid> newNode() {
+    public GridNode<FluidGrid> newNode() {
 
         return new FluidGridNode(this);
     }
@@ -60,7 +59,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
         renderUpdate();
 
         if (distArray.length != getNodes().size()) {
-            distArray = getNodes().values().toArray(new IFluidGridNode[0]);
+            distArray = getNodes().values().toArray(new FluidGridNode[0]);
         }
         int curIndex = distIndex;
 
@@ -118,13 +117,13 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     @Override
     public void onModified() {
 
-        distArray = new IFluidGridNode[0];
+        distArray = new FluidGridNode[0];
         setBaseCapacity(getNodes().size() * NODE_CAPACITY);
         super.onModified();
     }
 
     @Override
-    public void onMerge(IFluidGrid from) {
+    public void onMerge(FluidGrid from) {
 
         storage.setBaseCapacity(NODE_CAPACITY * getNodes().size());
         storage.setCapacity(this.getCapacity() + from.getCapacity());
@@ -137,10 +136,10 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     }
 
     @Override
-    public void onSplit(List<IFluidGrid> others) {
+    public void onSplit(List<FluidGrid> others) {
 
         int totalNodes = 0;
-        for (IFluidGrid grid : others) {
+        for (FluidGrid grid : others) {
             int gridNodes = grid.getNodes().size();
             totalNodes += grid.getNodes().size();
             grid.setBaseCapacity(NODE_CAPACITY * gridNodes);
@@ -152,7 +151,7 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
         int fluidPerNode = getFluid().getAmount() / totalNodes;
         int remFluid = getFluid().getAmount() % totalNodes;
 
-        for (IFluidGrid grid : others) {
+        for (FluidGrid grid : others) {
             int gridNodes = grid.getNodes().size();
             grid.setFluid(new FluidStack(getFluid(), (fluidPerNode * gridNodes)));
             grid.refreshCapabilities();
@@ -209,13 +208,13 @@ public class FluidGrid extends AbstractGrid<IFluidGrid, IFluidGridNode> implemen
     }
 
     //@formatter:off
-    @Override public int getCapacity() { return storage.getBaseCapacity(); }
-    @Override public FluidStack getFluid() { return storage.getFluid(); }
-    @Override public FluidStack getRenderFluid() { return renderFluid; }
-    @Override public int getFluidAmount() { return storage.getFluid().getAmount(); }
-    @Override public void setBaseCapacity(int baseCapacity) { storage.setBaseCapacity(baseCapacity); }
-    @Override public void setCapacity(int capacity) { storage.setCapacity(capacity); }
-    @Override public void setFluid(FluidStack fluid) { storage.setFluid(fluid); }
+    public int getCapacity() { return storage.getBaseCapacity(); }
+    public FluidStack getFluid() { return storage.getFluid(); }
+    public FluidStack getRenderFluid() { return renderFluid; }
+    public int getFluidAmount() { return storage.getFluid().getAmount(); }
+    public void setBaseCapacity(int baseCapacity) { storage.setBaseCapacity(baseCapacity); }
+    public void setCapacity(int capacity) { storage.setCapacity(capacity); }
+    public void setFluid(FluidStack fluid) { storage.setFluid(fluid); }
 
     @Override public int getTanks() { return storage.getTanks(); }
     @Override public FluidStack getFluidInTank(int tank) { return storage.getFluidInTank(tank); }

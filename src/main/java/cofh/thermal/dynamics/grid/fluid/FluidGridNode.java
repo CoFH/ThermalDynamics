@@ -1,8 +1,7 @@
 package cofh.thermal.dynamics.grid.fluid;
 
-import cofh.thermal.dynamics.api.grid.fluid.IFluidGrid;
-import cofh.thermal.dynamics.api.grid.fluid.IFluidGridNode;
-import cofh.thermal.dynamics.grid.AbstractGridNode;
+import cofh.thermal.dynamics.api.grid.ITickableGridNode;
+import cofh.thermal.dynamics.grid.GridNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -11,12 +10,12 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
 
-public class FluidGridNode extends AbstractGridNode<IFluidGrid> implements IFluidGridNode {
+public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridNode {
 
     protected Direction[] distArray = new Direction[0];
     protected int distIndex = 0;
 
-    protected FluidGridNode(IFluidGrid grid) {
+    protected FluidGridNode(FluidGrid grid) {
 
         super(grid);
     }

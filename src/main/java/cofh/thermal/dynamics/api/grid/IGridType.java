@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.api.grid;
 
-import cofh.thermal.dynamics.api.grid.item.IItemGrid;
+import cofh.thermal.dynamics.grid.Grid;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -21,14 +21,7 @@ import java.util.function.BiFunction;
  *
  * @author covers1624
  */
-public interface IGridType<G extends IGrid<?, ?>> extends IForgeRegistryEntry<IGridType<?>> {
-
-    /**
-     * The {@link IGrid} class that represents this {@link IGridType}.
-     *
-     * @return The grid class.
-     */
-    Class<G> getGridType();
+public interface IGridType<G extends Grid<?, ?>> extends IForgeRegistryEntry<IGridType<?>> {
 
     /**
      * <strong>INTERNAL, do not call externally.</strong>
@@ -46,16 +39,14 @@ public interface IGridType<G extends IGrid<?, ?>> extends IForgeRegistryEntry<IG
     /**
      * Static factory for creating simple Implementations of {@link IGridType}.
      *
-     * @param clazz       The High level interface that represents this grid. Such as {@link IItemGrid}.
-     * @param gridFactory The Factory used to create new instances of this {@link IGrid}.
+     * @param gridFactory The Factory used to create new instances of this {@link Grid}.
      * @return The new {@link IGridType}.
      */
-    static <G extends IGrid<?, ?>> IGridType<G> of(Class<G> clazz, BiFunction<UUID, Level, G> gridFactory) {
+    static <G extends Grid<?, ?>> IGridType<G> of(BiFunction<UUID, Level, G> gridFactory) {
 
-        abstract class GridTypeImpl<G2 extends IGrid<?, ?>> extends ForgeRegistryEntry<IGridType<?>> implements IGridType<G2> {}
-        return new GridTypeImpl<G>() {
+        abstract class GridTypeImpl<G2 extends Grid<?, ?>> extends ForgeRegistryEntry<IGridType<?>> implements IGridType<G2> { }
+        return new GridTypeImpl<>() {
             //@formatter:off
-            @Override public Class<G> getGridType() { return clazz; }
             @Override public G createGrid(UUID id, Level world) { return gridFactory.apply(id, world); }
             //@formatter:on
         };

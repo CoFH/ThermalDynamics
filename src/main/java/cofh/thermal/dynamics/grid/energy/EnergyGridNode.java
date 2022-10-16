@@ -1,20 +1,19 @@
 package cofh.thermal.dynamics.grid.energy;
 
-import cofh.thermal.dynamics.api.grid.energy.IEnergyGrid;
-import cofh.thermal.dynamics.api.grid.energy.IEnergyGridNode;
-import cofh.thermal.dynamics.grid.AbstractGridNode;
+import cofh.thermal.dynamics.api.grid.ITickableGridNode;
+import cofh.thermal.dynamics.grid.GridNode;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-public class EnergyGridNode extends AbstractGridNode<IEnergyGrid> implements IEnergyGridNode {
+public class EnergyGridNode extends GridNode<EnergyGrid> implements ITickableGridNode {
 
     protected Direction[] distArray = new Direction[0];
     protected int distIndex = 0;
 
-    protected EnergyGridNode(IEnergyGrid grid) {
+    protected EnergyGridNode(EnergyGrid grid) {
 
         super(grid);
     }
