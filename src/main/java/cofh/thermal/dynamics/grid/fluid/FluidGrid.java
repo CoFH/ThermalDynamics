@@ -47,7 +47,7 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
     }
 
     @Override
-    public GridNode<FluidGrid> newNode() {
+    public FluidGridNode newNode() {
 
         return new FluidGridNode(this);
     }

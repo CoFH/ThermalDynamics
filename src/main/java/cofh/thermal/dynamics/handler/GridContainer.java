@@ -70,7 +70,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         }
         if (adjacentGrids.size() == 1) {
             Map.Entry<Direction, IGridHost> adjacent = ColUtils.only(adjacentGrids.entrySet());
-            extendGrid(host, adjacent.getValue(), adjacent.getKey());
+            extendGrid(host, adjacent.getValue());
         } else {
             List<IGridHost> branches = new ArrayList<>(adjacentGrids.values());
             // Merge grids!
@@ -85,17 +85,17 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
                 mergeGrids(branches);
             }
             // Grid only has branches between itself.
-            mergeGridBranches(host, branches, !sameGrid);
+            mergeGridBranches(host, branches);
         }
     }
 
-    private void constructNewGrid(IGridHost host) {
+    private <G extends Grid<G, ?>> void constructNewGrid(IGridHost host) {
 
         if (DEBUG) {
             LOGGER.info("Constructing new grid for {}", host.getHostPos());
         }
         assert host.getExposedTypes().size() == 1; // TODO, multi grids.
-        Grid<?, ?> grid = createAndAddGrid(nextUUID(), host.getExposedTypes().iterator().next(), true);
+        G grid = createAndAddGrid(nextUUID(), unsafeCast(ColUtils.only(host.getExposedTypes())), true);
         host.setGrid(grid);
         grid.newNode(host.getHostPos());
         addGridLookup(grid, host.getHostPos());
@@ -103,15 +103,15 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         grid.onModified();
     }
 
-    private void extendGrid(IGridHost host, IGridHost adjacent, Direction adjacentDir) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> void extendGrid(IGridHost host, IGridHost adjacent) {
 
-        GridNode<?> adjacentNode = adjacent.getNode();
-        Grid<?, ?> adjacentGrid = adjacent.getGrid();
+        N adjacentNode = unsafeCast(adjacent.getNode());
+        G adjacentGrid = unsafeCast(adjacent.getGrid());
 
         // Set the GridHost's grid.
         host.setGrid(adjacentGrid);
 
-        GridNode<?> newNode = adjacentGrid.newNode(host.getHostPos());
+        N newNode = adjacentGrid.newNode(host.getHostPos());
         addGridLookup(adjacentGrid, newNode.getPos());
         if (adjacentNode == null) {
             // We are adding a duct next to another duct which does not have a node associated, we need to:
@@ -119,7 +119,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             // - Generate a new node at the adjacent position.
             // - Unlink the 'a/b' nodes from each other and re-link with the adjacent node.
             // - Add link to the node we just placed.
-            GridNode<?> abMiddle = getNodeOrSplitEdgeAndInsertNode(adjacentGrid, adjacent.getHostPos());
+            N abMiddle = adjacentGrid.getNodeOrSplitEdgeAndInsertNode(adjacent.getHostPos());
             adjacentGrid.nodeGraph.putEdge(abMiddle, newNode);
 
             if (DEBUG) {
@@ -134,9 +134,9 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             // - If there is a single edge to the node we are adjacent to and that edge is on the same axis as the new node:
             //   - Remove the edge, remove the node and re-link the edge to the new node and increment edge length by one.
             // - If there is 0, more than one edge, or the edge is not on the same axis, we can just link to the new node.
-            Set<GridNode<?>> edgeNodes = adjacentGrid.nodeGraph.adjacentNodes(adjacentNode);
+            Set<N> edgeNodes = adjacentGrid.nodeGraph.adjacentNodes(adjacentNode);
 
-            GridNode<?> edge = onlyOrDefault(edgeNodes, null);
+            N edge = onlyOrDefault(edgeNodes, null);
             if (edge != null && isOnSameAxis(newNode.getPos(), edge.getPos()) && !adjacentGrid.canConnectExternally(adjacentNode.getPos())) {
                 if (DEBUG) {
                     LOGGER.info(
@@ -161,66 +161,21 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         adjacentGrid.onModified();
     }
 
-    /**
-     * Inserts a node in the middle of an edge.
-     * <p>
-     * If a node already exists at {@code pos}, it will be returned instead.
-     *
-     * @param grid The grid to add the node to.
-     * @param pos  The position in the grid to generate the node.
-     * @return The existing node, or the new node at the position.
-     */
-    private GridNode<?> getNodeOrSplitEdgeAndInsertNode(Grid<?, ?> grid, BlockPos pos) {
-
-        GridNode<?> existing = grid.getNodes().get(pos);
-        if (existing != null) return existing;
-
-        // We are adding a duct, next to an existing duct that does not have a node.
-        // There is only one valid case for this, where there are 2 nodes directly attached.
-
-        // Find the edge which pos lies on.
-        EndpointPair<GridNode<?>> foundEdge = grid.findEdge(pos);
-        assert foundEdge != null;
-
-        GridNode<?> a = foundEdge.nodeU();
-        GridNode<?> b = foundEdge.nodeV();
-
-        // Make sure these 2 nodes are actually connected.
-        assert grid.nodeGraph.hasEdgeConnecting(a, b);
-
-        // Link new node to 2 existing nodes, remove edge between existing nodes.
-        GridNode<?> abMiddle = grid.newNode(pos);
-        grid.nodeGraph.putEdge(abMiddle, a);
-        grid.nodeGraph.putEdge(abMiddle, b);
-        grid.nodeGraph.removeEdge(a, b);
-        if (DEBUG) {
-            LOGGER.info("Node insertion. Node A: {}, Node B: {}, AB dist: {}, Middle: {}, NewA dist: {}, NewB dist: {}",
-                    a.getPos(),
-                    b.getPos(),
-                    numBetween(a.getPos(), b.getPos()),
-                    abMiddle.getPos(),
-                    numBetween(pos, a.getPos()),
-                    numBetween(pos, b.getPos())
-            );
-        }
-        return abMiddle;
-    }
-
-    private void mergeGridBranches(IGridHost host, List<IGridHost> branches, boolean wasMerge) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> void mergeGridBranches(IGridHost host, List<IGridHost> branches) {
 
         assert branches.size() != 1;
 
-        Grid<?, ?> grid = branches.get(0).getGrid();
+        G grid = unsafeCast(branches.get(0).getGrid());
 
         host.setGrid(grid);
         // More than 2 branches, or the 2 adjacent branches aren't on the same axis as us. We must generate a node.
-        GridNode<?> node = grid.newNode(host.getHostPos());
+        N node = grid.newNode(host.getHostPos());
         addGridLookup(grid, node.getPos());
         for (IGridHost branch : branches) {
-            GridNode<?> adj = branch.getNode();
+            N adj = unsafeCast(branch.getNode());
             if (adj == null) {
                 // Adjacent isn't present, just generate node.
-                GridNode<?> abMiddle = getNodeOrSplitEdgeAndInsertNode(grid, branch.getHostPos());
+                N abMiddle = grid.getNodeOrSplitEdgeAndInsertNode(branch.getHostPos());
                 if (DEBUG) {
                     LOGGER.info(" T intersection creation. New Node: {}, Adjacent: {}",
                             node.getPos(),
@@ -241,20 +196,18 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         grid.onModified();
     }
 
-    private void mergeGrids(List<IGridHost> branches) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> void mergeGrids(List<IGridHost> branches) {
 
-        Set<Grid<?, ?>> grids = new HashSet<>();
+        Set<G> grids = new HashSet<>();
         for (IGridHost branch : branches) {
-            Grid<?, ?> abstractGrid = branch.getGrid();
-
-            grids.add(abstractGrid);
+            grids.add(unsafeCast(branch.getGrid()));
         }
 
         // Choose the largest grid as the 'main' grid.
-        Grid<?, ?> main = ColUtils.maxBy(grids, e -> e.nodeGraph.nodes().size());
+        G main = ColUtils.maxBy(grids, e -> e.nodeGraph.nodes().size());
         grids.remove(main);
-        for (Grid<?, ?> other : grids) {
-            Set<GridNode<?>> toBeMoved = new HashSet<>(other.nodeGraph.nodes());
+        for (G other : grids) {
+            Set<N> toBeMoved = new HashSet<>(other.nodeGraph.nodes());
             main.mergeFrom(other);
             replaceGridLookup(main, other, toBeMoved);
             this.grids.remove(other.getId());
@@ -265,26 +218,28 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
     @Override
     public void onGridHostRemoved(IGridHost host) {
+        removeGridHost(host);
+    }
 
+    public <G extends Grid<G, N>, N extends GridNode<G>> void removeGridHost(IGridHost host) {
         // - Disconnect any edges.
         // - Remove current node.
         // - Try and split the grid if nodes exist.
         // - Delete grid if no more nodes exist.
-        Grid<?, ?> grid = host.getGrid();
+        G grid = unsafeCast(host.getGrid());
+        N removing = unsafeCast(host.getNode());
         BlockPos hostPos = host.getHostPos();
-
-        GridNode<?> removing = host.getNode();
 
         removeGridLookup(grid, host.getHostPos());
         if (removing != null) {
             // All we need to do is remove the node.
 
-            List<GridNode<?>> adjacentNodes = new LinkedList<>();
+            List<N> adjacentNodes = new LinkedList<>();
             // We must copy this otherwise, we get Concurrent modification exception modifying the grid with 'splitEdgeAndInsertNode'
-            Set<EndpointPair<GridNode<?>>> allEdges = ImmutableSet.copyOf(grid.nodeGraph.incidentEdges(removing));
-            for (EndpointPair<GridNode<?>> edge : allEdges) {
+            Set<EndpointPair<N>> allEdges = ImmutableSet.copyOf(grid.nodeGraph.incidentEdges(removing));
+            for (EndpointPair<N> edge : allEdges) {
                 GridNode<?> other = edge.nodeU() == removing ? edge.nodeV() : edge.nodeU();
-                adjacentNodes.add(getNodeOrSplitEdgeAndInsertNode(grid, stepTowards(hostPos, other.getPos())));
+                adjacentNodes.add(grid.getNodeOrSplitEdgeAndInsertNode(stepTowards(hostPos, other.getPos())));
             }
 
             if (DEBUG) {
@@ -292,15 +247,15 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             }
             grid.removeNode(removing);
             // Might be redundant, safe to do anyway.
-            for (GridNode<?> adjacentNode : adjacentNodes) {
+            for (N adjacentNode : adjacentNodes) {
                 simplifyNode(adjacentNode);
             }
         } else {
             // We are a host without a node, on an edge.
-            EndpointPair<GridNode<?>> edge = grid.findEdge(hostPos);
+            EndpointPair<N> edge = grid.findEdge(hostPos);
             assert edge != null : "Block does not lie on an edge.";
-            GridNode<?> a = getNodeOrSplitEdgeAndInsertNode(grid, stepTowards(hostPos, edge.nodeU().getPos()));
-            GridNode<?> b = getNodeOrSplitEdgeAndInsertNode(grid, stepTowards(hostPos, edge.nodeV().getPos()));
+            N a = grid.getNodeOrSplitEdgeAndInsertNode(stepTowards(hostPos, edge.nodeU().getPos()));
+            N b = grid.getNodeOrSplitEdgeAndInsertNode(stepTowards(hostPos, edge.nodeV().getPos()));
             grid.nodeGraph.removeEdge(a, b); // Yeet edge.
             if (DEBUG) {
                 LOGGER.info("Removing edge between: {} and {}", a.getPos(), b.getPos());
@@ -328,9 +283,14 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     @Override
     public void onGridHostNeighborChanged(IGridHost host) {
 
-        Grid<?, ?> grid = host.getGrid();
+        gridNeighborChanged(host);
+    }
 
-        GridNode<?> node = host.getNode();
+    public <G extends Grid<G, N>, N extends GridNode<G>> void gridNeighborChanged(IGridHost host) {
+
+        G grid = unsafeCast(host.getGrid());
+        N node = unsafeCast(host.getNode());
+
         boolean canExternallyConnect = grid.canConnectExternally(host.getHostPos());
         if (node != null) {
             if (!canExternallyConnect) {
@@ -340,7 +300,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
         } else {
             if (canExternallyConnect) {
-                getNodeOrSplitEdgeAndInsertNode(grid, host.getHostPos());
+                grid.getNodeOrSplitEdgeAndInsertNode(host.getHostPos());
                 ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
             }
         }
@@ -358,7 +318,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         onSideConnectionChanged(host, side, true);
     }
 
-    private void onSideConnectionChanged(IGridHost host, Direction changed, boolean disconnect) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> void onSideConnectionChanged(IGridHost host, Direction changed, boolean disconnect) {
         // Connection attempt:
         // - Already connected?
         //  - Yes? return.
@@ -383,8 +343,8 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
         // Grab grid and nodes either side of the split/join.
         // If nodes don't exist, insert temporary nodes, these will be cleaned up later.
-        Grid<?, ?> aGrid = host.getGrid();
-        Grid<?, ?> bGrid = other.getGrid();
+        G aGrid = unsafeCast(host.getGrid());
+        G bGrid = unsafeCast(other.getGrid());
 
         // If edge being updated is already part of the grid
         boolean connecting = !disconnect;
@@ -397,8 +357,8 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             return; // can't connect anyway
         }
 
-        GridNode<?> a = getNodeOrSplitEdgeAndInsertNode(aGrid, host.getHostPos());
-        GridNode<?> b = getNodeOrSplitEdgeAndInsertNode(bGrid, other.getHostPos());
+        N a = aGrid.getNodeOrSplitEdgeAndInsertNode(host.getHostPos());
+        N b = bGrid.getNodeOrSplitEdgeAndInsertNode(other.getHostPos());
 
         if (connecting) {
             // Connect
@@ -416,13 +376,13 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             aGrid.nodeGraph.putEdge(a, b);
 
             // Simplify all directly adjacent (in world) nodes of a (excluding b).
-            for (GridNode<?> adj : aGrid.nodeGraph.adjacentNodes(a)) {
+            for (N adj : aGrid.nodeGraph.adjacentNodes(a)) {
                 if (adj == b) continue;
                 if (aGrid.nodeGraph.hasEdgeConnecting(a, adj)) continue;
                 simplifyNode(adj);
             }
             // Simplify all directly adjacent (in world) nodes of b (excluding a)
-            for (GridNode<?> adj : aGrid.nodeGraph.adjacentNodes(b)) {
+            for (N adj : aGrid.nodeGraph.adjacentNodes(b)) {
                 if (adj == a) continue;
                 if (aGrid.nodeGraph.hasEdgeConnecting(b, adj)) continue;
                 simplifyNode(adj);
@@ -448,22 +408,22 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         }
     }
 
-    private void simplifyNode(GridNode<?> node) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> void simplifyNode(N node) {
 
-        Grid<?, ?> grid = unsafeCast(node.getGrid());
+        G grid = node.getGrid();
         if (!grid.nodeGraph.nodes().contains(node)) return;
 
         // We can't simplify if we can connect to adjacent blocks.
         if (grid.canConnectExternally(node.getPos())) {
             return;
         }
-        Set<GridNode<?>> edgesSet = grid.nodeGraph.adjacentNodes(node);
+        Set<N> edgesSet = grid.nodeGraph.adjacentNodes(node);
 
         // We can't simplify a node if there aren't exactly 2 edges.
         if (edgesSet.size() != 2) {
             return;
         }
-        GridNode<?>[] edges = edgesSet.toArray(new GridNode[0]);
+        N[] edges = unsafeCast(edgesSet.toArray(new GridNode[0]));
 
         // If both edges aren't on the same axis, then we can't simplify.
         if (!isOnSameAxis(edges[0].getPos(), edges[1].getPos())) {
@@ -484,18 +444,18 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         }
     }
 
-    private boolean separateGrids(Grid<?, ?> grid) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> boolean separateGrids(G grid) {
 
         // Generate the grid nodes isolated from each other.
-        List<Set<GridNode<?>>> splitGraphs = GraphHelper.separateGraphs(grid.nodeGraph);
+        List<Set<N>> splitGraphs = GraphHelper.separateGraphs(grid.nodeGraph);
         if (splitGraphs.size() <= 1) return false;
 
         if (DEBUG) {
             LOGGER.info("Splitting grid into {} segments.", splitGraphs.size());
         }
 
-        List<Grid<?, ?>> newGrids = grid.splitInto(splitGraphs);
-        for (Grid<?, ?> newGrid : newGrids) {
+        List<G> newGrids = grid.splitInto(splitGraphs);
+        for (G newGrid : newGrids) {
             replaceGridLookup(newGrid, grid, newGrid.nodeGraph.nodes());
             newGrid.onModified();
         }
@@ -517,18 +477,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             buffer.writeVarInt(loadedGrids.size());
             for (Grid<?, ?> value : loadedGrids.values()) {
-
-                Map<BlockPos, GridNode<?>> nodes = unsafeCast(value.getNodes());
-                buffer.writeUUID(value.getId());
-                buffer.writeVarInt(nodes.size());
-                for (GridNode<?> node : nodes.values()) {
-                    buffer.writeBlockPos(node.getPos());
-                    Set<GridNode<?>> edges = value.nodeGraph.adjacentNodes(node);
-                    buffer.writeVarInt(edges.size());
-                    for (GridNode<?> edge : edges) {
-                        buffer.writeBlockPos(edge.getPos());
-                    }
-                }
+                value.debugWriteToPacket(buffer);
             }
             GridDebugPacket debugPacket = new GridDebugPacket(buffer);
             debugPacket.sendToClients();
@@ -602,18 +551,22 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
                 LOGGER.error("Failed to load Grid {} with type {} in world {}. GridType is no longer registered, it will be removed from the world.", id, gridTypeName, world.dimension().location());
                 continue;
             }
-            Grid<?, ?> grid = createAndAddGrid(id, gridType, false);
-            grid.deserializeNBT(tag);
-
-            for (GridNode<?> node : grid.nodeGraph.nodes()) {
-                addGridLookup(grid, node.getPos());
-            }
-            for (EndpointPair<GridNode<?>> edge : grid.nodeGraph.edges()) {
-                addGridLookupEdge(grid, positionsBetween(edge.nodeU().getPos(), edge.nodeV().getPos()));
-            }
+            deserializeGrid(tag, id, unsafeCast(gridType));
         }
         if (DEBUG) {
             LOGGER.info("Loaded {} grids for {}.", grids.size(), world.dimension().location());
+        }
+    }
+
+    private <G extends Grid<G, N>, N extends GridNode<G>> void deserializeGrid(CompoundTag tag, UUID id, IGridType<G> gridType) {
+        G grid = createAndAddGrid(id, gridType, false);
+        grid.deserializeNBT(tag);
+
+        for (GridNode<?> node : grid.nodeGraph.nodes()) {
+            addGridLookup(grid, node.getPos());
+        }
+        for (EndpointPair<N> edge : grid.nodeGraph.edges()) {
+            addGridLookupEdge(grid, positionsBetween(edge.nodeU().getPos(), edge.nodeV().getPos()));
         }
     }
 
@@ -657,14 +610,14 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         assert removed == oldGrid;
     }
 
-    private void replaceGridLookup(Grid<?, ?> newGrid, Grid<?, ?> oldGrid, Set<GridNode<?>> nodes) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> void replaceGridLookup(G newGrid, G oldGrid, Set<N> nodes) {
 
-        for (GridNode<?> node : nodes) {
+        for (N node : nodes) {
             replaceGridLookup(newGrid, oldGrid, node.getPos());
         }
-        for (EndpointPair<GridNode<?>> edge : newGrid.nodeGraph.edges()) {
-            GridNode<?> u = edge.nodeU();
-            GridNode<?> v = edge.nodeV();
+        for (EndpointPair<N> edge : newGrid.nodeGraph.edges()) {
+            N u = edge.nodeU();
+            N v = edge.nodeV();
             boolean containsU = nodes.contains(u);
             boolean containsV = nodes.contains(v);
 
@@ -704,9 +657,9 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         return adjacentGrids;
     }
 
-    public Grid<?, ?> createAndAddGrid(UUID uuid, IGridType<?> gridType, boolean load) {
+    public <G extends Grid<G, ?>> G createAndAddGrid(UUID uuid, IGridType<G> gridType, boolean load) {
 
-        Grid<?, ?> grid = gridType.createGrid(uuid, world);
+        G grid = gridType.createGrid(uuid, world);
         grids.put(uuid, grid);
         if (load) {
             loadedGrids.put(uuid, grid);

@@ -38,7 +38,7 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
     }
 
     @Override
-    public GridNode<EnergyGrid> newNode() {
+    public EnergyGridNode newNode() {
 
         return new EnergyGridNode(this);
     }
