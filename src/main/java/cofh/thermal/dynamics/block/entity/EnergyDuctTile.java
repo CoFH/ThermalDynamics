@@ -2,6 +2,8 @@ package cofh.thermal.dynamics.block.entity;
 
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
+import cofh.thermal.dynamics.grid.energy.EnergyGrid;
+import cofh.thermal.dynamics.grid.energy.EnergyGridNode;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,7 +21,7 @@ import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
 import static cofh.thermal.dynamics.init.TDynGrids.GRID_ENERGY;
 import static cofh.thermal.dynamics.init.TDynTileEntities.DUCT_ENERGY_TILE;
 
-public class EnergyDuctTile extends DuctTileBase {
+public class EnergyDuctTile extends DuctTileBase<EnergyGrid, EnergyGridNode> {
 
     public EnergyDuctTile(BlockPos pos, BlockState state) {
 
@@ -33,16 +35,16 @@ public class EnergyDuctTile extends DuctTileBase {
             return false;
         }
         BlockEntity tile = level.getBlockEntity(getBlockPos().relative(dir));
-        if (tile == null || GridHelper.getGridHost(tile).isPresent()) {
+        if (tile == null || GridHelper.getGridHost(tile) != null) {
             return false;
         }
         return tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), dir.getOpposite()).isPresent();
     }
 
     @Override
-    public Set<IGridType<?>> getExposedTypes() {
+    public IGridType<EnergyGrid> getGridType() {
 
-        return Collections.singleton(GRID_ENERGY.get());
+        return GRID_ENERGY.get();
     }
 
     @Nonnull

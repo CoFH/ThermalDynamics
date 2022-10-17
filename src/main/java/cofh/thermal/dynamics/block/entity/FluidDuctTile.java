@@ -2,6 +2,8 @@ package cofh.thermal.dynamics.block.entity;
 
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
+import cofh.thermal.dynamics.grid.fluid.FluidGrid;
+import cofh.thermal.dynamics.grid.fluid.FluidGridNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -20,7 +22,7 @@ import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
 import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;
 import static cofh.thermal.dynamics.init.TDynTileEntities.DUCT_FLUID_TILE;
 
-public class FluidDuctTile extends DuctTileBase {
+public class FluidDuctTile extends DuctTileBase<FluidGrid, FluidGridNode> {
 
     public FluidDuctTile(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 
@@ -39,7 +41,7 @@ public class FluidDuctTile extends DuctTileBase {
             return false;
         }
         BlockEntity tile = level.getBlockEntity(getBlockPos().relative(dir));
-        if (tile == null || GridHelper.getGridHost(tile).isPresent()) {
+        if (tile == null || GridHelper.getGridHost(tile) != null) {
             return false;
         }
         return tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir.getOpposite()).isPresent();
@@ -47,9 +49,9 @@ public class FluidDuctTile extends DuctTileBase {
 
     // region IGridHost
     @Override
-    public Set<IGridType<?>> getExposedTypes() {
+    public IGridType<FluidGrid> getGridType() {
 
-        return Collections.singleton(GRID_FLUID.get());
+        return GRID_FLUID.get();
     }
 
     //    @Override

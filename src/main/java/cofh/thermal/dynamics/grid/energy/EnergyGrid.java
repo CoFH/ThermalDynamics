@@ -150,7 +150,7 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
     @Override
     public boolean canConnectOnSide(BlockEntity tile, @Nullable Direction dir) {
 
-        if (GridHelper.getGridHost(tile).isPresent()) {
+        if (GridHelper.getGridHost(tile) != null) {
             return false; // We cannot externally connect to other grids.
         }
         if (dir != null) {

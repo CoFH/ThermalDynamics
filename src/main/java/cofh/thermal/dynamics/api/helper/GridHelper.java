@@ -9,10 +9,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
-import java.util.Optional;
 
 /**
  * Contains helper methods for interacting with {@link Grid Grids} in world.
@@ -33,10 +32,11 @@ public class GridHelper {
      * @param pos    The {@link BlockPos}.
      * @return Optionally the {@link IGridHost}.
      */
-    public static Optional<IGridHost> getGridHost(BlockGetter reader, BlockPos pos) {
+    @Nullable
+    public static IGridHost<?, ?> getGridHost(BlockGetter reader, BlockPos pos) {
 
         if (reader instanceof LevelReader worldReader) {
-            if (!worldReader.hasChunkAt(pos)) return Optional.empty();
+            if (!worldReader.hasChunkAt(pos)) return null;
         }
         return getGridHost(reader.getBlockEntity(pos));
     }
@@ -47,15 +47,16 @@ public class GridHelper {
      * @param tile The {@link BlockEntity}.
      * @return Optionally the {@link IGridHost}.
      */
-    public static Optional<IGridHost> getGridHost(@Nullable BlockEntity tile) {
+    @Nullable
+    public static IGridHost<?, ?> getGridHost(@Nullable BlockEntity tile) {
 
         if (tile == null) {
-            return Optional.empty();
+            return null;
         }
-        if (tile instanceof IGridHost) {
-            return Optional.of((IGridHost) tile);
+        if (tile instanceof IGridHost host) {
+            return host;
         }
-        return tile.getCapability(TDynApi.GRID_HOST_CAPABILITY).resolve();
+        return tile.getCapability(TDynApi.GRID_HOST_CAPABILITY).orElse(null);
     }
 
     /**

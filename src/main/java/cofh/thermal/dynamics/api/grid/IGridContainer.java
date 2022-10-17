@@ -21,13 +21,13 @@ public interface IGridContainer {
     Grid<?, ?> getGrid(UUID id);
 
     @Nullable
-    Grid<?, ?> getGrid(BlockPos pos);
+    <G extends Grid<G, ?>> G getGrid(IGridType<G> gridType, BlockPos pos);
 
-    void onGridHostPlaced(IGridHost host);
+    void onGridHostPlaced(IGridHost<?, ?> host);
 
-    void onGridHostRemoved(IGridHost host);
+    void onGridHostRemoved(IGridHost<?, ?> host);
 
-    void onGridHostNeighborChanged(IGridHost host);
+    void onGridHostNeighborChanged(IGridHost<?, ?> host);
 
     /**
      * Connect the grid host side.
@@ -37,7 +37,7 @@ public interface IGridContainer {
      * @param host The host to connect.
      * @param side The side to connect.
      */
-    void onGridHostSideConnected(IGridHost host, Direction side);
+    void onGridHostSideConnected(IGridHost<?, ?> host, Direction side);
 
     /**
      * Disconnect the grid host side.
@@ -47,7 +47,7 @@ public interface IGridContainer {
      * @param host The host to disconnect.
      * @param side The side to disconnect.
      */
-    void onGridHostSideDisconnecting(IGridHost host, Direction side);
+    void onGridHostSideDisconnecting(IGridHost<?, ?> host, Direction side);
 
     static Optional<IGridContainer> getCapability(LevelAccessor la) {
 

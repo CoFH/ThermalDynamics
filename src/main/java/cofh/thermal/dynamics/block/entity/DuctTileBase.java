@@ -8,6 +8,7 @@ import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import cofh.thermal.dynamics.grid.Grid;
+import cofh.thermal.dynamics.grid.GridNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -29,13 +30,13 @@ import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.ALLOWED;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
 import static net.covers1624.quack.util.SneakyUtils.notPossible;
 
-public abstract class DuctTileBase extends BlockEntity implements ITileLocation, IGridHost, IPacketHandlerTile {
+public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> extends BlockEntity implements IGridHost<G, N>, ITileLocation, IPacketHandlerTile {
 
     // Only available server side.
     @Nullable
-    protected Grid<?, ?> grid = null;
+    protected G grid = null;
 
-    protected ConnectionType[] connections = {ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED};
+    protected ConnectionType[] connections = { ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED };
 
     protected final DuctModelData modelData = new DuctModelData();
     protected boolean modelUpdate;
@@ -47,8 +48,8 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
 
     public boolean attemptConnect(Direction dir) {
 
-        Optional<IGridHost> adjacentOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
-        if (adjacentOpt.isPresent() && adjacentOpt.get() instanceof DuctTileBase other) {
+        IGridHost<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+        if (adjacent instanceof DuctTileBase other) {
             connections[dir.ordinal()] = ALLOWED;
             other.connections[dir.getOpposite().ordinal()] = ALLOWED;
 
@@ -71,8 +72,8 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
 
     public boolean attemptDisconnect(Direction dir) {
 
-        Optional<IGridHost> adjacentOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
-        if (adjacentOpt.isPresent() && adjacentOpt.get() instanceof DuctTileBase other) {
+        IGridHost<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+        if (adjacent instanceof DuctTileBase<?, ?> other) { // TODO, This should be moved up to IGridHost as a common implementation for (eventual) multiparts.
             IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostSideDisconnecting(this, dir));
 
             connections[dir.ordinal()] = DISABLED;
@@ -117,9 +118,8 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
 
         if (modelUpdate) {
             for (Direction dir : Direction.values()) {
-                Optional<IGridHost> adjacentOpt = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
-                if (adjacentOpt.isPresent()) {
-                    IGridHost adjacent = adjacentOpt.get();
+                IGridHost<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+                if (adjacent != null) {
                     modelData.setInternalConnection(dir, canConnectTo(adjacent, dir) && adjacent.canConnectTo(this, dir.getOpposite()));
                 } else {
                     modelData.setInternalConnection(dir, false);
@@ -167,19 +167,19 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
 
     // region IGridHost
     @Override
-    public Level getHostWorld() {
+    public final Level getHostWorld() {
 
         return getLevel();
     }
 
     @Override
-    public BlockPos getHostPos() {
+    public final BlockPos getHostPos() {
 
         return getBlockPos();
     }
 
     @Override
-    public Grid<?, ?> getGrid() {
+    public final G getGrid() {
 
         if (level.isClientSide) {
             throw new UnsupportedOperationException("No grid representation on client.");
@@ -187,14 +187,14 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
         if (grid == null) {
             IGridContainer gridContainer = IGridContainer.getCapability(level)
                     .orElseThrow(notPossible());
-            grid = gridContainer.getGrid(getBlockPos());
+            grid = gridContainer.getGrid(getGridType(), getBlockPos());
         }
         assert grid != null;
         return grid;
     }
 
     @Override
-    public void setGrid(Grid<?, ?> grid) {
+    public final void setGrid(G grid) {
 
         if (level.isClientSide) {
             throw new UnsupportedOperationException("No grid representation on client.");
@@ -203,9 +203,9 @@ public abstract class DuctTileBase extends BlockEntity implements ITileLocation,
     }
 
     @Override
-    public boolean canConnectTo(IGridHost other, Direction dir) {
+    public boolean canConnectTo(IGridHost<?, ?> other, Direction dir) {
 
-        return connections[dir.ordinal()].allowDuctConnection() && getExposedTypes().equals(other.getExposedTypes());
+        return IGridHost.super.canConnectTo(other, dir) && connections[dir.ordinal()].allowDuctConnection();
     }
     // endregion
 

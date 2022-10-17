@@ -1,5 +1,6 @@
 package cofh.thermal.dynamics.api.grid;
 
+import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.grid.Grid;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistryEntry;
@@ -21,7 +22,7 @@ import java.util.function.BiFunction;
  *
  * @author covers1624
  */
-public interface IGridType<G extends Grid<?, ?>> extends IForgeRegistryEntry<IGridType<?>> {
+public interface IGridType<G extends Grid<G, ?>> extends IForgeRegistryEntry<IGridType<?>> {
 
     /**
      * <strong>INTERNAL, do not call externally.</strong>
@@ -42,13 +43,20 @@ public interface IGridType<G extends Grid<?, ?>> extends IForgeRegistryEntry<IGr
      * @param gridFactory The Factory used to create new instances of this {@link Grid}.
      * @return The new {@link IGridType}.
      */
-    static <G extends Grid<?, ?>> IGridType<G> of(BiFunction<UUID, Level, G> gridFactory) {
+    static <G extends Grid<G, ?>> IGridType<G> of(BiFunction<UUID, Level, G> gridFactory) {
 
-        abstract class GridTypeImpl<G2 extends Grid<?, ?>> extends ForgeRegistryEntry<IGridType<?>> implements IGridType<G2> { }
+        abstract class GridTypeImpl<G2 extends Grid<G2, ?>> extends ForgeRegistryEntry<IGridType<?>> implements IGridType<G2> { }
         return new GridTypeImpl<>() {
             //@formatter:off
             @Override public G createGrid(UUID id, Level world) { return gridFactory.apply(id, world); }
             //@formatter:on
+
+            @Override
+            public String toString() {
+                return getRegistryName().toString();
+//                return ThermalDynamics.GRID_TYPE_REGISTRY.get().getKey(this).toString();
+                // 1.19 ^^
+            }
         };
     }
 

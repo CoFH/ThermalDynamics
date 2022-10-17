@@ -11,8 +11,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
-
 /**
  * Represents an object capable of hosting a {@link Grid}.
  * <p>
@@ -24,7 +22,8 @@ import java.util.Set;
  * @author covers1624
  * @see TDynApi#GRID_HOST_CAPABILITY
  */
-public interface IGridHost {
+// TODO this should be renamed to IDuct
+public interface IGridHost<G extends Grid<G, N>, N extends GridNode<G>> {
 
     Level getHostWorld();
 
@@ -35,11 +34,11 @@ public interface IGridHost {
      *
      * @return The raw grid.
      */
-    Grid<?, ?> getGrid();
+    G getGrid();
 
-    void setGrid(Grid<?, ?> grid);
+    void setGrid(G grid);
 
-    Set<IGridType<?>> getExposedTypes();
+    IGridType<G> getGridType();
 
     /**
      * Gets the {@link GridNode} hosted by this grid host.
@@ -47,34 +46,9 @@ public interface IGridHost {
      * @return The {@link GridNode}.
      */
     @Nullable
-    default GridNode<?> getNode() {
+    default N getNode() {
 
         return getGrid().getNodes().get(getHostPos());
-    }
-
-    /**
-     * Tries to get the {@link GridNode} hosted by this {@link IGridHost} of the given type.
-     * <p>
-     *
-     * @param gridType The {@link IGridType}
-     * @return The {@link GridNode}
-     */
-    @Nullable
-    default <G extends Grid<G, ?>> GridNode<G> getNode(IGridType<G> gridType) {
-
-        GridNode<?> node = getNode();
-        if (node == null) {
-            return null;
-        }
-        //        if (node.getGrid().getGridType() == TDynReferences.MULTI_GRID) {
-        //            IMultiGridNode multiGridNode = (IMultiGridNode) node;
-        //            return multiGridNode.getSubGrid(gridType);
-        //        }
-        if (node.getGrid().getGridType() != gridType) {
-            return null;
-        }
-        // noinspection unchecked
-        return (GridNode<G>) node;
     }
 
     /**
@@ -94,9 +68,9 @@ public interface IGridHost {
      * @param dir   The direction from this host, to the other host.
      * @return If they can connect.
      */
-    default boolean canConnectTo(IGridHost other, Direction dir) {
+    default boolean canConnectTo(IGridHost<?, ?> other, Direction dir) {
 
-        return getExposedTypes().equals(other.getExposedTypes());
+        return getGridType() == other.getGridType();
     }
 
     // region CONNECTION TYPE

@@ -135,9 +135,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
             if (!world.isLoaded(pos)) {
                 continue;
             }
-            Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(world, pos);
-            assert gridHostOpt.isPresent();
-            assert gridHostOpt.get() instanceof IGridHostUpdateable;
+            assert GridHelper.getGridHost(world, pos) instanceof IGridHostUpdateable;
         }
     }
 
@@ -146,13 +144,11 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
         if (!world.isLoaded(pos)) {
             return;
         }
-        Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(world, pos);
-        assert gridHostOpt.isPresent();
-        IGridHost gridHost = gridHostOpt.get();
-        assert gridHost.getGrid() == this;
+        IGridHost<?, ?> gridHost = GridHelper.getGridHost(world, pos);
+        assert gridHost != null && gridHost.getGrid() == this;
         assert !(gridHost instanceof IGridHostUpdateable) || updatableHosts.contains(gridHost.getHostPos());
 
-        assert gridContainer.getGrid(pos) == this;
+        assert gridContainer.getGrid(gridHost.getGridType(), pos) == this;
     }
 
     // returns true if this grid changes its loaded state to true.
@@ -449,13 +445,12 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
             long chunkPos = entry.getLongKey();
             LevelChunk chunk = world.getChunk(ChunkPos.getX(chunkPos), ChunkPos.getZ(chunkPos));
             for (BlockPos pos : entry.getValue()) {
-                Optional<IGridHost> gridHostOpt = GridHelper.getGridHost(chunk.getBlockEntity(pos));
-                if (!gridHostOpt.isPresent()) {
+                IGridHost<?, ?> gridHost = GridHelper.getGridHost(chunk.getBlockEntity(pos));
+                if (gridHost == null) {
                     LOGGER.error("Node not connected to grid! Chunk modified externally. {}", pos);
                     continue;
                 }
-                IGridHost gridHost = gridHostOpt.get();
-                gridHost.setGrid(grid);
+                gridHost.setGrid(unsafeCast(grid));
             }
         }
     }
