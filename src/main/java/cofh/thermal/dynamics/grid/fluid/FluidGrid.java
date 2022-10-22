@@ -4,7 +4,6 @@ import cofh.core.util.helpers.FluidHelper;
 import cofh.lib.util.TimeTracker;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.Grid;
-import cofh.thermal.dynamics.grid.GridNode;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;

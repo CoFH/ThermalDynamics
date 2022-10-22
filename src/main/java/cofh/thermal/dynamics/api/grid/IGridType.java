@@ -1,6 +1,5 @@
 package cofh.thermal.dynamics.api.grid;
 
-import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.grid.Grid;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistryEntry;
@@ -45,7 +44,7 @@ public interface IGridType<G extends Grid<G, ?>> extends IForgeRegistryEntry<IGr
      */
     static <G extends Grid<G, ?>> IGridType<G> of(BiFunction<UUID, Level, G> gridFactory) {
 
-        abstract class GridTypeImpl<G2 extends Grid<G2, ?>> extends ForgeRegistryEntry<IGridType<?>> implements IGridType<G2> { }
+        abstract class GridTypeImpl<G2 extends Grid<G2, ?>> extends ForgeRegistryEntry<IGridType<?>> implements IGridType<G2> {}
         return new GridTypeImpl<>() {
             //@formatter:off
             @Override public G createGrid(UUID id, Level world) { return gridFactory.apply(id, world); }
@@ -53,8 +52,9 @@ public interface IGridType<G extends Grid<G, ?>> extends IForgeRegistryEntry<IGr
 
             @Override
             public String toString() {
+
                 return getRegistryName().toString();
-//                return ThermalDynamics.GRID_TYPE_REGISTRY.get().getKey(this).toString();
+                //                return ThermalDynamics.GRID_TYPE_REGISTRY.get().getKey(this).toString();
                 // 1.19 ^^
             }
         };

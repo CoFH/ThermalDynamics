@@ -400,7 +400,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
      * <p>
      * If a node already exists at {@code pos}, it will be returned instead.
      *
-     * @param pos  The position in the grid to generate the node.
+     * @param pos The position in the grid to generate the node.
      * @return The existing node, or the new node at the position.
      */
     public final N getNodeOrSplitEdgeAndInsertNode(BlockPos pos) {
@@ -556,6 +556,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
      * @return The Grid id.
      */
     public final UUID getId() {
+
         return id;
     }
 
@@ -565,6 +566,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
      * @return The world.
      */
     public final Level getLevel() {
+
         return world;
     }
 
@@ -578,6 +580,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
      * @see IGridType
      */
     public IGridType<G> getGridType() {
+
         return gridType;
     }
 
@@ -587,6 +590,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
      * @return The nodes.
      */
     public final Map<BlockPos, N> getNodes() {
+
         return nodes;
     }
 
@@ -640,6 +644,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
     }
 
     public final void debugWriteToPacket(FriendlyByteBuf buffer) {
+
         buffer.writeUUID(getId());
         buffer.writeVarInt(nodes.size());
         for (N node : nodes.values()) {

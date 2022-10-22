@@ -15,8 +15,6 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.Set;
 
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
 import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;

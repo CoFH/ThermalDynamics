@@ -61,10 +61,12 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
     @Override
     public void onGridHostPlaced(IGridHost<?, ?> host) {
+
         gridHostPlaced(host);
     }
 
     private <G extends Grid<G, N>, N extends GridNode<G>> void gridHostPlaced(IGridHost<G, N> host) {
+
         EnumMap<Direction, IGridHost<G, N>> adjacentGrids = getAdjacentGrids(host);
         // We aren't adjacent to anything else, new grid.
         if (adjacentGrids.isEmpty()) {
@@ -222,6 +224,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
     @Override
     public void onGridHostRemoved(IGridHost<?, ?> host) {
+
         removeGridHost(host);
     }
 
@@ -521,7 +524,8 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     public <G extends Grid<G, ?>> G getGrid(IGridType<G> type, BlockPos pos) {
 
         Grid<?, ?> grid = gridPosLookup.get(pos);
-        if (grid.getGridType() != type) throw new IllegalStateException("Grid at position " + pos + " is not of type " + type + ". Got: " + grid.getGridType());
+        if (grid.getGridType() != type)
+            throw new IllegalStateException("Grid at position " + pos + " is not of type " + type + ". Got: " + grid.getGridType());
         return unsafeCast(grid);
     }
 
@@ -562,6 +566,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     }
 
     private <G extends Grid<G, N>, N extends GridNode<G>> void deserializeGrid(CompoundTag tag, UUID id, IGridType<G> gridType) {
+
         G grid = createAndAddGrid(id, gridType, false);
         grid.deserializeNBT(tag);
 

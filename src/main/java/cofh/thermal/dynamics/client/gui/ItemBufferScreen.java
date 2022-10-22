@@ -27,12 +27,9 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
     public static final String TEX_IGNORE_NBT = ID_COFH_CORE + ":textures/gui/filters/filter_ignore_nbt.png";
     public static final String TEX_USE_NBT = ID_COFH_CORE + ":textures/gui/filters/filter_use_nbt.png";
 
-    protected ItemBufferTile tile;
-
     public ItemBufferScreen(ItemBufferContainer container, Inventory inv, Component titleIn) {
 
         super(container, inv, StringHelper.getTextComponent("block.thermal.item_buffer"));
-        tile = container.tile;
         texture = TEXTURE;
         info = generatePanelInfo("info.thermal.item_buffer");
         imageHeight = 178;
@@ -54,7 +51,7 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                tile.setLatchMode(true);
+                menu.tile.setLatchMode(true);
                 playClickSound(0.7F);
                 return true;
             }
@@ -62,14 +59,14 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
                 .setSize(20, 20)
                 .setTexture(TEX_MODE_LATCH_OFF, 40, 20)
                 .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.thermal.item_buffer.mode.0")))
-                .setVisible(() -> !tile.getLatchMode()));
+                .setVisible(() -> !menu.tile.getLatchMode()));
 
         addElement(new ElementButton(this, 78, 27) {
 
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                tile.setLatchMode(false);
+                menu.tile.setLatchMode(false);
                 playClickSound(0.4F);
                 return true;
             }
@@ -77,14 +74,14 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
                 .setSize(20, 20)
                 .setTexture(TEX_MODE_LATCH_ON, 40, 20)
                 .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.thermal.item_buffer.mode.1")))
-                .setVisible(() -> tile.getLatchMode()));
+                .setVisible(() -> menu.tile.getLatchMode()));
 
         addElement(new ElementButton(this, 78, 51) {
 
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                tile.setCheckNBT(true);
+                menu.tile.setCheckNBT(true);
                 playClickSound(0.7F);
                 return true;
             }
@@ -92,14 +89,14 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
                 .setSize(20, 20)
                 .setTexture(TEX_IGNORE_NBT, 40, 20)
                 .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.cofh.filter.checkNBT.0")))
-                .setVisible(() -> !tile.getCheckNBT()));
+                .setVisible(() -> !menu.tile.getCheckNBT()));
 
         addElement(new ElementButton(this, 78, 51) {
 
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                tile.setCheckNBT(false);
+                menu.tile.setCheckNBT(false);
                 playClickSound(0.4F);
                 return true;
             }
@@ -107,7 +104,7 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
                 .setSize(20, 20)
                 .setTexture(TEX_USE_NBT, 40, 20)
                 .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.cofh.filter.checkNBT.1")))
-                .setVisible(() -> tile.getCheckNBT()));
+                .setVisible(() -> menu.tile.getCheckNBT()));
     }
     // endregion
 }

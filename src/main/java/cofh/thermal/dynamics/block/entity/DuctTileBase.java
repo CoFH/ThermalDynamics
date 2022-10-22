@@ -23,7 +23,6 @@ import net.minecraftforge.client.model.data.IModelData;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 import static cofh.lib.util.constants.NBTTags.TAG_SIDES;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.ALLOWED;
@@ -36,7 +35,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     @Nullable
     protected G grid = null;
 
-    protected ConnectionType[] connections = { ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED };
+    protected ConnectionType[] connections = {ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED};
 
     protected final DuctModelData modelData = new DuctModelData();
     protected boolean modelUpdate;

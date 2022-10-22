@@ -6,7 +6,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
 
-import java.util.EnumMap;
 import java.util.EnumSet;
 
 /**
@@ -17,7 +16,7 @@ import java.util.EnumSet;
  */
 public abstract class GridNode<G extends Grid<G, ?>> implements INBTSerializable<CompoundTag> {
 
-//    protected final EnumMap<Direction, INodeAttachment> attachments = new EnumMap<>(Direction.class);
+    //    protected final EnumMap<Direction, INodeAttachment> attachments = new EnumMap<>(Direction.class);
     protected final EnumSet<Direction> connections = EnumSet.noneOf(Direction.class);
     protected G grid;
     protected BlockPos pos = BlockPos.ZERO;
@@ -56,6 +55,7 @@ public abstract class GridNode<G extends Grid<G, ?>> implements INBTSerializable
      * @return The grid.
      */
     public final G getGrid() {
+
         return grid;
     }
 
@@ -65,6 +65,7 @@ public abstract class GridNode<G extends Grid<G, ?>> implements INBTSerializable
      * @return The node's position.
      */
     public final BlockPos getPos() {
+
         return pos;
     }
 
@@ -74,6 +75,7 @@ public abstract class GridNode<G extends Grid<G, ?>> implements INBTSerializable
      * @return The node's loaded state.
      */
     public final boolean isLoaded() {
+
         return loaded;
     }
 
@@ -83,17 +85,18 @@ public abstract class GridNode<G extends Grid<G, ?>> implements INBTSerializable
      * @return The directions this node has external connections to.
      */
     public final EnumSet<Direction> getConnections() {
+
         return connections;
     }
 
-//    /**
-//     * The attachments this node provides for each face.
-//     *
-//     * @return The attachments.
-//     */
-//    public final EnumMap<Direction, INodeAttachment> getAttachments() {
-//        return attachments;
-//    }
+    //    /**
+    //     * The attachments this node provides for each face.
+    //     *
+    //     * @return The attachments.
+    //     */
+    //    public final EnumMap<Direction, INodeAttachment> getAttachments() {
+    //        return attachments;
+    //    }
 
     //@formatter:off
     public final Level getWorld() { return grid.getLevel(); }
