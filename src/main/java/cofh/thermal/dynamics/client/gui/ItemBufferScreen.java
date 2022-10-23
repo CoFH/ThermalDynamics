@@ -4,7 +4,6 @@ import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.SimpleTooltip;
 import cofh.lib.util.helpers.StringHelper;
-import cofh.thermal.dynamics.block.entity.ItemBufferTile;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;

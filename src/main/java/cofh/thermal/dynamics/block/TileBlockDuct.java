@@ -89,6 +89,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
 
         super(builder);
         this.blockEntityType = blockEntityType;
+        this.registerDefaultState(this.stateDefinition.any().setValue(WATERLOGGED, false));
     }
 
     @Override
