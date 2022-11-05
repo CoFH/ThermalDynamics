@@ -115,6 +115,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
             } else if (advHit.subHit < 7) {
                 duct.attemptDisconnect(Direction.values()[advHit.subHit - 1]);
             } else if (advHit.subHit < 13) {
+                // TODO Attachment logic goes here
                 duct.attemptDisconnect(Direction.values()[advHit.subHit - 7]);
             }
         }
