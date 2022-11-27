@@ -49,10 +49,19 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
 
         IGridHost<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
         if (adjacent instanceof DuctTileBase other) {
+            IGridContainer gridContainer = IGridContainer.getCapability(level);
+            if (gridContainer == null) {
+                return false;
+            }
+
             connections[dir.ordinal()] = ALLOWED;
             other.connections[dir.getOpposite().ordinal()] = ALLOWED;
 
-            IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostSideConnected(this, dir));
+            if (!gridContainer.onGridHostSideConnected(this, dir)) {
+                connections[dir.ordinal()] = DISABLED;
+                other.connections[dir.getOpposite().ordinal()] = DISABLED;
+                return false;
+            }
 
             setChanged();
             other.setChanged();
@@ -73,7 +82,11 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
 
         IGridHost<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
         if (adjacent instanceof DuctTileBase<?, ?> other) { // TODO, This should be moved up to IGridHost as a common implementation for (eventual) multiparts.
-            IGridContainer.getCapability(level).ifPresent(e -> e.onGridHostSideDisconnecting(this, dir));
+            IGridContainer gridContainer = IGridContainer.getCapability(level);
+            if (gridContainer == null) {
+                return false;
+            }
+            gridContainer.onGridHostSideDisconnecting(this, dir);
 
             connections[dir.ordinal()] = DISABLED;
             other.connections[dir.getOpposite().ordinal()] = DISABLED;
@@ -178,14 +191,19 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     }
 
     @Override
+    public boolean hasGrid() {
+        return grid != null;
+    }
+
+    @Override
     public final G getGrid() {
 
         if (level.isClientSide) {
             throw new UnsupportedOperationException("No grid representation on client.");
         }
         if (grid == null) {
-            IGridContainer gridContainer = IGridContainer.getCapability(level)
-                    .orElseThrow(notPossible());
+            IGridContainer gridContainer = IGridContainer.getCapability(level);
+            assert gridContainer != null;
             grid = gridContainer.getGrid(getGridType(), getBlockPos());
         }
         assert grid != null;
@@ -205,6 +223,19 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     public boolean canConnectTo(IGridHost<?, ?> other, Direction dir) {
 
         return IGridHost.super.canConnectTo(other, dir) && connections[dir.ordinal()].allowDuctConnection();
+    }
+
+    @Override
+    public ConnectionType getConnectionType(Direction dir) {
+        return connections[dir.ordinal()];
+    }
+
+    @Override
+    public void setConnectionType(Direction dir, ConnectionType type) {
+        connections[dir.ordinal()] = type;
+        setChanged();
+        callNeighborStateChange();
+        TileStatePacket.sendToClient(this);
     }
     // endregion
 

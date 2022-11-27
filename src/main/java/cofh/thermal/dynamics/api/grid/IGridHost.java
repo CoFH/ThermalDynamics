@@ -30,12 +30,24 @@ public interface IGridHost<G extends Grid<G, N>, N extends GridNode<G>> {
     BlockPos getHostPos();
 
     /**
+     * Checks if this duct has a grid attached.
+     *
+     * @return If a grid is attached.
+     */
+    boolean hasGrid();
+
+    /**
      * Gets the raw {@link Grid} hosted by this {@link IGridHost}.
      *
      * @return The raw grid.
      */
     G getGrid();
 
+    /**
+     * Set the {@link Grid}.
+     *
+     * @param grid The gird to set.
+     */
     void setGrid(G grid);
 
     IGridType<G> getGridType();
@@ -72,6 +84,22 @@ public interface IGridHost<G extends Grid<G, N>, N extends GridNode<G>> {
 
         return getGridType() == other.getGridType();
     }
+
+    /**
+     * Get the {@link ConnectionType} for the duct.
+     *
+     * @param dir The side.
+     * @return The {@link ConnectionType}.
+     */
+    ConnectionType getConnectionType(Direction dir);
+
+    /**
+     * Set the {@link ConnectionType} for the duct.
+     *
+     * @param dir  The side.
+     * @param type The {@link ConnectionType}.
+     */
+    void setConnectionType(Direction dir, ConnectionType type);
 
     // region CONNECTION TYPE
     enum ConnectionType implements StringRepresentable {

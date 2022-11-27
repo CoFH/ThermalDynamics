@@ -107,8 +107,8 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
         if (!DEBUG) {
             return;
         }
-        GridContainer gridContainer = ((GridContainer) IGridContainer.getCapability(world)
-                .orElseThrow(notPossible()));
+        GridContainer gridContainer = (GridContainer) IGridContainer.getCapability(world);
+        assert gridContainer != null;
 
         // Check all blocks on edges.
         for (EndpointPair<N> edge : nodeGraph.edges()) {
@@ -348,8 +348,8 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
     // Called to split the current grid into the specified partitions.
     public final List<G> splitInto(List<Set<N>> splitGraphs) {
 
-        GridContainer gridContainer = ((GridContainer) IGridContainer.getCapability(world)
-                .orElseThrow(notPossible()));
+        GridContainer gridContainer = (GridContainer) IGridContainer.getCapability(world);
+        assert gridContainer != null;
         List<G> newGrids = new LinkedList<>();
 
         for (Set<N> splitGraph : splitGraphs) {

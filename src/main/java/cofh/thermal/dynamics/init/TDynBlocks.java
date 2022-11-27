@@ -4,13 +4,17 @@ import cofh.core.block.TileBlock6Way;
 import cofh.thermal.core.config.ThermalCoreConfig;
 import cofh.thermal.dynamics.block.TileBlockDuct;
 import cofh.thermal.dynamics.block.entity.ItemBufferTile;
+import cofh.thermal.dynamics.item.DuctItemBlock;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.Material;
 
 import java.util.function.IntSupplier;
 
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
+import static cofh.thermal.core.ThermalCore.BLOCKS;
 import static cofh.thermal.core.util.RegistrationHelper.registerBlock;
+import static cofh.thermal.core.util.RegistrationHelper.registerBlockAndItem;
 import static cofh.thermal.dynamics.init.TDynIDs.*;
 import static cofh.thermal.dynamics.init.TDynTileEntities.*;
 import static cofh.thermal.lib.common.ThermalItemGroups.THERMAL_DEVICES;
@@ -30,10 +34,15 @@ public class TDynBlocks {
     // region HELPERS
     private static void registerTileBlocks() {
 
-
-        registerBlock(ID_ENERGY_DUCT, () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), DUCT_ENERGY_TILE), THERMAL_DEVICES, ID_THERMAL_DYNAMICS);
-        registerBlock(ID_FLUID_DUCT, () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), DUCT_FLUID_TILE), THERMAL_DEVICES, ID_THERMAL_DYNAMICS);
-        registerBlock(ID_FLUID_DUCT_GLASS, () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), DUCT_FLUID_GLASS_TILE), THERMAL_DEVICES, ID_THERMAL_DYNAMICS);
+        registerBlockAndItem(ID_ENERGY_DUCT,
+                () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), DUCT_ENERGY_TILE),
+                () -> new DuctItemBlock(BLOCKS.get(ID_ENERGY_DUCT), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
+        registerBlockAndItem(ID_FLUID_DUCT,
+                () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), DUCT_FLUID_TILE),
+                () -> new DuctItemBlock(BLOCKS.get(ID_FLUID_DUCT), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
+        registerBlockAndItem(ID_FLUID_DUCT_GLASS,
+                () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), DUCT_FLUID_GLASS_TILE),
+                () -> new DuctItemBlock(BLOCKS.get(ID_FLUID_DUCT_GLASS), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
 
 
         IntSupplier storageAugs = () -> ThermalCoreConfig.storageAugments;

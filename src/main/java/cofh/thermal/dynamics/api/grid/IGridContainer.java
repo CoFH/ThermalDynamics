@@ -6,9 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -23,7 +22,7 @@ public interface IGridContainer {
     @Nullable
     <G extends Grid<G, ?>> G getGrid(IGridType<G> gridType, BlockPos pos);
 
-    void onGridHostPlaced(IGridHost<?, ?> host);
+    void onGridHostPlaced(IGridHost<?, ?> host, @Nullable Direction connectionPreference);
 
     void onGridHostRemoved(IGridHost<?, ?> host);
 
@@ -36,8 +35,9 @@ public interface IGridContainer {
      *
      * @param host The host to connect.
      * @param side The side to connect.
+     * @return If the connection was successful.
      */
-    void onGridHostSideConnected(IGridHost<?, ?> host, Direction side);
+    boolean onGridHostSideConnected(IGridHost<?, ?> host, Direction side);
 
     /**
      * Disconnect the grid host side.
@@ -49,10 +49,11 @@ public interface IGridContainer {
      */
     void onGridHostSideDisconnecting(IGridHost<?, ?> host, Direction side);
 
-    static Optional<IGridContainer> getCapability(LevelAccessor la) {
+    @Nullable
+    static IGridContainer getCapability(LevelAccessor la) {
 
-        if (!(la instanceof Level level)) return Optional.empty();
-        return level.getCapability(TDynApi.GRID_CONTAINER_CAPABILITY).resolve();
+        if (!(la instanceof Level level)) return null;
+        return level.getCapability(TDynApi.GRID_CONTAINER_CAPABILITY).resolve().orElse(null);
     }
 
 }

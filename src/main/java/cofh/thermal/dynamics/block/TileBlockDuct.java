@@ -4,9 +4,11 @@ import cofh.lib.api.block.IDismantleable;
 import cofh.lib.util.Utils;
 import cofh.lib.util.raytracer.IndexedVoxelShape;
 import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
+import cofh.lib.util.raytracer.RayTracer;
 import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.block.entity.DuctTileBase;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import com.google.common.collect.ImmutableSet;
@@ -16,7 +18,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -33,10 +37,11 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterloggedBlock, IDismantleable {
@@ -130,7 +135,10 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
         }
         BlockEntity tile = world.getBlockEntity(pos);
         if (tile instanceof IGridHost host) {
-            IGridContainer.getCapability(world).ifPresent(e -> e.onGridHostNeighborChanged(host));
+            IGridContainer gridContainer = IGridContainer.getCapability(world);
+            if (gridContainer != null) {
+                gridContainer.onGridHostNeighborChanged(host);
+            }
         }
     }
 
@@ -141,8 +149,11 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
             return;
         }
         BlockEntity tile = worldIn.getBlockEntity(pos);
-        if (tile instanceof IGridHost host) {
-            IGridContainer.getCapability(worldIn).ifPresent(e -> e.onGridHostPlaced(host));
+        if (tile instanceof IGridHost host && !host.hasGrid()) {
+            IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
+            if (gridContainer != null) {
+                gridContainer.onGridHostPlaced(host, null);
+            }
         }
     }
 
@@ -152,7 +163,10 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity tile = worldIn.getBlockEntity(pos);
             if (tile instanceof IGridHost host) {
-                IGridContainer.getCapability(worldIn).ifPresent(e -> e.onGridHostRemoved(host));
+                IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
+                if (gridContainer != null) {
+                    gridContainer.onGridHostRemoved(host);
+                }
             }
             super.onRemove(state, worldIn, pos, newState, isMoving);
         }

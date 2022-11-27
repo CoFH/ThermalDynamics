@@ -27,17 +27,26 @@ public class GridEvents {
 
     private static void onWorldTick(TickEvent.WorldTickEvent event) {
 
-        IGridContainer.getCapability(event.world).ifPresent(e -> ((GridContainer) e).onWorldTick(event.phase));
+        IGridContainer gridContainer = IGridContainer.getCapability(event.world);
+        if (gridContainer != null) {
+            ((GridContainer) gridContainer).onWorldTick(event.phase);
+        }
     }
 
     private static void onChunkLoad(ChunkEvent.Load event) {
 
-        IGridContainer.getCapability(event.getWorld()).ifPresent(e -> ((GridContainer) e).onChunkLoad(event.getChunk()));
+        IGridContainer gridContainer = IGridContainer.getCapability(event.getWorld());
+        if (gridContainer != null) {
+            ((GridContainer) gridContainer).onChunkLoad(event.getChunk());
+        }
     }
 
     private static void onChunkUnload(ChunkEvent.Unload event) {
 
-        IGridContainer.getCapability(event.getWorld()).ifPresent(e -> ((GridContainer) e).onChunkUnload(event.getChunk()));
+        IGridContainer gridContainer = IGridContainer.getCapability(event.getWorld());
+        if (gridContainer != null) {
+            ((GridContainer) gridContainer).onChunkUnload(event.getChunk());
+        }
     }
 
 }

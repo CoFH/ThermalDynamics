@@ -1,5 +1,7 @@
 package cofh.thermal.dynamics.block.entity;
 
+import cofh.core.util.helpers.FluidHelper;
+import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.fluid.FluidGrid;
@@ -11,6 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import javax.annotation.Nonnull;
@@ -52,18 +55,18 @@ public class FluidDuctTile extends DuctTileBase<FluidGrid, FluidGridNode> {
         return GRID_FLUID.get();
     }
 
-    //    @Override
-    //    public boolean canConnectTo(IGridHost other, Direction dir) {
-    //
-    //        if (getGrid() instanceof FluidGrid myGrid && other.getGrid() instanceof FluidGrid otherGrid) {
-    //            FluidStack myFluid = myGrid.getFluid();
-    //            FluidStack otherFluid = otherGrid.getFluid();
-    //            if (!FluidHelper.fluidsEqual(myFluid, otherFluid)) {
-    //                return false;
-    //            }
-    //        }
-    //        return connections[dir.ordinal()].allowDuctConnection() && getExposedTypes().equals(other.getExposedTypes());
-    //    }
+    @Override
+    public boolean canConnectTo(IGridHost<?, ?> other, Direction dir) {
+
+        if (!getLevel().isClientSide && other.getGrid() instanceof FluidGrid otherGrid) {
+            FluidStack myFluid = getGrid().getFluid();
+            FluidStack otherFluid = otherGrid.getFluid();
+            if (!myFluid.isEmpty() && !otherFluid.isEmpty() && !FluidHelper.fluidsEqual(myFluid, otherFluid)) {
+                return false;
+            }
+        }
+        return super.canConnectTo(other, dir);
+    }
     // endregion
 
     @Nonnull
