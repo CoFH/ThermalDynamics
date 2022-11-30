@@ -3,10 +3,6 @@ package cofh.thermal.dynamics.attachment;
 import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.FluidFilter;
 import cofh.core.util.filter.IFilter;
-import cofh.thermal.dynamics.api.grid.IGridHost;
-import cofh.thermal.dynamics.grid.fluid.FluidGrid;
-import cofh.thermal.dynamics.grid.fluid.FluidGridNode;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -24,10 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
-
-import static cofh.lib.util.constants.NBTTags.TAG_MODE;
 
 public class FluidFilterAttachment implements IFilterableAttachment, MenuProvider {
 
@@ -36,27 +29,14 @@ public class FluidFilterAttachment implements IFilterableAttachment, MenuProvide
     protected IFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic();
 
-    protected IGridHost<FluidGrid, FluidGridNode> host;
-    protected Direction side;
-
-    protected boolean allowReverseFlow = true;
-
     protected LazyOptional<IFluidHandler> gridCap = LazyOptional.empty();
-    protected LazyOptional<IFluidHandler> tileCap = LazyOptional.empty();
-
-    public FluidFilterAttachment(IGridHost<FluidGrid, FluidGridNode> host, Direction side) {
-
-        this.host = host;
-        this.side = side;
-    }
+    protected LazyOptional<IFluidHandler> externalCap = LazyOptional.empty();
 
     @Override
     public IAttachment read(CompoundTag nbt) {
 
         filter.read(nbt);
         rsControl.read(nbt);
-
-        allowReverseFlow = nbt.getBoolean(TAG_MODE);
 
         return this;
     }
@@ -66,8 +46,6 @@ public class FluidFilterAttachment implements IFilterableAttachment, MenuProvide
 
         filter.write(nbt);
         rsControl.write(nbt);
-
-        nbt.putBoolean(TAG_MODE, allowReverseFlow);
 
         return nbt;
     }
@@ -86,35 +64,35 @@ public class FluidFilterAttachment implements IFilterableAttachment, MenuProvide
     }
 
     @Override
-    public <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridCap) {
+    public <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridLazOpt) {
 
         if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            Optional<T> gridOpt = gridCap.resolve();
+            Optional<T> gridOpt = gridLazOpt.resolve();
             if (gridOpt.isPresent() && gridOpt.get() instanceof IFluidHandler) {
-                if (!this.gridCap.isPresent()) {
-                    this.gridCap = LazyOptional.of(() -> new InternalWrapper((IFluidHandler) gridOpt.get(), e -> !rsControl.getState() || filter.valid(e), () -> allowReverseFlow));
-                    gridCap.addListener(e -> this.gridCap.invalidate());
+                if (!gridCap.isPresent()) {
+                    gridCap = LazyOptional.of(() -> new CapabilityWrapper((IFluidHandler) gridOpt.get(), e -> !rsControl.getState() || filter.valid(e)));
+                    gridLazOpt.addListener(e -> gridCap.invalidate());
                 }
-                return this.gridCap.cast();
+                return gridCap.cast();
             }
         }
-        return gridCap;
+        return gridLazOpt;
     }
 
     @Override
-    public <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> tileCap) {
+    public <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> extLazOpt) {
 
         if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            Optional<T> tileOpt = tileCap.resolve();
-            if (tileOpt.isPresent() && tileOpt.get() instanceof IFluidHandler) {
-                if (!this.tileCap.isPresent()) {
-                    this.tileCap = LazyOptional.of(() -> new InternalWrapper((IFluidHandler) tileOpt.get(), e -> !rsControl.getState() || filter.valid(e), () -> allowReverseFlow));
-                    tileCap.addListener(e -> this.tileCap.invalidate());
+            Optional<T> extOpt = extLazOpt.resolve();
+            if (extOpt.isPresent() && extOpt.get() instanceof IFluidHandler) {
+                if (!externalCap.isPresent()) {
+                    externalCap = LazyOptional.of(() -> new CapabilityWrapper((IFluidHandler) extOpt.get(), e -> !rsControl.getState() || filter.valid(e)));
+                    extLazOpt.addListener(e -> externalCap.invalidate());
                 }
-                return this.tileCap.cast();
+                return externalCap.cast();
             }
         }
-        return tileCap;
+        return extLazOpt;
     }
 
     // region IFilterableAttachment
@@ -126,18 +104,16 @@ public class FluidFilterAttachment implements IFilterableAttachment, MenuProvide
     // endregion
 
     // region WRAPPER CLASS
-    private static class InternalWrapper implements IFluidHandler {
+    private static class CapabilityWrapper implements IFluidHandler {
 
         protected IFluidHandler wrappedHandler;
 
         protected Predicate<FluidStack> validator;
-        protected BooleanSupplier allowReverseFlow;
 
-        public InternalWrapper(IFluidHandler wrappedHandler, Predicate<FluidStack> validator, BooleanSupplier allowReverseFlow) {
+        public CapabilityWrapper(IFluidHandler wrappedHandler, Predicate<FluidStack> validator) {
 
             this.wrappedHandler = wrappedHandler;
             this.validator = validator;
-            this.allowReverseFlow = allowReverseFlow;
         }
 
         @Override
@@ -175,14 +151,14 @@ public class FluidFilterAttachment implements IFilterableAttachment, MenuProvide
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
 
-            return allowReverseFlow.getAsBoolean() ? wrappedHandler.drain(resource, action) : FluidStack.EMPTY;
+            return wrappedHandler.drain(resource, action);
         }
 
         @NotNull
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
 
-            return allowReverseFlow.getAsBoolean() ? wrappedHandler.drain(maxDrain, action) : FluidStack.EMPTY;
+            return wrappedHandler.drain(maxDrain, action);
         }
 
     }

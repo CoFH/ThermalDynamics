@@ -32,25 +32,25 @@ public interface IAttachment extends INBTSerializable<CompoundTag> {
     /**
      * This allows for the grid's capability to be "wrapped" by an attachment.
      *
-     * @param cap     The capability being queried (e.g., ENERGY).
-     * @param gridCap The returned LazyOptional from the grid (or a LazyOptional.empty())
+     * @param cap        The capability being queried (e.g., ENERGY).
+     * @param gridLazOpt The returned LazyOptional from the grid (or a LazyOptional.empty())
      * @return The wrapped capability.
      */
-    default <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridCap) {
+    default <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridLazOpt) {
 
-        return gridCap;
+        return gridLazOpt;
     }
 
     /**
      * This allows for a tile's capability to be "wrapped" by an attachment.
      *
-     * @param cap     The capability being queried (e.g., ENERGY).
-     * @param tileCap The returned LazyOptional from the tile (or a LazyOptional.empty())
+     * @param cap       The capability being queried (e.g., ENERGY).
+     * @param extLazOpt The returned LazyOptional from the tile (or a LazyOptional.empty())
      * @return The wrapped capability.
      */
-    default <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> tileCap) {
+    default <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> extLazOpt) {
 
-        return tileCap;
+        return extLazOpt;
     }
 
 }

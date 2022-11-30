@@ -32,7 +32,7 @@ public class EnergyLimiterAttachment implements IAttachment, MenuProvider {
     protected int amountOutput = MAX_OUTPUT;
 
     protected LazyOptional<IEnergyStorage> gridCap = LazyOptional.empty();
-    protected LazyOptional<IEnergyStorage> tileCap = LazyOptional.empty();
+    protected LazyOptional<IEnergyStorage> externalCap = LazyOptional.empty();
 
     @Override
     public IAttachment read(CompoundTag nbt) {
@@ -70,46 +70,46 @@ public class EnergyLimiterAttachment implements IAttachment, MenuProvider {
     }
 
     @Override
-    public <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridCap) {
+    public <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridLazOpt) {
 
         if (cap == ThermalEnergyHelper.getBaseEnergySystem()) {
-            Optional<T> gridOpt = gridCap.resolve();
+            Optional<T> gridOpt = gridLazOpt.resolve();
             if (gridOpt.isPresent() && gridOpt.get() instanceof IEnergyStorage) {
-                if (!this.gridCap.isPresent()) {
-                    this.gridCap = LazyOptional.of(() -> new InternalWrapper((IEnergyStorage) gridOpt.get(), () -> rsControl.getState() ? amountInput : 0, () -> rsControl.getState() ? amountOutput : 0));
-                    gridCap.addListener(e -> this.gridCap.invalidate());
+                if (!gridCap.isPresent()) {
+                    gridCap = LazyOptional.of(() -> new CapabilityWrapper((IEnergyStorage) gridOpt.get(), () -> rsControl.getState() ? amountInput : 0, () -> rsControl.getState() ? amountOutput : 0));
+                    gridLazOpt.addListener(e -> gridCap.invalidate());
                 }
-                return this.gridCap.cast();
+                return gridCap.cast();
             }
         }
-        return gridCap;
+        return gridLazOpt;
     }
 
     @Override
-    public <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> tileCap) {
+    public <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> extLazOpt) {
 
         if (cap == ThermalEnergyHelper.getBaseEnergySystem()) {
-            Optional<T> tileOpt = tileCap.resolve();
-            if (tileOpt.isPresent() && tileOpt.get() instanceof IEnergyStorage) {
-                if (!this.tileCap.isPresent()) {
-                    this.tileCap = LazyOptional.of(() -> new InternalWrapper((IEnergyStorage) tileOpt.get(), () -> rsControl.getState() ? amountInput : 0, () -> rsControl.getState() ? amountOutput : 0));
-                    tileCap.addListener(e -> this.tileCap.invalidate());
+            Optional<T> extOpt = extLazOpt.resolve();
+            if (extOpt.isPresent() && extOpt.get() instanceof IEnergyStorage) {
+                if (!externalCap.isPresent()) {
+                    externalCap = LazyOptional.of(() -> new CapabilityWrapper((IEnergyStorage) extOpt.get(), () -> rsControl.getState() ? amountInput : 0, () -> rsControl.getState() ? amountOutput : 0));
+                    extLazOpt.addListener(e -> externalCap.invalidate());
                 }
-                return this.tileCap.cast();
+                return externalCap.cast();
             }
         }
-        return tileCap;
+        return extLazOpt;
     }
 
     // region WRAPPER CLASS
-    private static class InternalWrapper implements IEnergyStorage {
+    private static class CapabilityWrapper implements IEnergyStorage {
 
         protected IEnergyStorage wrappedStorage;
 
         protected IntSupplier curReceive;
         protected IntSupplier curExtract;
 
-        public InternalWrapper(IEnergyStorage wrappedStorage, IntSupplier curReceive, IntSupplier curExtract) {
+        public CapabilityWrapper(IEnergyStorage wrappedStorage, IntSupplier curReceive, IntSupplier curExtract) {
 
             this.wrappedStorage = wrappedStorage;
             this.curReceive = curReceive;

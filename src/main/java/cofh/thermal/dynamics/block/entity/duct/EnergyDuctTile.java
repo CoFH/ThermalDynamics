@@ -2,7 +2,6 @@ package cofh.thermal.dynamics.block.entity.duct;
 
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.attachment.EnergyLimiterAttachment;
 import cofh.thermal.dynamics.grid.energy.EnergyGrid;
 import cofh.thermal.dynamics.grid.energy.EnergyGridNode;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
