@@ -308,7 +308,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         if (side == null || level == null || level.isClientSide || connections[side.ordinal()] == DISABLED) {
             return LazyOptional.empty();
         }
-        return attachments[side.ordinal()].wrapInputCapability(cap, getGrid().getCapability(cap));
+        return attachments[side.ordinal()].wrapGridCapability(cap, getGrid().getCapability(cap));
     }
 
 }

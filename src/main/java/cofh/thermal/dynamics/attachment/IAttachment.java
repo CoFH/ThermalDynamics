@@ -36,7 +36,7 @@ public interface IAttachment extends INBTSerializable<CompoundTag> {
      * @param gridCap The returned LazyOptional from the grid (or a LazyOptional.empty())
      * @return The wrapped capability.
      */
-    default <T> LazyOptional<T> wrapInputCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridCap) {
+    default <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridCap) {
 
         return gridCap;
     }
@@ -48,7 +48,7 @@ public interface IAttachment extends INBTSerializable<CompoundTag> {
      * @param tileCap The returned LazyOptional from the tile (or a LazyOptional.empty())
      * @return The wrapped capability.
      */
-    default <T> LazyOptional<T> wrapOutputCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> tileCap) {
+    default <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> tileCap) {
 
         return tileCap;
     }

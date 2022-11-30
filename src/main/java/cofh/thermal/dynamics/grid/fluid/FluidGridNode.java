@@ -67,7 +67,7 @@ public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridN
         if (tile == null) {
             return;
         }
-        attachment.wrapOutputCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY,
+        attachment.wrapExternalCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY,
                         tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir.getOpposite()))
                 .ifPresent(e -> grid.drain(e.fill(grid.getFluid(), EXECUTE), EXECUTE));
     }

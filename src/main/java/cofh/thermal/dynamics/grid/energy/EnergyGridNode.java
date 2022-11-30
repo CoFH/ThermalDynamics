@@ -66,7 +66,7 @@ public class EnergyGridNode extends GridNode<EnergyGrid> implements ITickableGri
         if (tile == null) {
             return;
         }
-        attachment.wrapOutputCapability(ThermalEnergyHelper.getBaseEnergySystem(),
+        attachment.wrapExternalCapability(ThermalEnergyHelper.getBaseEnergySystem(),
                         tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), dir.getOpposite()).cast())
                 .ifPresent(e -> grid.extractEnergy(e.receiveEnergy(grid.getEnergyStored(), false), false));
     }
