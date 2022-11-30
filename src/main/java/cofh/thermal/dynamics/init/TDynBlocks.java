@@ -4,7 +4,7 @@ import cofh.core.block.TileBlock6Way;
 import cofh.thermal.core.config.ThermalCoreConfig;
 import cofh.thermal.dynamics.block.TileBlockDuct;
 import cofh.thermal.dynamics.block.entity.ItemBufferTile;
-import cofh.thermal.dynamics.item.DuctItemBlock;
+import cofh.thermal.dynamics.item.DuctBlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.Material;
@@ -36,13 +36,13 @@ public class TDynBlocks {
 
         registerBlockAndItem(ID_ENERGY_DUCT,
                 () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), DUCT_ENERGY_TILE),
-                () -> new DuctItemBlock(BLOCKS.get(ID_ENERGY_DUCT), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
+                () -> new DuctBlockItem(BLOCKS.get(ID_ENERGY_DUCT), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
         registerBlockAndItem(ID_FLUID_DUCT,
                 () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), DUCT_FLUID_TILE),
-                () -> new DuctItemBlock(BLOCKS.get(ID_FLUID_DUCT), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
+                () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
         registerBlockAndItem(ID_FLUID_DUCT_GLASS,
                 () -> new TileBlockDuct(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), DUCT_FLUID_GLASS_TILE),
-                () -> new DuctItemBlock(BLOCKS.get(ID_FLUID_DUCT_GLASS), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
+                () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT_GLASS), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
 
 
         IntSupplier storageAugs = () -> ThermalCoreConfig.storageAugments;

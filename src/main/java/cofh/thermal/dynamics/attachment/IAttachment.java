@@ -1,10 +1,13 @@
 package cofh.thermal.dynamics.attachment;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.MenuProvider;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.LazyOptional;
 
-public interface IAttachment extends INBTSerializable<CompoundTag>, MenuProvider {
+import javax.annotation.Nonnull;
+
+public interface IAttachment extends INBTSerializable<CompoundTag> {
 
     IAttachment read(CompoundTag nbt);
 
@@ -20,6 +23,34 @@ public interface IAttachment extends INBTSerializable<CompoundTag>, MenuProvider
     default void deserializeNBT(CompoundTag nbt) {
 
         read(nbt);
+    }
+
+    default void tick() {
+
+    }
+
+    /**
+     * This allows for the grid's capability to be "wrapped" by an attachment.
+     *
+     * @param cap     The capability being queried (e.g., ENERGY).
+     * @param gridCap The returned LazyOptional from the grid (or a LazyOptional.empty())
+     * @return The wrapped capability.
+     */
+    default <T> LazyOptional<T> wrapInputCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridCap) {
+
+        return gridCap;
+    }
+
+    /**
+     * This allows for a tile's capability to be "wrapped" by an attachment.
+     *
+     * @param cap     The capability being queried (e.g., ENERGY).
+     * @param tileCap The returned LazyOptional from the tile (or a LazyOptional.empty())
+     * @return The wrapped capability.
+     */
+    default <T> LazyOptional<T> wrapOutputCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> tileCap) {
+
+        return tileCap;
     }
 
 }

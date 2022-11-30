@@ -17,9 +17,10 @@ import net.minecraft.world.phys.HitResult;
 /**
  * Created by covers1624 on 27/11/22.
  */
-public class DuctItemBlock extends BlockItemCoFH {
+public class DuctBlockItem extends BlockItemCoFH {
 
-    public DuctItemBlock(Block block, Properties properties) {
+    public DuctBlockItem(Block block, Properties properties) {
+
         super(block, properties);
     }
 
@@ -32,16 +33,13 @@ public class DuctItemBlock extends BlockItemCoFH {
         if (!placed || level.isClientSide()) {
             return placed;
         }
-
         BlockEntity tile = level.getBlockEntity(pos);
         if (tile instanceof IGridHost host) {
             IGridContainer gridContainer = IGridContainer.getCapability(level);
             if (gridContainer != null) {
-
                 gridContainer.onGridHostPlaced(host, computeConnectionPreference(level, ctx.getHitResult()));
             }
         }
-
         level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
         return true;
     }
@@ -51,7 +49,7 @@ public class DuctItemBlock extends BlockItemCoFH {
         if (hitResult.getType() == HitResult.Type.MISS) {
             return null;
         }
-
         return GridHelper.getGridHost(level, hitResult.getBlockPos()) != null ? hitResult.getDirection().getOpposite() : null;
     }
+
 }

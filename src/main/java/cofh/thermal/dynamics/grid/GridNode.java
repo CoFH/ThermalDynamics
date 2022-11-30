@@ -1,11 +1,14 @@
 package cofh.thermal.dynamics.grid;
 
+import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.helper.GridHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
 
+import javax.annotation.Nullable;
 import java.util.EnumSet;
 
 /**
@@ -16,7 +19,6 @@ import java.util.EnumSet;
  */
 public abstract class GridNode<G extends Grid<G, ?>> implements INBTSerializable<CompoundTag> {
 
-    //    protected final EnumMap<Direction, INodeAttachment> attachments = new EnumMap<>(Direction.class);
     protected final EnumSet<Direction> connections = EnumSet.noneOf(Direction.class);
     protected G grid;
     protected BlockPos pos = BlockPos.ZERO;
@@ -89,14 +91,11 @@ public abstract class GridNode<G extends Grid<G, ?>> implements INBTSerializable
         return connections;
     }
 
-    //    /**
-    //     * The attachments this node provides for each face.
-    //     *
-    //     * @return The attachments.
-    //     */
-    //    public final EnumMap<Direction, INodeAttachment> getAttachments() {
-    //        return attachments;
-    //    }
+    @Nullable
+    protected IGridHost<?, ?> gridHost() {
+
+        return GridHelper.getGridHost(getWorld(), getPos());
+    }
 
     //@formatter:off
     public final Level getWorld() { return grid.getLevel(); }

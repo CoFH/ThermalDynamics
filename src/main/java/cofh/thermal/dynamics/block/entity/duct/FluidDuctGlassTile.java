@@ -1,4 +1,4 @@
-package cofh.thermal.dynamics.block.entity;
+package cofh.thermal.dynamics.block.entity.duct;
 
 import cofh.core.network.packet.client.TileStatePacket;
 import cofh.core.util.helpers.FluidHelper;

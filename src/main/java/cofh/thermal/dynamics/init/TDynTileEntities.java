@@ -1,9 +1,9 @@
 package cofh.thermal.dynamics.init;
 
-import cofh.thermal.dynamics.block.entity.EnergyDuctTile;
-import cofh.thermal.dynamics.block.entity.FluidDuctGlassTile;
-import cofh.thermal.dynamics.block.entity.FluidDuctTile;
 import cofh.thermal.dynamics.block.entity.ItemBufferTile;
+import cofh.thermal.dynamics.block.entity.duct.EnergyDuctTile;
+import cofh.thermal.dynamics.block.entity.duct.FluidDuctGlassTile;
+import cofh.thermal.dynamics.block.entity.duct.FluidDuctTile;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.RegistryObject;
 

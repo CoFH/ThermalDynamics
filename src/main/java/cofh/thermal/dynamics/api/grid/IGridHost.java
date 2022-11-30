@@ -1,6 +1,7 @@
 package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.TDynApi;
+import cofh.thermal.dynamics.attachment.IAttachment;
 import cofh.thermal.dynamics.grid.Grid;
 import cofh.thermal.dynamics.grid.GridNode;
 import net.minecraft.core.BlockPos;
@@ -10,6 +11,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nonnull;
 
 /**
  * Represents an object capable of hosting a {@link Grid}.
@@ -62,6 +65,9 @@ public interface IGridHost<G extends Grid<G, N>, N extends GridNode<G>> {
 
         return getGrid().getNodes().get(getHostPos());
     }
+
+    @Nonnull
+    IAttachment getAttachment(Direction dir);
 
     /**
      * Checks if {@code other} can connect to this grid host.

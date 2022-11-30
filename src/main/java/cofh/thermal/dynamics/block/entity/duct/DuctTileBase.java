@@ -1,4 +1,4 @@
-package cofh.thermal.dynamics.block.entity;
+package cofh.thermal.dynamics.block.entity.duct;
 
 import cofh.core.network.packet.client.TileStatePacket;
 import cofh.lib.api.block.entity.IPacketHandlerTile;
@@ -6,6 +6,8 @@ import cofh.lib.api.block.entity.ITileLocation;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.helper.GridHelper;
+import cofh.thermal.dynamics.attachment.EmptyAttachment;
+import cofh.thermal.dynamics.attachment.IAttachment;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import cofh.thermal.dynamics.grid.Grid;
 import cofh.thermal.dynamics.grid.GridNode;
@@ -20,6 +22,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,7 +31,6 @@ import javax.annotation.Nullable;
 import static cofh.lib.util.constants.NBTTags.TAG_SIDES;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.ALLOWED;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
-import static net.covers1624.quack.util.SneakyUtils.notPossible;
 
 public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> extends BlockEntity implements IGridHost<G, N>, ITileLocation, IPacketHandlerTile {
 
@@ -36,6 +39,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     protected G grid = null;
 
     protected ConnectionType[] connections = {ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED};
+    protected IAttachment[] attachments = {EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE};
 
     protected final DuctModelData modelData = new DuctModelData();
     protected boolean modelUpdate;
@@ -192,6 +196,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
 
     @Override
     public boolean hasGrid() {
+
         return grid != null;
     }
 
@@ -219,6 +224,13 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         this.grid = grid;
     }
 
+    @Nonnull
+    @Override
+    public IAttachment getAttachment(Direction dir) {
+
+        return attachments[dir.ordinal()];
+    }
+
     @Override
     public boolean canConnectTo(IGridHost<?, ?> other, Direction dir) {
 
@@ -227,11 +239,13 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
 
     @Override
     public ConnectionType getConnectionType(Direction dir) {
+
         return connections[dir.ordinal()];
     }
 
     @Override
     public void setConnectionType(Direction dir, ConnectionType type) {
+
         connections[dir.ordinal()] = type;
         setChanged();
         callNeighborStateChange();
@@ -284,6 +298,17 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
             connections[i] = ConnectionType.VALUES[buffer.readByte()];
         }
         requestModelDataUpdate();
+    }
+    // endregion
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+
+        if (side == null || level == null || level.isClientSide || connections[side.ordinal()] == DISABLED) {
+            return LazyOptional.empty();
+        }
+        return attachments[side.ordinal()].wrapInputCapability(cap, getGrid().getCapability(cap));
     }
 
 }

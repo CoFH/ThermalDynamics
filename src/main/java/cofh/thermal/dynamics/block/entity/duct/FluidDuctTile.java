@@ -1,4 +1,4 @@
-package cofh.thermal.dynamics.block.entity;
+package cofh.thermal.dynamics.block.entity.duct;
 
 import cofh.core.util.helpers.FluidHelper;
 import cofh.thermal.dynamics.api.grid.IGridHost;
@@ -11,15 +11,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
 import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;
 import static cofh.thermal.dynamics.init.TDynTileEntities.DUCT_FLUID_TILE;
 
@@ -68,12 +62,4 @@ public class FluidDuctTile extends DuctTileBase<FluidGrid, FluidGridNode> {
         return super.canConnectTo(other, dir);
     }
     // endregion
-
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-
-        return level.isClientSide || side != null && connections[side.ordinal()] == DISABLED ? LazyOptional.empty() : getGrid().getCapability(cap);
-    }
-
 }

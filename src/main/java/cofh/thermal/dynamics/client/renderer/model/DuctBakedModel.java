@@ -85,8 +85,6 @@ public class DuctBakedModel implements IDynamicBakedModel {
         return getModelFor(modelData);
     }
 
-    private List<BakedQuad> testQuads;
-
     private List<BakedQuad> getModelFor(DuctModelData modelData) {
 
         List<BakedQuad> modelQuads = modelCache.get(modelData); // TODO race condition with DuctModelData being mutable?

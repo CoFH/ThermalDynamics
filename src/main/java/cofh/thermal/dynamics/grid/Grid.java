@@ -31,7 +31,6 @@ import java.util.function.LongFunction;
 
 import static cofh.thermal.dynamics.api.helper.GridHelper.numBetween;
 import static java.util.Objects.requireNonNull;
-import static net.covers1624.quack.util.SneakyUtils.notPossible;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
 /**

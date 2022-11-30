@@ -33,7 +33,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static cofh.thermal.dynamics.api.helper.GridHelper.*;
-import static net.covers1624.quack.collection.ColUtils.onlyOrDefault;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
 /**
