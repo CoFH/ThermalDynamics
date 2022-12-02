@@ -6,6 +6,8 @@ import cofh.lib.api.block.entity.ITileLocation;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.helper.GridHelper;
+import cofh.thermal.dynamics.attachment.AttachmentHelper;
+import cofh.thermal.dynamics.attachment.AttachmentRegistry;
 import cofh.thermal.dynamics.attachment.EmptyAttachment;
 import cofh.thermal.dynamics.attachment.IAttachment;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
@@ -15,6 +17,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -24,11 +29,14 @@ import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.lib.util.constants.NBTTags.TAG_SIDES;
+import static cofh.lib.util.constants.NBTTags.TAG_TYPE;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.ALLOWED;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
 
@@ -73,17 +81,20 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
             TileStatePacket.sendToClient(this);
             TileStatePacket.sendToClient(other);
         } else {
-            System.out.println("Attempt to connect to BLOCK on: " + dir);
             connections[dir.ordinal()] = ALLOWED;
             setChanged();
             callNeighborStateChange();
             TileStatePacket.sendToClient(this);
         }
-        return false;
+        return true;
     }
 
     public boolean attemptDisconnect(Direction dir) {
 
+        // TODO Dismantle attachment
+        //        if (false) {
+        //            return true;
+        //        }
         IGridHost<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
         if (adjacent instanceof DuctTileBase<?, ?> other) { // TODO, This should be moved up to IGridHost as a common implementation for (eventual) multiparts.
             IGridContainer gridContainer = IGridContainer.getCapability(level);
@@ -101,11 +112,28 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
             TileStatePacket.sendToClient(this);
             TileStatePacket.sendToClient(other);
         } else {
-            System.out.println("Attempt to sever BLOCK connection on: " + dir);
             connections[dir.ordinal()] = DISABLED;
             setChanged();
             callNeighborStateChange();
             TileStatePacket.sendToClient(this);
+        }
+        return true;
+    }
+
+    public boolean openDuctGui(Player player) {
+
+        if (this instanceof MenuProvider provider) {
+            NetworkHooks.openGui((ServerPlayer) player, provider, pos());
+            return true;
+        }
+        return false;
+    }
+
+    public boolean openAttachmentGui(Direction side, Player player) {
+
+        if (side != null && attachments[side.ordinal()] instanceof MenuProvider provider) {
+            AttachmentHelper.openAttachmentScreen((ServerPlayer) player, provider, pos(), side);
+            return true;
         }
         return false;
     }
@@ -133,7 +161,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     public IModelData getModelData() {
 
         if (modelUpdate) {
-            for (Direction dir : Direction.values()) {
+            for (Direction dir : DIRECTIONS) {
                 IGridHost<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
                 if (adjacent != null) {
                     modelData.setInternalConnection(dir, canConnectTo(adjacent, dir) && adjacent.canConnectTo(this, dir.getOpposite()));
@@ -147,8 +175,29 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         return modelData;
     }
 
-    // region NBT
+    // region NETWORK
 
+    // STATE
+    @Override
+    public FriendlyByteBuf getStatePacket(FriendlyByteBuf buffer) {
+
+        for (ConnectionType connection : connections) {
+            buffer.writeByte(connection.ordinal());
+        }
+        return buffer;
+    }
+
+    @Override
+    public void handleStatePacket(FriendlyByteBuf buffer) {
+
+        for (int i = 0; i < 6; i++) {
+            connections[i] = ConnectionType.VALUES[buffer.readByte()];
+        }
+        requestModelDataUpdate();
+    }
+    // endregion
+
+    // region NBT
     @Override
     public CompoundTag getUpdateTag() {
 
@@ -166,6 +215,16 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
                 connections[i] = ConnectionType.VALUES[bConn[i]];
             }
         }
+        for (int i = 0; i < 6; ++i) {
+            if (tag.contains("Attachment" + i)) {
+                CompoundTag attachmentTag = tag.getCompound("Attachment" + i);
+                String type = attachmentTag.getString(TAG_TYPE);
+
+                attachments[i] = AttachmentRegistry.getAttachment(type, attachmentTag, pos(), DIRECTIONS[i]);
+            } else {
+                attachments[i] = EmptyAttachment.INSTANCE;
+            }
+        }
     }
 
     @Override
@@ -178,6 +237,14 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
             bConn[i] = (byte) connections[i].ordinal();
         }
         tag.putByteArray(TAG_SIDES, bConn);
+
+        for (int i = 0; i < 6; ++i) {
+            CompoundTag attachmentTag = new CompoundTag();
+            attachments[i].write(attachmentTag);
+            if (!attachmentTag.isEmpty()) {
+                tag.put("Attachment" + i, attachmentTag);
+            }
+        }
     }
     // endregion
 
@@ -185,13 +252,13 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     @Override
     public final Level getHostWorld() {
 
-        return getLevel();
+        return world();
     }
 
     @Override
     public final BlockPos getHostPos() {
 
-        return getBlockPos();
+        return pos();
     }
 
     @Override
@@ -276,28 +343,6 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     public Level world() {
 
         return level;
-    }
-    // endregion
-
-    // region STATE
-
-    @Override
-    public FriendlyByteBuf getStatePacket(FriendlyByteBuf buffer) {
-
-        for (ConnectionType connection : connections) {
-            buffer.writeByte(connection.ordinal());
-        }
-
-        return buffer;
-    }
-
-    @Override
-    public void handleStatePacket(FriendlyByteBuf buffer) {
-
-        for (int i = 0; i < 6; i++) {
-            connections[i] = ConnectionType.VALUES[buffer.readByte()];
-        }
-        requestModelDataUpdate();
     }
     // endregion
 

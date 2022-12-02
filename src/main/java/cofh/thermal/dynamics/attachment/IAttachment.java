@@ -1,5 +1,7 @@
 package cofh.thermal.dynamics.attachment;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -7,10 +9,16 @@ import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 
+
 public interface IAttachment extends INBTSerializable<CompoundTag> {
+
+    BlockPos pos();
+
+    Direction side();
 
     IAttachment read(CompoundTag nbt);
 
+    // Attachments MUST write their type to the NBT. Reading is optional.
     CompoundTag write(CompoundTag nbt);
 
     @Override

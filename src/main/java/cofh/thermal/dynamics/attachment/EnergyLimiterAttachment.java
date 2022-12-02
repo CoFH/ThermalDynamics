@@ -1,7 +1,12 @@
 package cofh.thermal.dynamics.attachment;
 
+import cofh.lib.util.helpers.MathHelper;
+import cofh.thermal.dynamics.inventory.container.attachment.EnergyLimiterAttachmentContainer;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.MenuProvider;
@@ -17,10 +22,12 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.IntSupplier;
 
-import static cofh.lib.util.constants.NBTTags.TAG_AMOUNT_IN;
-import static cofh.lib.util.constants.NBTTags.TAG_AMOUNT_OUT;
+import static cofh.lib.util.constants.NBTTags.*;
+import static cofh.thermal.dynamics.attachment.AttachmentRegistry.ENERGY_LIMITER;
 
-public class EnergyLimiterAttachment implements IAttachment, MenuProvider {
+public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttachment, IRedstoneControllableAttachment, MenuProvider {
+
+    public static final IAttachmentFactory<IAttachment> FACTORY = (nbt, pos, side) -> new EnergyLimiterAttachment(pos, side).read(nbt);
 
     public static final Component DISPLAY_NAME = new TranslatableComponent("info.thermal.energy_limiter");
     public static final int MAX_INPUT = 64000;
@@ -28,11 +35,42 @@ public class EnergyLimiterAttachment implements IAttachment, MenuProvider {
 
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic();
 
-    protected int amountInput = MAX_INPUT;
-    protected int amountOutput = MAX_OUTPUT;
+    protected final BlockPos pos;
+    protected final Direction side;
+
+    public int amountInput = MAX_INPUT / 2;
+    public int amountOutput = MAX_OUTPUT / 2;
 
     protected LazyOptional<IEnergyStorage> gridCap = LazyOptional.empty();
     protected LazyOptional<IEnergyStorage> externalCap = LazyOptional.empty();
+
+    public EnergyLimiterAttachment(BlockPos pos, Direction side) {
+
+        this.pos = pos;
+        this.side = side;
+    }
+
+    public int getMaxInput() {
+
+        return MAX_INPUT;
+    }
+
+    public int getMaxOutput() {
+
+        return MAX_OUTPUT;
+    }
+
+    @Override
+    public BlockPos pos() {
+
+        return pos;
+    }
+
+    @Override
+    public Direction side() {
+
+        return side;
+    }
 
     @Override
     public IAttachment read(CompoundTag nbt) {
@@ -47,6 +85,8 @@ public class EnergyLimiterAttachment implements IAttachment, MenuProvider {
 
     @Override
     public CompoundTag write(CompoundTag nbt) {
+
+        nbt.putString(TAG_TYPE, ENERGY_LIMITER);
 
         rsControl.write(nbt);
 
@@ -66,7 +106,7 @@ public class EnergyLimiterAttachment implements IAttachment, MenuProvider {
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
-        return null;
+        return new EnergyLimiterAttachmentContainer(i, player.getLevel(), pos, side, inventory, player);
     }
 
     @Override
@@ -74,9 +114,9 @@ public class EnergyLimiterAttachment implements IAttachment, MenuProvider {
 
         if (cap == ThermalEnergyHelper.getBaseEnergySystem()) {
             Optional<T> gridOpt = gridLazOpt.resolve();
-            if (gridOpt.isPresent() && gridOpt.get() instanceof IEnergyStorage) {
+            if (gridOpt.isPresent() && gridOpt.get() instanceof IEnergyStorage storage) {
                 if (!gridCap.isPresent()) {
-                    gridCap = LazyOptional.of(() -> new CapabilityWrapper((IEnergyStorage) gridOpt.get(), () -> rsControl.getState() ? amountInput : 0, () -> rsControl.getState() ? amountOutput : 0));
+                    gridCap = LazyOptional.of(() -> new WrappedEnergyStorage(storage, () -> rsControl.getState() ? amountInput : 0, () -> rsControl.getState() ? amountOutput : 0));
                     gridLazOpt.addListener(e -> gridCap.invalidate());
                 }
                 return gridCap.cast();
@@ -90,9 +130,9 @@ public class EnergyLimiterAttachment implements IAttachment, MenuProvider {
 
         if (cap == ThermalEnergyHelper.getBaseEnergySystem()) {
             Optional<T> extOpt = extLazOpt.resolve();
-            if (extOpt.isPresent() && extOpt.get() instanceof IEnergyStorage) {
+            if (extOpt.isPresent() && extOpt.get() instanceof IEnergyStorage storage) {
                 if (!externalCap.isPresent()) {
-                    externalCap = LazyOptional.of(() -> new CapabilityWrapper((IEnergyStorage) extOpt.get(), () -> rsControl.getState() ? amountInput : 0, () -> rsControl.getState() ? amountOutput : 0));
+                    externalCap = LazyOptional.of(() -> new WrappedEnergyStorage(storage, () -> rsControl.getState() ? amountOutput : 0, () -> rsControl.getState() ? amountInput : 0));
                     extLazOpt.addListener(e -> externalCap.invalidate());
                 }
                 return externalCap.cast();
@@ -101,15 +141,71 @@ public class EnergyLimiterAttachment implements IAttachment, MenuProvider {
         return extLazOpt;
     }
 
+    // region IPacketHandlerAttachment
+    @Override
+    public FriendlyByteBuf getConfigPacket(FriendlyByteBuf buffer) {
+
+        buffer.writeInt(amountInput);
+        buffer.writeInt(amountOutput);
+
+        return buffer;
+    }
+
+    @Override
+    public void handleConfigPacket(FriendlyByteBuf buffer) {
+
+        amountInput = MathHelper.clamp(buffer.readInt(), 0, getMaxInput());
+        amountOutput = MathHelper.clamp(buffer.readInt(), 0, getMaxOutput());
+    }
+
+    @Override
+    public FriendlyByteBuf getControlPacket(FriendlyByteBuf buffer) {
+
+        rsControl.writeToBuffer(buffer);
+
+        return buffer;
+    }
+
+    @Override
+    public void handleControlPacket(FriendlyByteBuf buffer) {
+
+        rsControl.readFromBuffer(buffer);
+    }
+
+    @Override
+    public FriendlyByteBuf getGuiPacket(FriendlyByteBuf buffer) {
+
+        buffer.writeInt(amountInput);
+        buffer.writeInt(amountOutput);
+
+        return buffer;
+    }
+
+    @Override
+    public void handleGuiPacket(FriendlyByteBuf buffer) {
+
+        amountInput = buffer.readInt();
+        amountOutput = buffer.readInt();
+    }
+    // endregion
+
+    // region IRedstoneControllableAttachment
+    @Override
+    public RedstoneControlLogic redstoneControl() {
+
+        return rsControl;
+    }
+    // endregion
+
     // region WRAPPER CLASS
-    private static class CapabilityWrapper implements IEnergyStorage {
+    private static class WrappedEnergyStorage implements IEnergyStorage {
 
         protected IEnergyStorage wrappedStorage;
 
         protected IntSupplier curReceive;
         protected IntSupplier curExtract;
 
-        public CapabilityWrapper(IEnergyStorage wrappedStorage, IntSupplier curReceive, IntSupplier curExtract) {
+        public WrappedEnergyStorage(IEnergyStorage wrappedStorage, IntSupplier curReceive, IntSupplier curExtract) {
 
             this.wrappedStorage = wrappedStorage;
             this.curReceive = curReceive;

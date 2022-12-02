@@ -27,6 +27,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static cofh.lib.util.Constants.DIRECTIONS;
+
 public class DuctModel implements IModelGeometry<DuctModel> {
 
     private final Map<String, Map<String, BlockElement>> parts;
@@ -122,9 +124,9 @@ public class DuctModel implements IModelGeometry<DuctModel> {
     private EnumMap<Direction, List<BakedQuad>> buildGroupParts(String groupPart, IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
-        fill(quads, Arrays.asList(Direction.values()), LinkedList::new);
+        fill(quads, Arrays.asList(DIRECTIONS), LinkedList::new);
 
-        for (Direction dir : Direction.values()) {
+        for (Direction dir : DIRECTIONS) {
             String group = dir.getName() + "/" + groupPart;
             Map<String, BlockElement> groupParts = parts.get(group);
             if (groupParts == null) continue;

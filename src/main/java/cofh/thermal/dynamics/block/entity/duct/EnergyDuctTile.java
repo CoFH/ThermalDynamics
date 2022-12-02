@@ -2,6 +2,7 @@ package cofh.thermal.dynamics.block.entity.duct;
 
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
+import cofh.thermal.dynamics.attachment.EnergyLimiterAttachment;
 import cofh.thermal.dynamics.grid.energy.EnergyGrid;
 import cofh.thermal.dynamics.grid.energy.EnergyGridNode;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
@@ -19,7 +20,7 @@ public class EnergyDuctTile extends DuctTileBase<EnergyGrid, EnergyGridNode> {
 
         super(DUCT_ENERGY_TILE.get(), pos, state);
 
-        // attachments[0] = EnergyLimiterAttachment.INSTANCE;
+        attachments[0] = new EnergyLimiterAttachment(getBlockPos(), Direction.DOWN);
     }
 
     @Override

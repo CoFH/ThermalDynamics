@@ -3,7 +3,6 @@ package cofh.thermal.dynamics.client.gui;
 import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.SimpleTooltip;
-import cofh.lib.util.helpers.StringHelper;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -28,7 +27,7 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
 
     public ItemBufferScreen(ItemBufferContainer container, Inventory inv, Component titleIn) {
 
-        super(container, inv, StringHelper.getTextComponent("block.thermal.item_buffer"));
+        super(container, inv, titleIn);
         texture = TEXTURE;
         info = generatePanelInfo("info.thermal.item_buffer");
         imageHeight = 178;

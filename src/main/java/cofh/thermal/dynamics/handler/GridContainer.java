@@ -9,7 +9,7 @@ import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.Grid;
 import cofh.thermal.dynamics.grid.GridNode;
-import cofh.thermal.dynamics.network.client.GridDebugPacket;
+import cofh.thermal.dynamics.network.packet.client.GridDebugPacket;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.graph.EndpointPair;
@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.thermal.dynamics.api.helper.GridHelper.*;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
@@ -74,7 +75,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             return;
         }
 
-        List<Direction> dirs = Lists.newArrayList(Direction.values());
+        List<Direction> dirs = Lists.newArrayList(DIRECTIONS);
         if (connectionPreference != null) {
             dirs.remove(connectionPreference);
             dirs.add(0, connectionPreference);
@@ -193,7 +194,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         }
 
         // Clear masks set by placement when duct is removed.
-        for (Direction dir : Direction.values()) {
+        for (Direction dir : DIRECTIONS) {
             IGridHost<?, ?> adjacent = GridHelper.getGridHost(host.getHostWorld(), host.getHostPos().relative(dir));
             if (adjacent == null) continue;
 
@@ -564,7 +565,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     private <G extends Grid<G, N>, N extends GridNode<G>> EnumMap<Direction, IGridHost<G, N>> getAdjacentGrids(IGridHost<G, N> host) {
 
         EnumMap<Direction, IGridHost<G, N>> adjacentGrids = new EnumMap<>(Direction.class);
-        for (Direction dir : Direction.values()) {
+        for (Direction dir : DIRECTIONS) {
             IGridHost<?, ?> other = GridHelper.getGridHost(world, host.getHostPos().relative(dir));
             if (other != null && canConnectTo(host, other, dir)) {
                 adjacentGrids.put(dir, unsafeCast(other)); // canConnectTo asserts both grids are of the same type.

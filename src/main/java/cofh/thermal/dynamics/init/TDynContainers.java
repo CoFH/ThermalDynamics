@@ -2,11 +2,14 @@ package cofh.thermal.dynamics.init;
 
 import cofh.core.util.ProxyUtils;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
+import cofh.thermal.dynamics.inventory.container.attachment.EnergyLimiterAttachmentContainer;
+import net.minecraft.core.Direction;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.registries.RegistryObject;
 
 import static cofh.thermal.core.ThermalCore.CONTAINERS;
+import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_LIMITER_ATTACHMENT;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ITEM_BUFFER;
 
 public class TDynContainers {
@@ -22,5 +25,7 @@ public class TDynContainers {
     }
 
     public static final RegistryObject<MenuType<ItemBufferContainer>> ITEM_BUFFER_CONTAINER = CONTAINERS.register(ID_ITEM_BUFFER, () -> IForgeMenuType.create((windowId, inv, data) -> new ItemBufferContainer(windowId, ProxyUtils.getClientWorld(), data.readBlockPos(), inv, ProxyUtils.getClientPlayer())));
+
+    public static final RegistryObject<MenuType<EnergyLimiterAttachmentContainer>> ENERGY_LIMITER_ATTACHMENT_CONTAINER = CONTAINERS.register(ID_ENERGY_LIMITER_ATTACHMENT, () -> IForgeMenuType.create((windowId, inv, data) -> new EnergyLimiterAttachmentContainer(windowId, ProxyUtils.getClientWorld(), data.readBlockPos(), data.readEnum(Direction.class), inv, ProxyUtils.getClientPlayer())));
 
 }

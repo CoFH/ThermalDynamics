@@ -26,6 +26,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
 
 public class DuctBakedModel implements IDynamicBakedModel {
@@ -94,7 +95,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
             modelQuads = modelCache.get(modelData); // Another thread could have computed whilst we were locked.
             if (!DEBUG && modelQuads != null) return modelQuads;
             ImmutableList.Builder<BakedQuad> quads = ImmutableList.builder();
-            for (Direction dir : Direction.values()) {
+            for (Direction dir : DIRECTIONS) {
                 boolean internal = modelData.hasInternalConnection(dir);
                 boolean external = modelData.hasExternalConnection(dir);
                 ResourceLocation servo = modelData.getServo(dir);

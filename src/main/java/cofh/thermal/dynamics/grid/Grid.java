@@ -29,6 +29,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.LongFunction;
 
+import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.thermal.dynamics.api.helper.GridHelper.numBetween;
 import static java.util.Objects.requireNonNull;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
@@ -602,7 +603,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
      */
     public boolean canConnectExternally(BlockPos pos) {
 
-        for (Direction dir : Direction.values()) {
+        for (Direction dir : DIRECTIONS) {
             if (canConnectOnSide(pos.relative(dir), dir.getOpposite())) {
                 return true;
             }

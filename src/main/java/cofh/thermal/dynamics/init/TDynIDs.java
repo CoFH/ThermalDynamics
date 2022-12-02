@@ -23,4 +23,6 @@ public class TDynIDs {
     public static final String ID_FLUID_BUFFER = "fluid_buffer";
     public static final String ID_ITEM_BUFFER = "item_buffer";
 
+    public static final String ID_ENERGY_LIMITER_ATTACHMENT = "energy_limiter_attachment";
+
 }

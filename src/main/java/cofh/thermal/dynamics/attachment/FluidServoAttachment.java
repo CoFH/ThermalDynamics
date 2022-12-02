@@ -3,9 +3,7 @@ package cofh.thermal.dynamics.attachment;
 import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.FluidFilter;
 import cofh.core.util.filter.IFilter;
-import cofh.thermal.dynamics.api.grid.IGridHost;
-import cofh.thermal.dynamics.grid.fluid.FluidGrid;
-import cofh.thermal.dynamics.grid.fluid.FluidGridNode;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -14,7 +12,12 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Predicate;
 
 public class FluidServoAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
@@ -23,13 +26,25 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     protected IFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic();
 
-    protected IGridHost<FluidGrid, FluidGridNode> host;
+    protected final BlockPos pos;
     protected Direction side;
 
-    public FluidServoAttachment(IGridHost<FluidGrid, FluidGridNode> host, Direction side) {
+    public FluidServoAttachment(BlockPos pos, Direction side) {
 
-        this.host = host;
+        this.pos = pos;
         this.side = side;
+    }
+
+    @Override
+    public BlockPos pos() {
+
+        return pos;
+    }
+
+    @Override
+    public Direction side() {
+
+        return side;
     }
 
     @Override
@@ -76,6 +91,67 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     public RedstoneControlLogic redstoneControl() {
 
         return rsControl;
+    }
+    // endregion
+
+    // region WRAPPER CLASS
+    private static class WrappedFluidHandler implements IFluidHandler {
+
+        protected IFluidHandler wrappedHandler;
+
+        protected Predicate<FluidStack> validator;
+
+        public WrappedFluidHandler(IFluidHandler wrappedHandler, Predicate<FluidStack> validator) {
+
+            this.wrappedHandler = wrappedHandler;
+            this.validator = validator;
+        }
+
+        @Override
+        public int getTanks() {
+
+            return wrappedHandler.getTanks();
+        }
+
+        @NotNull
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+
+            return wrappedHandler.getFluidInTank(tank);
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+
+            return wrappedHandler.getTankCapacity(tank);
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
+
+            return validator.test(stack) && wrappedHandler.isFluidValid(tank, stack);
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+
+            return validator.test(resource) ? wrappedHandler.fill(resource, action) : 0;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action) {
+
+            return wrappedHandler.drain(resource, action);
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+
+            return wrappedHandler.drain(maxDrain, action);
+        }
+
     }
     // endregion
 }

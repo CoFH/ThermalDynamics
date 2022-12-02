@@ -39,6 +39,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
+import static cofh.lib.util.Constants.DIRECTIONS;
+
 public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterloggedBlock, IDismantleable {
 
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -108,15 +110,35 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
-        if (Utils.isServerWorld(worldIn) && Utils.isWrench(player.getItemInHand(handIn)) && hit instanceof VoxelShapeBlockHitResult advHit && worldIn.getBlockEntity(pos) instanceof DuctTileBase duct) {
-
-            if (advHit.subHit == 0) {
-                duct.attemptConnect(advHit.getDirection());
-            } else if (advHit.subHit < 7) {
-                duct.attemptDisconnect(Direction.values()[advHit.subHit - 1]);
-            } else if (advHit.subHit < 13) {
-                // TODO Attachment logic goes here
-                duct.attemptDisconnect(Direction.values()[advHit.subHit - 7]);
+        if (hit instanceof VoxelShapeBlockHitResult advHit && worldIn.getBlockEntity(pos) instanceof DuctTileBase<?, ?> duct) {
+            if (Utils.isWrench(player.getItemInHand(handIn))) {
+                if (Utils.isClientWorld(worldIn)) {
+                    return InteractionResult.SUCCESS;
+                }
+                if (advHit.subHit == 0) {
+                    duct.attemptConnect(advHit.getDirection());
+                } else if (advHit.subHit < 7) {
+                    duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 1]);
+                } else if (advHit.subHit < 13) {
+                    duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 7]);
+                }
+                return InteractionResult.CONSUME;
+            } else if (player.getItemInHand(handIn).isEmpty()) {
+                if (Utils.isClientWorld(worldIn)) {
+                    return InteractionResult.SUCCESS;
+                }
+                if (advHit.subHit >= 7) {
+                    System.out.println("Attempt open GUI on side:" + DIRECTIONS[advHit.subHit - 7]);
+                    if (duct.openAttachmentGui(DIRECTIONS[advHit.subHit - 7], player)) {
+                        return InteractionResult.SUCCESS;
+                    }
+                } else {
+                    System.out.println("Attempt open duct GUI");
+                    if (duct.openDuctGui(player)) {
+                        return InteractionResult.SUCCESS;
+                    }
+                }
+                return InteractionResult.CONSUME;
             }
         }
         return InteractionResult.PASS;

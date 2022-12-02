@@ -1,10 +1,10 @@
-package cofh.thermal.dynamics.client.gui;
+package cofh.thermal.dynamics.client.gui.attachment;
 
 import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.ElementFluid;
 import cofh.core.client.gui.element.SimpleTooltip;
-import cofh.thermal.dynamics.inventory.container.FluidServoAttachmentContainer;
+import cofh.thermal.dynamics.inventory.container.attachment.FluidServoAttachmentContainer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;

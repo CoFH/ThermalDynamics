@@ -3,6 +3,8 @@ package cofh.thermal.dynamics.attachment;
 import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.FluidFilter;
 import cofh.core.util.filter.IFilter;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -22,15 +24,36 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class FluidFilterAttachment implements IFilterableAttachment, MenuProvider {
+public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
     public static final Component DISPLAY_NAME = new TranslatableComponent("info.thermal.fluid_filter");
 
     protected IFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic();
 
+    protected final BlockPos pos;
+    protected final Direction side;
+
     protected LazyOptional<IFluidHandler> gridCap = LazyOptional.empty();
     protected LazyOptional<IFluidHandler> externalCap = LazyOptional.empty();
+
+    public FluidFilterAttachment(BlockPos pos, Direction side) {
+
+        this.pos = pos;
+        this.side = side;
+    }
+
+    @Override
+    public BlockPos pos() {
+
+        return pos;
+    }
+
+    @Override
+    public Direction side() {
+
+        return side;
+    }
 
     @Override
     public IAttachment read(CompoundTag nbt) {
@@ -68,9 +91,9 @@ public class FluidFilterAttachment implements IFilterableAttachment, MenuProvide
 
         if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
             Optional<T> gridOpt = gridLazOpt.resolve();
-            if (gridOpt.isPresent() && gridOpt.get() instanceof IFluidHandler) {
+            if (gridOpt.isPresent() && gridOpt.get() instanceof IFluidHandler handler) {
                 if (!gridCap.isPresent()) {
-                    gridCap = LazyOptional.of(() -> new CapabilityWrapper((IFluidHandler) gridOpt.get(), e -> !rsControl.getState() || filter.valid(e)));
+                    gridCap = LazyOptional.of(() -> new WrappedFluidHandler(handler, e -> !rsControl.getState() || filter.valid(e)));
                     gridLazOpt.addListener(e -> gridCap.invalidate());
                 }
                 return gridCap.cast();
@@ -84,9 +107,9 @@ public class FluidFilterAttachment implements IFilterableAttachment, MenuProvide
 
         if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
             Optional<T> extOpt = extLazOpt.resolve();
-            if (extOpt.isPresent() && extOpt.get() instanceof IFluidHandler) {
+            if (extOpt.isPresent() && extOpt.get() instanceof IFluidHandler handler) {
                 if (!externalCap.isPresent()) {
-                    externalCap = LazyOptional.of(() -> new CapabilityWrapper((IFluidHandler) extOpt.get(), e -> !rsControl.getState() || filter.valid(e)));
+                    externalCap = LazyOptional.of(() -> new WrappedFluidHandler(handler, e -> !rsControl.getState() || filter.valid(e)));
                     extLazOpt.addListener(e -> externalCap.invalidate());
                 }
                 return externalCap.cast();
@@ -103,14 +126,22 @@ public class FluidFilterAttachment implements IFilterableAttachment, MenuProvide
     }
     // endregion
 
+    // region IRedstoneControllableAttachment
+    @Override
+    public RedstoneControlLogic redstoneControl() {
+
+        return rsControl;
+    }
+    // endregion
+
     // region WRAPPER CLASS
-    private static class CapabilityWrapper implements IFluidHandler {
+    private static class WrappedFluidHandler implements IFluidHandler {
 
         protected IFluidHandler wrappedHandler;
 
         protected Predicate<FluidStack> validator;
 
-        public CapabilityWrapper(IFluidHandler wrappedHandler, Predicate<FluidStack> validator) {
+        public WrappedFluidHandler(IFluidHandler wrappedHandler, Predicate<FluidStack> validator) {
 
             this.wrappedHandler = wrappedHandler;
             this.validator = validator;

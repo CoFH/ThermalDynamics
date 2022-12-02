@@ -1,7 +1,8 @@
-package cofh.thermal.dynamics.network.client;
+package cofh.thermal.dynamics.network.packet.client;
 
 import cofh.lib.network.packet.IPacketClient;
 import cofh.lib.network.packet.PacketBase;
+import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.client.DebugRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -9,7 +10,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import javax.annotation.Nullable;
 import java.util.*;
 
-import static cofh.thermal.dynamics.ThermalDynamics.PACKET_HANDLER;
 import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;
 
 public class GridDebugPacket extends PacketBase implements IPacketClient {
@@ -25,7 +25,7 @@ public class GridDebugPacket extends PacketBase implements IPacketClient {
 
     public GridDebugPacket() {
 
-        super(PACKET_GRID_DEBUG, PACKET_HANDLER);
+        super(PACKET_GRID_DEBUG, ThermalDynamics.PACKET_HANDLER);
     }
 
     @Override

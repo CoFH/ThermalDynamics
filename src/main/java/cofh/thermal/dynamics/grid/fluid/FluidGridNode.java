@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
+import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
 import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
 
@@ -25,7 +26,7 @@ public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridN
 
     protected void cacheConnections() {
 
-        for (Direction dir : Direction.values()) {
+        for (Direction dir : DIRECTIONS) {
             if (grid.canConnectOnSide(pos.relative(dir), dir.getOpposite())) {
                 connections.add(dir);
             }

@@ -1,4 +1,4 @@
-package cofh.thermal.dynamics.inventory.container;
+package cofh.thermal.dynamics.inventory.container.attachment;
 
 import cofh.core.inventory.container.ContainerCoFH;
 import cofh.core.network.packet.server.ContainerConfigPacket;

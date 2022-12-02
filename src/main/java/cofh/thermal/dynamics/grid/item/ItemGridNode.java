@@ -14,7 +14,7 @@
 //
 //    protected void cacheConnections() {
 //
-//        for (Direction dir : Direction.values()) {
+//        for (Direction dir : DIRECTIONS) {
 //            if (grid.canConnectOnSide(pos.relative(dir), dir.getOpposite())) {
 //                connections.add(dir);
 //            }

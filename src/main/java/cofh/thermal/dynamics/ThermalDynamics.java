@@ -6,9 +6,13 @@ import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.client.DebugRenderer;
 import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
+import cofh.thermal.dynamics.client.gui.attachment.EnergyLimiterAttachmentScreen;
 import cofh.thermal.dynamics.handler.GridEvents;
 import cofh.thermal.dynamics.init.*;
-import cofh.thermal.dynamics.network.client.GridDebugPacket;
+import cofh.thermal.dynamics.network.packet.client.AttachmentGuiPacket;
+import cofh.thermal.dynamics.network.packet.client.GridDebugPacket;
+import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
+import cofh.thermal.dynamics.network.packet.server.AttachmentRedstoneControlPacket;
 import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -25,8 +29,10 @@ import net.minecraftforge.registries.RegistryBuilder;
 
 import java.util.function.Supplier;
 
+import static cofh.core.network.packet.PacketIDs.*;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.core.ThermalCore.BLOCKS;
+import static cofh.thermal.dynamics.init.TDynContainers.ENERGY_LIMITER_ATTACHMENT_CONTAINER;
 import static cofh.thermal.dynamics.init.TDynContainers.ITEM_BUFFER_CONTAINER;
 import static cofh.thermal.dynamics.init.TDynIDs.*;
 import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;
@@ -75,6 +81,10 @@ public class ThermalDynamics {
 
     private void registerPackets() {
 
+        PACKET_HANDLER.registerPacket(PACKET_GUI, AttachmentGuiPacket::new);
+        PACKET_HANDLER.registerPacket(PACKET_CONFIG, AttachmentConfigPacket::new);
+        PACKET_HANDLER.registerPacket(PACKET_REDSTONE_CONTROL, AttachmentRedstoneControlPacket::new);
+
         PACKET_HANDLER.registerPacket(PACKET_GRID_DEBUG, GridDebugPacket::new);
     }
 
@@ -109,6 +119,8 @@ public class ThermalDynamics {
 
         // ScreenManager.register(ENERGY_DISTRIBUTOR_CONTAINER, EnergyDistributorScreen::new);
         MenuScreens.register(ITEM_BUFFER_CONTAINER.get(), ItemBufferScreen::new);
+
+        MenuScreens.register(ENERGY_LIMITER_ATTACHMENT_CONTAINER.get(), EnergyLimiterAttachmentScreen::new);
     }
 
     private void registerRenderLayers() {
