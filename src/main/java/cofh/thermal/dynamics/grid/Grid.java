@@ -144,7 +144,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
         if (!world.isLoaded(pos)) {
             return;
         }
-        IGridHost<?, ?> gridHost = GridHelper.getGridHost(world, pos);
+        IDuct<?, ?> gridHost = GridHelper.getGridHost(world, pos);
         assert gridHost != null && gridHost.getGrid() == this;
         assert !(gridHost instanceof IGridHostUpdateable) || updatableHosts.contains(gridHost.getHostPos());
 
@@ -445,7 +445,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
             long chunkPos = entry.getLongKey();
             LevelChunk chunk = world.getChunk(ChunkPos.getX(chunkPos), ChunkPos.getZ(chunkPos));
             for (BlockPos pos : entry.getValue()) {
-                IGridHost<?, ?> gridHost = GridHelper.getGridHost(chunk.getBlockEntity(pos));
+                IDuct<?, ?> gridHost = GridHelper.getGridHost(chunk.getBlockEntity(pos));
                 if (gridHost == null) {
                     LOGGER.error("Node not connected to grid! Chunk modified externally. {}", pos);
                     continue;
@@ -498,7 +498,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
      */
     public abstract void onSplit(List<G> others);
 
-    public void onGridHostAdded(IGridHost host) {
+    public void onGridHostAdded(IDuct<?, ?> host) {
 
         if (host instanceof IGridHostUpdateable uHost) {
             updatableHosts.add(host.getHostPos());
@@ -506,7 +506,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
         }
     }
 
-    public void onGridHostRemoved(IGridHost host) {
+    public void onGridHostRemoved(IDuct<?, ?> host) {
 
         if (host instanceof IGridHostUpdateable) {
             updatableHosts.remove(host.getHostPos());

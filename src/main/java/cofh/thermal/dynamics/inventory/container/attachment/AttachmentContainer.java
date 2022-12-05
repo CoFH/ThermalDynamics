@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.inventory.container.attachment;
 
 import cofh.core.inventory.container.ContainerCoFH;
-import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.attachment.IAttachment;
 import cofh.thermal.dynamics.attachment.IPacketHandlerAttachment;
 import cofh.thermal.dynamics.network.packet.client.AttachmentGuiPacket;
@@ -26,8 +26,8 @@ public abstract class AttachmentContainer extends ContainerCoFH {
         super(type, id, inventory, player);
         hostTile = world.getBlockEntity(pos);
 
-        if (hostTile instanceof IGridHost<?, ?> host) {
-            this.baseAttachment = host.getAttachment(side);
+        if (hostTile instanceof IDuct<?, ?> duct) {
+            this.baseAttachment = duct.getAttachment(side);
         } else {
             this.baseAttachment = null;
         }

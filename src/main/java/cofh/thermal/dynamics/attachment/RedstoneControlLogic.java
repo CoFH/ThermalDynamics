@@ -1,6 +1,8 @@
 package cofh.thermal.dynamics.attachment;
 
 import cofh.lib.api.control.IRedstoneControllable;
+import cofh.lib.util.Utils;
+import cofh.thermal.dynamics.network.packet.server.AttachmentRedstoneControlPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -11,19 +13,21 @@ import static cofh.lib.util.constants.NBTTags.*;
 
 public class RedstoneControlLogic implements IRedstoneControllable {
 
+    protected IRedstoneControllableAttachment attachment;
     protected Supplier<Boolean> enabled;
 
     protected int power;
     protected int threshold;
     protected ControlMode mode = ControlMode.DISABLED;
 
-    public RedstoneControlLogic() {
+    public RedstoneControlLogic(IRedstoneControllableAttachment attachment) {
 
-        this(TRUE);
+        this(attachment, TRUE);
     }
 
-    public RedstoneControlLogic(Supplier<Boolean> enabled) {
+    public RedstoneControlLogic(IRedstoneControllableAttachment attachment, Supplier<Boolean> enabled) {
 
+        this.attachment = attachment;
         this.enabled = enabled;
     }
 
@@ -140,13 +144,13 @@ public class RedstoneControlLogic implements IRedstoneControllable {
         this.threshold = threshold;
         this.mode = mode;
 
-        //        if (Utils.isClientWorld(tile.world())) {
-        //            RedstoneControlPacket.sendToServer(this.tile);
-        //            this.threshold = curThreshold;
-        //            this.mode = curMode;
-        //        } else {
-        //            tile.onControlUpdate();
-        //        }
+        if (Utils.isClientWorld(attachment.world())) {
+            AttachmentRedstoneControlPacket.sendToServer(this.attachment);
+            this.threshold = curThreshold;
+            this.mode = curMode;
+        } else {
+            attachment.onControlUpdate();
+        }
     }
     // endregion
 }

@@ -4,7 +4,7 @@ import cofh.lib.api.control.IRedstoneControllable.ControlMode;
 import cofh.lib.network.packet.IPacketServer;
 import cofh.lib.network.packet.PacketBase;
 import cofh.thermal.dynamics.ThermalDynamics;
-import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.attachment.IRedstoneControllableAttachment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,7 +35,7 @@ public class AttachmentRedstoneControlPacket extends PacketBase implements IPack
             return;
         }
         BlockEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof IGridHost<?, ?> host && host.getAttachment(side) instanceof IRedstoneControllableAttachment attachment) {
+        if (tile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof IRedstoneControllableAttachment attachment) {
             attachment.setControl(threshold, ControlMode.VALUES[mode]);
         }
     }

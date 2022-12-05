@@ -3,7 +3,7 @@ package cofh.thermal.dynamics.network.packet.server;
 import cofh.lib.network.packet.IPacketServer;
 import cofh.lib.network.packet.PacketBase;
 import cofh.thermal.dynamics.ThermalDynamics;
-import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.attachment.IPacketHandlerAttachment;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
@@ -34,7 +34,7 @@ public class AttachmentConfigPacket extends PacketBase implements IPacketServer 
             return;
         }
         BlockEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof IGridHost<?, ?> host && host.getAttachment(side) instanceof IPacketHandlerAttachment attachment) {
+        if (tile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof IPacketHandlerAttachment attachment) {
             attachment.handleConfigPacket(buffer);
         }
     }

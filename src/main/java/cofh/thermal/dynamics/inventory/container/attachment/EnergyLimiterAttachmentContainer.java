@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.inventory.container.attachment;
 
-import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.attachment.EnergyLimiterAttachment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,7 +18,7 @@ public class EnergyLimiterAttachmentContainer extends AttachmentContainer {
 
         super(ENERGY_LIMITER_ATTACHMENT_CONTAINER.get(), id, world, pos, side, inventory, player);
 
-        if (hostTile instanceof IGridHost<?, ?> host && host.getAttachment(side) instanceof EnergyLimiterAttachment expectedAttachment) {
+        if (hostTile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof EnergyLimiterAttachment expectedAttachment) {
             this.attachment = expectedAttachment;
         } else {
             this.attachment = null;

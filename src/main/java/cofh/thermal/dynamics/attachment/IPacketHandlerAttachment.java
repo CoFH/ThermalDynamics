@@ -1,8 +1,15 @@
 package cofh.thermal.dynamics.attachment;
 
+import cofh.thermal.dynamics.network.packet.client.AttachmentControlPacket;
 import net.minecraft.network.FriendlyByteBuf;
 
 public interface IPacketHandlerAttachment extends IAttachment {
+
+    default void onControlUpdate() {
+
+        AttachmentControlPacket.sendToClient(this);
+        duct().onAttachmentUpdate();
+    }
 
     // CONFIG
     default FriendlyByteBuf getConfigPacket(FriendlyByteBuf buffer) {

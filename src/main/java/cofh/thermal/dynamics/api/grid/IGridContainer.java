@@ -21,32 +21,32 @@ public interface IGridContainer {
 
     @Nullable <G extends Grid<G, ?>> G getGrid(IGridType<G> gridType, BlockPos pos);
 
-    void onGridHostPlaced(IGridHost<?, ?> host, @Nullable Direction connectionPreference);
+    void onDuctPlaced(IDuct<?, ?> duct, @Nullable Direction connectionPreference);
 
-    void onGridHostRemoved(IGridHost<?, ?> host);
+    void onDuctRemoved(IDuct<?, ?> duct);
 
-    void onGridHostNeighborChanged(IGridHost<?, ?> host);
+    void onDuctNeighborChanged(IDuct<?, ?> duct);
 
     /**
      * Connect the grid host side.
      * <p>
      * Requires that any modifications to exposed connection state happen before this call.
      *
-     * @param host The host to connect.
+     * @param duct The duct to connect.
      * @param side The side to connect.
      * @return If the connection was successful.
      */
-    boolean onGridHostSideConnected(IGridHost<?, ?> host, Direction side);
+    boolean onDuctSideConnected(IDuct<?, ?> duct, Direction side);
 
     /**
      * Disconnect the grid host side.
      * <p>
      * Requires that any modifications to exposed connection state happens after this call.
      *
-     * @param host The host to disconnect.
+     * @param duct The duct to disconnect.
      * @param side The side to disconnect.
      */
-    void onGridHostSideDisconnecting(IGridHost<?, ?> host, Direction side);
+    void onDuctSideDisconnecting(IDuct<?, ?> duct, Direction side);
 
     @Nullable
     static IGridContainer getCapability(LevelAccessor la) {

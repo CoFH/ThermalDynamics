@@ -5,8 +5,8 @@ import cofh.lib.util.Utils;
 import cofh.lib.util.raytracer.IndexedVoxelShape;
 import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
 import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
-import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.block.entity.duct.DuctTileBase;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import com.google.common.collect.ImmutableSet;
@@ -128,33 +128,37 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
                     return InteractionResult.SUCCESS;
                 }
                 if (advHit.subHit >= 7) {
-                    System.out.println("Attempt open GUI on side:" + DIRECTIONS[advHit.subHit - 7]);
                     if (duct.openAttachmentGui(DIRECTIONS[advHit.subHit - 7], player)) {
                         return InteractionResult.SUCCESS;
                     }
                 } else {
-                    System.out.println("Attempt open duct GUI");
                     if (duct.openDuctGui(player)) {
                         return InteractionResult.SUCCESS;
                     }
                 }
                 return InteractionResult.CONSUME;
+            } else if (player.getItemInHand(handIn).isEmpty()) {
+                if (Utils.isClientWorld(worldIn)) {
+                    return InteractionResult.SUCCESS;
+                }
+                // TODO: Attachment installation
             }
         }
         return InteractionResult.PASS;
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos adj, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
 
         if (world.isClientSide()) {
             return;
         }
         BlockEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof IGridHost host) {
+        if (tile instanceof IDuct<?, ?> host) {
+            host.neighborChanged(blockIn, fromPos);
             IGridContainer gridContainer = IGridContainer.getCapability(world);
             if (gridContainer != null) {
-                gridContainer.onGridHostNeighborChanged(host);
+                gridContainer.onDuctNeighborChanged(host);
             }
         }
     }
@@ -166,10 +170,10 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
             return;
         }
         BlockEntity tile = worldIn.getBlockEntity(pos);
-        if (tile instanceof IGridHost host && !host.hasGrid()) {
+        if (tile instanceof IDuct<?, ?> host && !host.hasGrid()) {
             IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
             if (gridContainer != null) {
-                gridContainer.onGridHostPlaced(host, null);
+                gridContainer.onDuctPlaced(host, null);
             }
         }
     }
@@ -179,10 +183,10 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
 
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity tile = worldIn.getBlockEntity(pos);
-            if (tile instanceof IGridHost host) {
+            if (tile instanceof IDuct<?, ?> host) {
                 IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
                 if (gridContainer != null) {
-                    gridContainer.onGridHostRemoved(host);
+                    gridContainer.onDuctRemoved(host);
                 }
             }
             super.onRemove(state, worldIn, pos, newState, isMoving);

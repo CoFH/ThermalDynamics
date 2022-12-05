@@ -9,6 +9,7 @@ import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
 import cofh.thermal.dynamics.client.gui.attachment.EnergyLimiterAttachmentScreen;
 import cofh.thermal.dynamics.handler.GridEvents;
 import cofh.thermal.dynamics.init.*;
+import cofh.thermal.dynamics.network.packet.client.AttachmentControlPacket;
 import cofh.thermal.dynamics.network.packet.client.AttachmentGuiPacket;
 import cofh.thermal.dynamics.network.packet.client.GridDebugPacket;
 import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
@@ -81,6 +82,7 @@ public class ThermalDynamics {
 
     private void registerPackets() {
 
+        PACKET_HANDLER.registerPacket(PACKET_CONTROL, AttachmentControlPacket::new);
         PACKET_HANDLER.registerPacket(PACKET_GUI, AttachmentGuiPacket::new);
         PACKET_HANDLER.registerPacket(PACKET_CONFIG, AttachmentConfigPacket::new);
         PACKET_HANDLER.registerPacket(PACKET_REDSTONE_CONTROL, AttachmentRedstoneControlPacket::new);

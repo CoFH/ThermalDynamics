@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import org.jetbrains.annotations.Nullable;
@@ -25,8 +26,7 @@ import javax.annotation.Nonnull;
  * @author covers1624
  * @see TDynApi#GRID_HOST_CAPABILITY
  */
-// TODO this should be renamed to IDuct
-public interface IGridHost<G extends Grid<G, N>, N extends GridNode<G>> {
+public interface IDuct<G extends Grid<G, N>, N extends GridNode<G>> {
 
     Level getHostWorld();
 
@@ -40,7 +40,7 @@ public interface IGridHost<G extends Grid<G, N>, N extends GridNode<G>> {
     boolean hasGrid();
 
     /**
-     * Gets the raw {@link Grid} hosted by this {@link IGridHost}.
+     * Gets the raw {@link Grid} hosted by this {@link IDuct}.
      *
      * @return The raw grid.
      */
@@ -66,13 +66,19 @@ public interface IGridHost<G extends Grid<G, N>, N extends GridNode<G>> {
         return getGrid().getNodes().get(getHostPos());
     }
 
+    default void neighborChanged(Block blockIn, BlockPos fromPos) {
+
+    }
+
+    void onAttachmentUpdate();
+
     @Nonnull
     IAttachment getAttachment(Direction dir);
 
     /**
-     * Checks if {@code other} can connect to this grid host.
+     * Checks if {@code other} can connect to this duct.
      * <p>
-     * These 2 hosts are guaranteed to be adjacent to each other.
+     * These 2 ducts are guaranteed to be adjacent to each other.
      * <p>
      * This method should be called bidirectionally whenever used, e.g.
      * host.canConnectTo(other, dir) && other.canConnectTo(host, dir.getOpposite())
@@ -86,7 +92,7 @@ public interface IGridHost<G extends Grid<G, N>, N extends GridNode<G>> {
      * @param dir   The direction from this host, to the other host.
      * @return If they can connect.
      */
-    default boolean canConnectTo(IGridHost<?, ?> other, Direction dir) {
+    default boolean canConnectTo(IDuct<?, ?> other, Direction dir) {
 
         return getGridType() == other.getGridType();
     }

@@ -2,9 +2,9 @@ package cofh.thermal.dynamics.handler;
 
 import cofh.core.network.packet.client.ModelUpdatePacket;
 import cofh.thermal.dynamics.ThermalDynamics;
+import cofh.thermal.dynamics.api.grid.IDuct;
+import cofh.thermal.dynamics.api.grid.IDuct.ConnectionType;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
-import cofh.thermal.dynamics.api.grid.IGridHost;
-import cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.Grid;
@@ -61,16 +61,16 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     }
 
     @Override
-    public void onGridHostPlaced(IGridHost<?, ?> host, @Nullable Direction connectionPreference) {
+    public void onDuctPlaced(IDuct<?, ?> duct, @Nullable Direction connectionPreference) {
 
-        gridHostPlaced(host, connectionPreference);
+        gridHostPlaced(duct, connectionPreference);
     }
 
-    private <G extends Grid<G, N>, N extends GridNode<G>> void gridHostPlaced(IGridHost<G, N> host, @Nullable Direction connectionPreference) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> void gridHostPlaced(IDuct<G, N> host, @Nullable Direction connectionPreference) {
 
         // New Grid.
         constructNewGrid(host);
-        EnumMap<Direction, IGridHost<G, N>> adjacentGrids = getAdjacentGrids(host);
+        EnumMap<Direction, IDuct<G, N>> adjacentGrids = getAdjacentGrids(host);
         if (adjacentGrids.isEmpty()) {
             return;
         }
@@ -82,7 +82,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         }
 
         for (Direction dir : dirs) {
-            IGridHost<?, ?> other = GridHelper.getGridHost(world, host.getHostPos().relative(dir));
+            IDuct<?, ?> other = GridHelper.getGridHost(world, host.getHostPos().relative(dir));
             if (other == null) continue; // No host
             if (!canConnectTo(host, other, dir)) {
                 host.setConnectionType(dir, ConnectionType.DISABLED);
@@ -90,7 +90,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
                 continue; // Not allowed to connect.
             }
 
-            IGridHost<G, N> otherHost = unsafeCast(other); // Guaranteed safe by canConnectTo
+            IDuct<G, N> otherHost = unsafeCast(other); // Guaranteed safe by canConnectTo
 
             if (other.getGrid() != host.getGrid()) {
                 // Merge into the other grid.
@@ -107,7 +107,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         host.getGrid().onModified();
     }
 
-    private <G extends Grid<G, ?>> void constructNewGrid(IGridHost<G, ?> host) {
+    private <G extends Grid<G, ?>> void constructNewGrid(IDuct<G, ?> host) {
 
         if (DEBUG) {
             LOGGER.info("Constructing new grid for {}", host.getHostPos());
@@ -120,10 +120,10 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         grid.onModified();
     }
 
-    private <G extends Grid<G, N>, N extends GridNode<G>> void mergeGrids(List<IGridHost<G, N>> branches) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> void mergeGrids(List<IDuct<G, N>> branches) {
 
         Set<G> grids = new HashSet<>();
-        for (IGridHost<G, N> branch : branches) {
+        for (IDuct<G, N> branch : branches) {
             grids.add(branch.getGrid());
         }
 
@@ -143,12 +143,12 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     }
 
     @Override
-    public void onGridHostRemoved(IGridHost<?, ?> host) {
+    public void onDuctRemoved(IDuct<?, ?> duct) {
 
-        removeGridHost(host);
+        removeGridHost(duct);
     }
 
-    public <G extends Grid<G, N>, N extends GridNode<G>> void removeGridHost(IGridHost<G, N> host) {
+    public <G extends Grid<G, N>, N extends GridNode<G>> void removeGridHost(IDuct<G, N> host) {
         // - Disconnect any edges.
         // - Remove current node.
         // - Try and split the grid if nodes exist.
@@ -195,7 +195,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
         // Clear masks set by placement when duct is removed.
         for (Direction dir : DIRECTIONS) {
-            IGridHost<?, ?> adjacent = GridHelper.getGridHost(host.getHostWorld(), host.getHostPos().relative(dir));
+            IDuct<?, ?> adjacent = GridHelper.getGridHost(host.getHostWorld(), host.getHostPos().relative(dir));
             if (adjacent == null) continue;
 
             if (adjacent.getConnectionType(dir.getOpposite()) == ConnectionType.DISABLED) {
@@ -218,44 +218,44 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     }
 
     @Override
-    public void onGridHostNeighborChanged(IGridHost<?, ?> host) {
+    public void onDuctNeighborChanged(IDuct<?, ?> duct) {
 
-        gridNeighborChanged(host);
+        gridNeighborChanged(duct);
     }
 
-    public <G extends Grid<G, N>, N extends GridNode<G>> void gridNeighborChanged(IGridHost<G, N> host) {
+    public <G extends Grid<G, N>, N extends GridNode<G>> void gridNeighborChanged(IDuct<G, N> duct) {
 
-        G grid = host.getGrid();
-        N node = host.getNode();
+        G grid = duct.getGrid();
+        N node = duct.getNode();
 
-        boolean canExternallyConnect = grid.canConnectExternally(host.getHostPos());
+        boolean canExternallyConnect = grid.canConnectExternally(duct.getHostPos());
         if (node != null) {
             if (!canExternallyConnect) {
                 simplifyNode(node);
             }
             node.clearConnections();
-            ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
+            ModelUpdatePacket.sendToClient(duct.getHostWorld(), duct.getHostPos());
         } else {
             if (canExternallyConnect) {
-                grid.getNodeOrSplitEdgeAndInsertNode(host.getHostPos());
-                ModelUpdatePacket.sendToClient(host.getHostWorld(), host.getHostPos());
+                grid.getNodeOrSplitEdgeAndInsertNode(duct.getHostPos());
+                ModelUpdatePacket.sendToClient(duct.getHostWorld(), duct.getHostPos());
             }
         }
     }
 
     @Override
-    public boolean onGridHostSideConnected(IGridHost<?, ?> host, Direction side) {
+    public boolean onDuctSideConnected(IDuct<?, ?> duct, Direction side) {
 
-        return onSideConnectionChanged(host, side, false);
+        return onSideConnectionChanged(duct, side, false);
     }
 
     @Override
-    public void onGridHostSideDisconnecting(IGridHost<?, ?> host, Direction side) {
+    public void onDuctSideDisconnecting(IDuct<?, ?> duct, Direction side) {
 
-        onSideConnectionChanged(host, side, true);
+        onSideConnectionChanged(duct, side, true);
     }
 
-    private <G extends Grid<G, N>, N extends GridNode<G>> boolean onSideConnectionChanged(IGridHost<G, N> host, Direction changed, boolean disconnect) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> boolean onSideConnectionChanged(IDuct<G, N> host, Direction changed, boolean disconnect) {
         // Connection attempt:
         // - Already connected?
         //  - Yes? return.
@@ -275,7 +275,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         //  - Try splitting the grid.
 
         // Try and find adjacent grid host.
-        IGridHost<G, N> other = getAdjacentGrids(host).get(changed);
+        IDuct<G, N> other = getAdjacentGrids(host).get(changed);
         if (other == null) return false;
 
         // Grab grid and nodes either side of the split/join.
@@ -562,11 +562,11 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         }
     }
 
-    private <G extends Grid<G, N>, N extends GridNode<G>> EnumMap<Direction, IGridHost<G, N>> getAdjacentGrids(IGridHost<G, N> host) {
+    private <G extends Grid<G, N>, N extends GridNode<G>> EnumMap<Direction, IDuct<G, N>> getAdjacentGrids(IDuct<G, N> host) {
 
-        EnumMap<Direction, IGridHost<G, N>> adjacentGrids = new EnumMap<>(Direction.class);
+        EnumMap<Direction, IDuct<G, N>> adjacentGrids = new EnumMap<>(Direction.class);
         for (Direction dir : DIRECTIONS) {
-            IGridHost<?, ?> other = GridHelper.getGridHost(world, host.getHostPos().relative(dir));
+            IDuct<?, ?> other = GridHelper.getGridHost(world, host.getHostPos().relative(dir));
             if (other != null && canConnectTo(host, other, dir)) {
                 adjacentGrids.put(dir, unsafeCast(other)); // canConnectTo asserts both grids are of the same type.
             }
@@ -574,7 +574,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         return adjacentGrids;
     }
 
-    private static boolean canConnectTo(IGridHost<?, ?> from, IGridHost<?, ?> to, Direction dir) {
+    private static boolean canConnectTo(IDuct<?, ?> from, IDuct<?, ?> to, Direction dir) {
 
         return from.canConnectTo(to, dir) && to.canConnectTo(from, dir.getOpposite());
     }

@@ -12,21 +12,21 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-import static cofh.core.network.packet.PacketIDs.PACKET_GUI;
+import static cofh.core.network.packet.PacketIDs.PACKET_CONTROL;
+import static cofh.lib.util.Constants.NETWORK_UPDATE_DISTANCE;
 
-public class AttachmentGuiPacket extends PacketBase implements IPacketClient {
+public class AttachmentControlPacket extends PacketBase implements IPacketClient {
 
     protected BlockPos pos;
     protected Direction side;
     protected FriendlyByteBuf buffer;
 
-    public AttachmentGuiPacket() {
+    public AttachmentControlPacket() {
 
-        super(PACKET_GUI, ThermalDynamics.PACKET_HANDLER);
+        super(PACKET_CONTROL, ThermalDynamics.PACKET_HANDLER);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class AttachmentGuiPacket extends PacketBase implements IPacketClient {
         }
         BlockEntity tile = world.getBlockEntity(pos);
         if (tile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof IPacketHandlerAttachment attachment) {
-            attachment.handleGuiPacket(buffer);
+            attachment.handleControlPacket(buffer);
         }
     }
 
@@ -59,16 +59,16 @@ public class AttachmentGuiPacket extends PacketBase implements IPacketClient {
         side = buffer.readEnum(Direction.class);
     }
 
-    public static void sendToClient(IPacketHandlerAttachment attachment, ServerPlayer player) {
+    public static void sendToClient(IPacketHandlerAttachment attachment) {
 
-        if (Utils.isClientWorld(player.getLevel())) {
+        if (attachment.world() == null || Utils.isClientWorld(attachment.world())) {
             return;
         }
-        AttachmentGuiPacket packet = new AttachmentGuiPacket();
+        AttachmentControlPacket packet = new AttachmentControlPacket();
         packet.pos = attachment.pos();
         packet.side = attachment.side();
-        packet.buffer = attachment.getGuiPacket(new FriendlyByteBuf(Unpooled.buffer()));
-        packet.sendToPlayer(player);
+        packet.buffer = attachment.getControlPacket(new FriendlyByteBuf(Unpooled.buffer()));
+        packet.sendToAllAround(packet.pos, NETWORK_UPDATE_DISTANCE, attachment.world().dimension());
     }
 
 }

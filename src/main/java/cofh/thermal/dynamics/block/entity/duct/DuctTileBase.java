@@ -1,15 +1,13 @@
 package cofh.thermal.dynamics.block.entity.duct;
 
+import cofh.core.network.packet.client.TileRedstonePacket;
 import cofh.core.network.packet.client.TileStatePacket;
 import cofh.lib.api.block.entity.IPacketHandlerTile;
 import cofh.lib.api.block.entity.ITileLocation;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
-import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.attachment.AttachmentHelper;
-import cofh.thermal.dynamics.attachment.AttachmentRegistry;
-import cofh.thermal.dynamics.attachment.EmptyAttachment;
-import cofh.thermal.dynamics.attachment.IAttachment;
+import cofh.thermal.dynamics.attachment.*;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import cofh.thermal.dynamics.grid.Grid;
 import cofh.thermal.dynamics.grid.GridNode;
@@ -35,12 +33,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
-import static cofh.lib.util.constants.NBTTags.TAG_SIDES;
-import static cofh.lib.util.constants.NBTTags.TAG_TYPE;
-import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.ALLOWED;
-import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
+import static cofh.lib.util.constants.NBTTags.*;
+import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.ALLOWED;
+import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.DISABLED;
 
-public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> extends BlockEntity implements IGridHost<G, N>, ITileLocation, IPacketHandlerTile {
+public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> extends BlockEntity implements IDuct<G, N>, ITileLocation, IPacketHandlerTile {
 
     // Only available server side.
     @Nullable
@@ -52,6 +49,8 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     protected final DuctModelData modelData = new DuctModelData();
     protected boolean modelUpdate;
 
+    protected int redstonePower;
+
     public DuctTileBase(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 
         super(type, pos, state);
@@ -59,7 +58,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
 
     public boolean attemptConnect(Direction dir) {
 
-        IGridHost<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+        IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
         if (adjacent instanceof DuctTileBase other) {
             IGridContainer gridContainer = IGridContainer.getCapability(level);
             if (gridContainer == null) {
@@ -69,7 +68,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
             connections[dir.ordinal()] = ALLOWED;
             other.connections[dir.getOpposite().ordinal()] = ALLOWED;
 
-            if (!gridContainer.onGridHostSideConnected(this, dir)) {
+            if (!gridContainer.onDuctSideConnected(this, dir)) {
                 connections[dir.ordinal()] = DISABLED;
                 other.connections[dir.getOpposite().ordinal()] = DISABLED;
                 return false;
@@ -95,13 +94,13 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         //        if (false) {
         //            return true;
         //        }
-        IGridHost<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+        IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
         if (adjacent instanceof DuctTileBase<?, ?> other) { // TODO, This should be moved up to IGridHost as a common implementation for (eventual) multiparts.
             IGridContainer gridContainer = IGridContainer.getCapability(level);
             if (gridContainer == null) {
                 return false;
             }
-            gridContainer.onGridHostSideDisconnecting(this, dir);
+            gridContainer.onDuctSideDisconnecting(this, dir);
 
             connections[dir.ordinal()] = DISABLED;
             other.connections[dir.getOpposite().ordinal()] = DISABLED;
@@ -162,7 +161,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
 
         if (modelUpdate) {
             for (Direction dir : DIRECTIONS) {
-                IGridHost<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+                IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
                 if (adjacent != null) {
                     modelData.setInternalConnection(dir, canConnectTo(adjacent, dir) && adjacent.canConnectTo(this, dir.getOpposite()));
                 } else {
@@ -176,6 +175,26 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     }
 
     // region NETWORK
+
+    // REDSTONE
+    @Override
+    public FriendlyByteBuf getRedstonePacket(FriendlyByteBuf buffer) {
+
+        buffer.writeInt(redstonePower);
+
+        return buffer;
+    }
+
+    @Override
+    public void handleRedstonePacket(FriendlyByteBuf buffer) {
+
+        int power = buffer.readInt();
+        for (IAttachment attachment : attachments) {
+            if (attachment instanceof IRedstoneControllableAttachment redstoneControllableAttachment) {
+                redstoneControllableAttachment.redstoneControl().setPower(power);
+            }
+        }
+    }
 
     // STATE
     @Override
@@ -209,6 +228,8 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
 
         super.load(tag);
 
+        redstonePower = tag.getInt(TAG_RS_POWER);
+
         byte[] bConn = tag.getByteArray(TAG_SIDES);
         if (bConn.length == 6) {
             for (int i = 0; i < 6; ++i) {
@@ -218,9 +239,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         for (int i = 0; i < 6; ++i) {
             if (tag.contains("Attachment" + i)) {
                 CompoundTag attachmentTag = tag.getCompound("Attachment" + i);
-                String type = attachmentTag.getString(TAG_TYPE);
-
-                attachments[i] = AttachmentRegistry.getAttachment(type, attachmentTag, pos(), DIRECTIONS[i]);
+                attachments[i] = AttachmentRegistry.getAttachment(attachmentTag.getString(TAG_TYPE), attachmentTag, this, DIRECTIONS[i]);
             } else {
                 attachments[i] = EmptyAttachment.INSTANCE;
             }
@@ -231,6 +250,8 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     public void saveAdditional(CompoundTag tag) {
 
         super.saveAdditional(tag);
+
+        tag.putInt(TAG_RS_POWER, redstonePower);
 
         byte[] bConn = new byte[6];
         for (int i = 0; i < 6; ++i) {
@@ -291,6 +312,28 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         this.grid = grid;
     }
 
+    @Override
+    public void neighborChanged(Block blockIn, BlockPos fromPos) {
+
+        if (level != null) {
+            redstonePower = level.getBestNeighborSignal(worldPosition);
+            for (IAttachment attachment : attachments) {
+                if (attachment instanceof IRedstoneControllableAttachment redstoneControllableAttachment) {
+                    redstoneControllableAttachment.redstoneControl().setPower(redstonePower);
+                }
+            }
+            TileRedstonePacket.sendToClient(this);
+        }
+    }
+
+    @Override
+    public void onAttachmentUpdate() {
+
+        setChanged();
+        callNeighborStateChange();
+        // TileControlPacket.sendToClient(this);
+    }
+
     @Nonnull
     @Override
     public IAttachment getAttachment(Direction dir) {
@@ -299,9 +342,9 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     }
 
     @Override
-    public boolean canConnectTo(IGridHost<?, ?> other, Direction dir) {
+    public boolean canConnectTo(IDuct<?, ?> other, Direction dir) {
 
-        return IGridHost.super.canConnectTo(other, dir) && connections[dir.ordinal()].allowDuctConnection();
+        return IDuct.super.canConnectTo(other, dir) && connections[dir.ordinal()].allowDuctConnection();
     }
 
     @Override

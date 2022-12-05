@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.attachment;
 
 import cofh.lib.api.control.IRedstoneControllable;
 
-public interface IRedstoneControllableAttachment extends IAttachment, IRedstoneControllable {
+public interface IRedstoneControllableAttachment extends IAttachment, IPacketHandlerAttachment, IRedstoneControllable {
 
     RedstoneControlLogic redstoneControl();
 

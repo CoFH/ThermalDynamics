@@ -4,6 +4,7 @@ import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.ElementBase;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.ElementTexture;
+import cofh.core.client.gui.element.panel.RSControlPanel;
 import cofh.thermal.dynamics.attachment.EnergyLimiterAttachment;
 import cofh.thermal.dynamics.inventory.container.attachment.EnergyLimiterAttachmentContainer;
 import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
@@ -15,7 +16,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 import java.util.Collections;
 
-import static cofh.core.util.helpers.GuiHelper.*;
+import static cofh.core.util.helpers.GuiHelper.generatePanelInfo;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
@@ -27,6 +28,9 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
     public static final String TEX_PATH = ID_THERMAL + ":textures/gui/container/energy_limiter_attachment.png";
     public static final ResourceLocation TEXTURE = new ResourceLocation(TEX_PATH);
 
+    public static final String TEX_INPUT = ID_THERMAL + ":textures/gui/elements/info_to_grid.png";
+    public static final String TEX_OUTPUT = ID_THERMAL + ":textures/gui/elements/info_from_grid.png";
+
     public static final String TEX_INCREMENT = ID_COFH_CORE + ":textures/gui/elements/button_increment.png";
     public static final String TEX_DECREMENT = ID_COFH_CORE + ":textures/gui/elements/button_decrement.png";
 
@@ -37,7 +41,7 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
         super(container, inv, titleIn);
         texture = TEXTURE;
         attachment = container.attachment;
-        info = generatePanelInfo("info.thermal.energy_limiter_attachment");
+        info = generatePanelInfo("info.thermal.energy_limiter");
     }
 
     @Override
@@ -45,12 +49,14 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
 
         super.init();
 
-        addElement(new ElementTexture(this, 24, 16)
+        addPanel(new RSControlPanel(this, attachment));
+
+        addElement(new ElementTexture(this, 40, 16)
                 .setSize(20, 20)
-                .setTexture(INFO_INPUT, 20, 20));
-        addElement(new ElementTexture(this, 132, 16)
+                .setTexture(TEX_INPUT, 20, 20));
+        addElement(new ElementTexture(this, 116, 16)
                 .setSize(20, 20)
-                .setTexture(INFO_OUTPUT, 20, 20));
+                .setTexture(TEX_OUTPUT, 20, 20));
 
         addButtons();
     }
@@ -61,8 +67,8 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
         String input = format(attachment.amountInput);
         String output = format(attachment.amountOutput);
 
-        getFontRenderer().draw(matrixStack, input, getCenteredOffset(input, 34), 42, 0x404040);
-        getFontRenderer().draw(matrixStack, output, getCenteredOffset(output, 142), 42, 0x404040);
+        getFontRenderer().draw(matrixStack, input, getCenteredOffset(input, 50), 42, 0x404040);
+        getFontRenderer().draw(matrixStack, output, getCenteredOffset(output, 126), 42, 0x404040);
 
         super.renderLabels(matrixStack, mouseX, mouseY);
     }
@@ -118,7 +124,7 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
 
     protected void addButtons() {
 
-        ElementBase decInput = new ElementButton(this, 19, 56)
+        ElementBase decInput = new ElementButton(this, 35, 56)
                 .setTooltipFactory((element, mouseX, mouseY) -> {
 
                     if (element.enabled()) {
@@ -142,7 +148,7 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
                 .setTexture(TEX_DECREMENT, 42, 14)
                 .setEnabled(() -> attachment.amountInput > 0);
 
-        ElementBase incInput = new ElementButton(this, 35, 56)
+        ElementBase incInput = new ElementButton(this, 51, 56)
                 .setTooltipFactory((element, mouseX, mouseY) -> {
 
                     if (element.enabled()) {
@@ -166,7 +172,7 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
                 .setTexture(TEX_INCREMENT, 42, 14)
                 .setEnabled(() -> attachment.amountInput < attachment.getMaxInput());
 
-        ElementBase decOutput = new ElementButton(this, 127, 56)
+        ElementBase decOutput = new ElementButton(this, 111, 56)
                 .setTooltipFactory((element, mouseX, mouseY) -> {
 
                     if (element.enabled()) {
@@ -190,7 +196,7 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
                 .setTexture(TEX_DECREMENT, 42, 14)
                 .setEnabled(() -> attachment.amountOutput > 0);
 
-        ElementBase incOutput = new ElementButton(this, 143, 56)
+        ElementBase incOutput = new ElementButton(this, 127, 56)
                 .setTooltipFactory((element, mouseX, mouseY) -> {
 
                     if (element.enabled()) {

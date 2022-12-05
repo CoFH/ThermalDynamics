@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.grid.energy;
 
-import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.ITickableGridNode;
 import cofh.thermal.dynamics.attachment.IAttachment;
 import cofh.thermal.dynamics.grid.GridNode;
@@ -10,7 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
+import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.DISABLED;
 
 public class EnergyGridNode extends GridNode<EnergyGrid> implements ITickableGridNode {
 
@@ -38,28 +38,28 @@ public class EnergyGridNode extends GridNode<EnergyGrid> implements ITickableGri
         if (!cached) {
             cacheConnections();
         }
-        IGridHost<?, ?> host = gridHost();
+        IDuct<?, ?> duct = gridHost();
 
-        if (host != null && distArray.length > 0) {
+        if (duct != null && distArray.length > 0) {
             ++distIndex;
             distIndex %= distArray.length;
             Level world = getWorld();
 
             for (int i = distIndex; i < distArray.length; ++i) {
-                tickDir(world, pos, host, distArray[i]);
+                tickDir(world, pos, duct, distArray[i]);
             }
             for (int i = 0; i < distIndex; ++i) {
-                tickDir(world, pos, host, distArray[i]);
+                tickDir(world, pos, duct, distArray[i]);
             }
         }
     }
 
-    private void tickDir(Level world, BlockPos pos, IGridHost<?, ?> host, Direction dir) {
+    private void tickDir(Level world, BlockPos pos, IDuct<?, ?> duct, Direction dir) {
 
-        if (host.getConnectionType(dir) == DISABLED) {
+        if (duct.getConnectionType(dir) == DISABLED) {
             return;
         }
-        IAttachment attachment = host.getAttachment(dir);
+        IAttachment attachment = duct.getAttachment(dir);
         attachment.tick();
 
         BlockEntity tile = world.getBlockEntity(pos.relative(dir));

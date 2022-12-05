@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.grid;
 
-import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -92,7 +92,7 @@ public abstract class GridNode<G extends Grid<G, ?>> implements INBTSerializable
     }
 
     @Nullable
-    protected IGridHost<?, ?> gridHost() {
+    protected IDuct<?, ?> gridHost() {
 
         return GridHelper.getGridHost(getWorld(), getPos());
     }

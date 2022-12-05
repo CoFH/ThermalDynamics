@@ -3,7 +3,7 @@ package cofh.thermal.dynamics.attachment;
 import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.FluidFilter;
 import cofh.core.util.filter.IFilter;
-import net.minecraft.core.BlockPos;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -24,21 +24,21 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     public static final Component DISPLAY_NAME = new TranslatableComponent("info.thermal.fluid_servo");
 
     protected IFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
-    protected RedstoneControlLogic rsControl = new RedstoneControlLogic();
+    protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
 
-    protected final BlockPos pos;
-    protected Direction side;
+    protected final IDuct<?, ?> duct;
+    protected final Direction side;
 
-    public FluidServoAttachment(BlockPos pos, Direction side) {
+    public FluidServoAttachment(IDuct<?, ?> duct, Direction side) {
 
-        this.pos = pos;
+        this.duct = duct;
         this.side = side;
     }
 
     @Override
-    public BlockPos pos() {
+    public IDuct<?, ?> duct() {
 
-        return pos;
+        return duct;
     }
 
     @Override

@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.grid.fluid;
 
-import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.ITickableGridNode;
 import cofh.thermal.dynamics.attachment.IAttachment;
 import cofh.thermal.dynamics.grid.GridNode;
@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
-import static cofh.thermal.dynamics.api.grid.IGridHost.ConnectionType.DISABLED;
+import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.DISABLED;
 import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
 
 public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridNode {
@@ -40,28 +40,28 @@ public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridN
         if (!cached) {
             cacheConnections();
         }
-        IGridHost<?, ?> host = gridHost();
+        IDuct<?, ?> duct = gridHost();
 
-        if (host != null && distArray.length > 0) {
+        if (duct != null && distArray.length > 0) {
             ++distIndex;
             distIndex %= distArray.length;
             Level world = getWorld();
 
             for (int i = distIndex; i < distArray.length; ++i) {
-                tickDir(world, pos, host, distArray[i]);
+                tickDir(world, pos, duct, distArray[i]);
             }
             for (int i = 0; i < distIndex; ++i) {
-                tickDir(world, pos, host, distArray[i]);
+                tickDir(world, pos, duct, distArray[i]);
             }
         }
     }
 
-    private void tickDir(Level world, BlockPos pos, IGridHost<?, ?> host, Direction dir) {
+    private void tickDir(Level world, BlockPos pos, IDuct<?, ?> duct, Direction dir) {
 
-        if (host.getConnectionType(dir) == DISABLED) {
+        if (duct.getConnectionType(dir) == DISABLED) {
             return;
         }
-        IAttachment attachment = host.getAttachment(dir);
+        IAttachment attachment = duct.getAttachment(dir);
         attachment.tick();
 
         BlockEntity tile = world.getBlockEntity(pos.relative(dir));

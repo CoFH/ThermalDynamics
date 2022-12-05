@@ -1,9 +1,9 @@
 package cofh.thermal.dynamics.attachment;
 
 import cofh.lib.util.helpers.MathHelper;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.inventory.container.attachment.EnergyLimiterAttachmentContainer;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -27,15 +27,15 @@ import static cofh.thermal.dynamics.attachment.AttachmentRegistry.ENERGY_LIMITER
 
 public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttachment, IRedstoneControllableAttachment, MenuProvider {
 
-    public static final IAttachmentFactory<IAttachment> FACTORY = (nbt, pos, side) -> new EnergyLimiterAttachment(pos, side).read(nbt);
+    public static final IAttachmentFactory<IAttachment> FACTORY = (nbt, duct, side) -> new EnergyLimiterAttachment(duct, side).read(nbt);
 
-    public static final Component DISPLAY_NAME = new TranslatableComponent("info.thermal.energy_limiter");
+    public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.energy_limiter");
     public static final int MAX_INPUT = 64000;
     public static final int MAX_OUTPUT = 64000;
 
-    protected RedstoneControlLogic rsControl = new RedstoneControlLogic();
+    protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
 
-    protected final BlockPos pos;
+    protected final IDuct<?, ?> duct;
     protected final Direction side;
 
     public int amountInput = MAX_INPUT / 2;
@@ -44,9 +44,9 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
     protected LazyOptional<IEnergyStorage> gridCap = LazyOptional.empty();
     protected LazyOptional<IEnergyStorage> externalCap = LazyOptional.empty();
 
-    public EnergyLimiterAttachment(BlockPos pos, Direction side) {
+    public EnergyLimiterAttachment(IDuct<?, ?> duct, Direction side) {
 
-        this.pos = pos;
+        this.duct = duct;
         this.side = side;
     }
 
@@ -61,9 +61,9 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
     }
 
     @Override
-    public BlockPos pos() {
+    public IDuct<?, ?> duct() {
 
-        return pos;
+        return duct;
     }
 
     @Override
@@ -106,7 +106,7 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
-        return new EnergyLimiterAttachmentContainer(i, player.getLevel(), pos, side, inventory, player);
+        return new EnergyLimiterAttachmentContainer(i, player.getLevel(), pos(), side, inventory, player);
     }
 
     @Override

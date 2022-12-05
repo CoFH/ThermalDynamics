@@ -1,8 +1,8 @@
 package cofh.thermal.dynamics.item;
 
 import cofh.core.item.BlockItemCoFH;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
-import cofh.thermal.dynamics.api.grid.IGridHost;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,10 +34,10 @@ public class DuctBlockItem extends BlockItemCoFH {
             return placed;
         }
         BlockEntity tile = level.getBlockEntity(pos);
-        if (tile instanceof IGridHost host) {
+        if (tile instanceof IDuct<?, ?> host) {
             IGridContainer gridContainer = IGridContainer.getCapability(level);
             if (gridContainer != null) {
-                gridContainer.onGridHostPlaced(host, computeConnectionPreference(level, ctx.getHitResult()));
+                gridContainer.onDuctPlaced(host, computeConnectionPreference(level, ctx.getHitResult()));
             }
         }
         level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);

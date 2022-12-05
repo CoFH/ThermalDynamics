@@ -20,7 +20,7 @@ public class EnergyDuctTile extends DuctTileBase<EnergyGrid, EnergyGridNode> {
 
         super(DUCT_ENERGY_TILE.get(), pos, state);
 
-        attachments[0] = new EnergyLimiterAttachment(getBlockPos(), Direction.DOWN);
+        attachments[0] = new EnergyLimiterAttachment(this, Direction.DOWN);
     }
 
     @Override

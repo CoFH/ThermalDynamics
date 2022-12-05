@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.block.entity.duct;
 
 import cofh.core.util.helpers.FluidHelper;
-import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.fluid.FluidGrid;
@@ -50,7 +50,7 @@ public class FluidDuctTile extends DuctTileBase<FluidGrid, FluidGridNode> {
     }
 
     @Override
-    public boolean canConnectTo(IGridHost<?, ?> other, Direction dir) {
+    public boolean canConnectTo(IDuct<?, ?> other, Direction dir) {
 
         if (!getLevel().isClientSide && other.getGrid() instanceof FluidGrid otherGrid) {
             FluidStack myFluid = getGrid().getFluid();

@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.api.helper;
 
 import cofh.lib.util.helpers.BlockHelper;
 import cofh.thermal.dynamics.api.TDynApi;
-import cofh.thermal.dynamics.api.grid.IGridHost;
+import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.grid.Grid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,15 +25,15 @@ public class GridHelper {
     }
 
     /**
-     * Optionally get a {@link IGridHost} at the given {@link BlockPos} within the
+     * Optionally get a {@link IDuct} at the given {@link BlockPos} within the
      * given {@link BlockGetter}.
      *
      * @param reader The level.
      * @param pos    The {@link BlockPos}.
-     * @return Optionally the {@link IGridHost}.
+     * @return Optionally the {@link IDuct}.
      */
     @Nullable
-    public static IGridHost<?, ?> getGridHost(BlockGetter reader, BlockPos pos) {
+    public static IDuct<?, ?> getGridHost(BlockGetter reader, BlockPos pos) {
 
         if (reader instanceof LevelReader worldReader) {
             if (!worldReader.hasChunkAt(pos)) return null;
@@ -42,18 +42,18 @@ public class GridHelper {
     }
 
     /**
-     * Optionally get a {@link IGridHost} from the given {@link BlockEntity}.
+     * Optionally get a {@link IDuct} from the given {@link BlockEntity}.
      *
      * @param tile The {@link BlockEntity}.
-     * @return Optionally the {@link IGridHost}.
+     * @return Optionally the {@link IDuct}.
      */
     @Nullable
-    public static IGridHost<?, ?> getGridHost(@Nullable BlockEntity tile) {
+    public static IDuct<?, ?> getGridHost(@Nullable BlockEntity tile) {
 
         if (tile == null) {
             return null;
         }
-        if (tile instanceof IGridHost host) {
+        if (tile instanceof IDuct<?, ?> host) {
             return host;
         }
         return tile.getCapability(TDynApi.GRID_HOST_CAPABILITY).orElse(null);
