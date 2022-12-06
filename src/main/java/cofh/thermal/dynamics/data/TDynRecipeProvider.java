@@ -3,9 +3,11 @@ package cofh.thermal.dynamics.data;
 import cofh.lib.data.RecipeProviderCoFH;
 import cofh.lib.tags.ItemTagsCoFH;
 import cofh.thermal.lib.common.ThermalFlags;
+import cofh.thermal.lib.util.references.ThermalTags;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.Tags;
 
@@ -13,8 +15,7 @@ import java.util.function.Consumer;
 
 import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.thermal.core.ThermalCore.ITEMS;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_DUCT;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_ITEM_BUFFER;
+import static cofh.thermal.dynamics.init.TDynIDs.*;
 
 public class TDynRecipeProvider extends RecipeProviderCoFH {
 
@@ -46,14 +47,14 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .define('C', ItemTagsCoFH.INGOTS_SIGNALUM)
                 .define('I', ItemTagsCoFH.INGOTS_TIN)
                 .define('Q', Tags.Items.GEMS_QUARTZ)
-                .define('R', reg.get("cured_rubber"))
+                .define('P', ItemTags.PLANKS)
                 .pattern("IQI")
-                .pattern("RCR")
+                .pattern("PCP")
                 .pattern("IQI")
                 .unlockedBy("has_quartz", has(Tags.Items.GEMS_QUARTZ))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(reg.get(ID_ENERGY_DUCT), 6)
+        ShapedRecipeBuilder.shaped(reg.get(ID_ENERGY_DUCT), 4)
                 .define('G', Tags.Items.GLASS)
                 .define('L', ItemTagsCoFH.INGOTS_LEAD)
                 .define('R', Tags.Items.DUSTS_REDSTONE)
@@ -63,19 +64,19 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .unlockedBy("has_lead", has(ItemTagsCoFH.INGOTS_LEAD))
                 .save(consumer);
 
-        //        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT), 4)
-        //                .define('L', ItemTagsCoFH.INGOTS_LEAD)
-        //                .define('C', ItemTagsCoFH.INGOTS_BRONZE)
-        //                .pattern("CLC")
-        //                .unlockedBy("has_copper", has(ItemTagsCoFH.INGOTS_BRONZE))
-        //                .save(consumer);
-        //
-        //        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT_GLASS), 4)
-        //                .define('G', ItemTagsCoFH.HARDENED_GLASS)
-        //                .define('C', ItemTagsCoFH.INGOTS_BRONZE)
-        //                .pattern("CGC")
-        //                .unlockedBy("has_copper", has(ItemTagsCoFH.INGOTS_BRONZE))
-        //                .save(consumer);
+        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT), 4)
+                .define('L', ItemTagsCoFH.INGOTS_LEAD)
+                .define('C', ItemTagsCoFH.INGOTS_BRONZE)
+                .pattern("CLC")
+                .unlockedBy("has_bronze", has(ItemTagsCoFH.INGOTS_BRONZE))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT_GLASS), 4)
+                .define('G', ThermalTags.Items.HARDENED_GLASS)
+                .define('C', ItemTagsCoFH.INGOTS_BRONZE)
+                .pattern("CGC")
+                .unlockedBy("has_bronze", has(ItemTagsCoFH.INGOTS_BRONZE))
+                .save(consumer);
     }
 
 }

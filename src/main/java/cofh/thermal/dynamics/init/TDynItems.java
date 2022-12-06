@@ -1,7 +1,13 @@
 package cofh.thermal.dynamics.init;
 
+import cofh.thermal.dynamics.item.AttachmentItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 
+import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
+import static cofh.thermal.core.util.RegistrationHelper.registerItem;
+import static cofh.thermal.dynamics.init.TDynIDs.*;
+import static cofh.thermal.lib.common.ThermalItemGroups.THERMAL_ITEMS;
 import static cofh.thermal.lib.common.ThermalItemGroups.THERMAL_TOOLS;
 
 public class TDynItems {
@@ -11,6 +17,11 @@ public class TDynItems {
     }
 
     public static void register() {
+
+        CreativeModeTab group = THERMAL_ITEMS;
+
+        registerItem(ID_ENERGY_LIMITER_ATTACHMENT, () -> new AttachmentItem(new Item.Properties().tab(group), ENERGY_LIMITER).setModId(ID_THERMAL_DYNAMICS));
+        registerItem(ID_FILTER_ATTACHMENT, () -> new AttachmentItem(new Item.Properties().tab(group), FILTER).setModId(ID_THERMAL_DYNAMICS));
 
         registerTools();
     }

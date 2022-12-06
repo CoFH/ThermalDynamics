@@ -10,14 +10,34 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
+import static cofh.thermal.dynamics.client.TDynTextures.*;
 
 @Mod.EventBusSubscriber (value = Dist.CLIENT, modid = ID_THERMAL_DYNAMICS, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class TDynClientSetupEvents {
+
+    private TDynClientSetupEvents() {
+
+    }
+
+    private static final String BLOCK_ATLAS = "minecraft:textures/atlas/blocks.png";
 
     @SubscribeEvent
     public static void registerModels(final ModelRegistryEvent event) {
 
         ModelLoaderRegistry.registerLoader(new ResourceLocation(ID_THERMAL_DYNAMICS, "duct"), new DuctModel.Loader());
+    }
+
+    @SubscribeEvent
+    public static void preStitch(TextureStitchEvent.Pre event) {
+
+        if (!event.getAtlas().location().toString().equals(BLOCK_ATLAS)) {
+            return;
+        }
+        event.addSprite(ENERGY_LIMITER_ATTACHMENT_ACTIVE_LOC);
+        event.addSprite(ENERGY_LIMITER_ATTACHMENT_LOC);
+
+        event.addSprite(FLUID_FILTER_ATTACHMENT_ACTIVE_LOC);
+        event.addSprite(FLUID_FILTER_ATTACHMENT_LOC);
     }
 
     @SubscribeEvent

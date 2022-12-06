@@ -41,7 +41,7 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
         super(container, inv, titleIn);
         texture = TEXTURE;
         attachment = container.attachment;
-        info = generatePanelInfo("info.thermal.energy_limiter");
+        info = generatePanelInfo("info.thermal.energy_limiter_attachment");
     }
 
     @Override

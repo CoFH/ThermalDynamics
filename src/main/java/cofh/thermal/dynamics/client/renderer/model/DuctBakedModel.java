@@ -43,7 +43,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
         modelCache.clear();
         centerFillCache.clear();
         fillCache.clear();
-        servoCache.clear();
+        attachmentCache.clear();
     }
 
     private final IModelConfiguration config;
@@ -57,7 +57,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
     private final Map<DuctModelData, List<BakedQuad>> modelCache = new HashMap<>();
     private final Map<TexColorWrapper, Map<Direction, List<BakedQuad>>> centerFillCache = new Object2ObjectOpenHashMap<>();
     private final Map<TexColorWrapper, Map<Direction, List<BakedQuad>>> fillCache = new Object2ObjectOpenHashMap<>();
-    private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> servoCache = new Object2ObjectOpenHashMap<>();  // TODO Servos
+    private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> attachmentCache = new Object2ObjectOpenHashMap<>();
 
     public DuctBakedModel(IModelConfiguration config, TextureAtlasSprite particle, EnumMap<Direction, List<BakedQuad>> centerModel, EnumMap<Direction, List<BakedQuad>> centerFill, EnumMap<Direction, List<BakedQuad>> sides, EnumMap<Direction, List<BakedQuad>> fill, EnumMap<Direction, List<BakedQuad>> connections, boolean isInventory) {
 
@@ -81,16 +81,18 @@ public class DuctBakedModel implements IDynamicBakedModel {
         if (isInventory) {
             extraData = INV_DATA;
         }
-        if (!(extraData instanceof DuctModelData modelData)) return ImmutableList.of();
-
+        if (!(extraData instanceof DuctModelData modelData)) {
+            return ImmutableList.of();
+        }
         return getModelFor(modelData);
     }
 
     private List<BakedQuad> getModelFor(DuctModelData modelData) {
 
-        List<BakedQuad> modelQuads = modelCache.get(modelData); // TODO race condition with DuctModelData being mutable?
-        if (!DEBUG && modelQuads != null) return modelQuads;
-
+        List<BakedQuad> modelQuads = modelCache.get(modelData);
+        if (!DEBUG && modelQuads != null) {
+            return modelQuads;
+        }
         synchronized (modelCache) {
             modelQuads = modelCache.get(modelData); // Another thread could have computed whilst we were locked.
             if (!DEBUG && modelQuads != null) return modelQuads;
@@ -98,7 +100,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
             for (Direction dir : DIRECTIONS) {
                 boolean internal = modelData.hasInternalConnection(dir);
                 boolean external = modelData.hasExternalConnection(dir);
-                ResourceLocation servo = modelData.getServo(dir);
+                ResourceLocation attachment = modelData.getAttachment(dir);
 
                 if (!internal && !external) {
                     List<BakedQuad> fillQuads = rebakeFill(centerFillCache, centerFill, modelData.getFill(), modelData.getFillColor(), dir);
@@ -109,7 +111,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
                     quads.addAll(filterBlank(sides.get(dir), !fillQuads.isEmpty()));
                     quads.addAll(filterBlank(fillQuads, false));
                     if (external) {
-                        quads.addAll(filterBlank(rebakeServo(servoCache, connections, servo, dir), false));
+                        quads.addAll(filterBlank(rebakeAttachment(attachmentCache, connections, attachment, dir), false));
                     }
                 }
             }
@@ -136,17 +138,21 @@ public class DuctBakedModel implements IDynamicBakedModel {
 
         // Easy bail if there are no quads.
         List<BakedQuad> fillQuads = raw.get(dir);
-        if (fillQuads.isEmpty()) return ImmutableList.of();
-
+        if (fillQuads.isEmpty()) {
+            return ImmutableList.of();
+        }
         // Again if there is no texture.
-        if (texture == null) return fillQuads;
-
+        if (texture == null) {
+            return fillQuads;
+        }
         // Is it cached already?
         Map<Direction, List<BakedQuad>> retextured = cache.get(new TexColorWrapper(texture, color));
         if (retextured != null) {
             List<BakedQuad> quads = retextured.get(dir);
             // Sure is!
-            if (quads != null) return quads;
+            if (quads != null) {
+                return quads;
+            }
         }
         // Whatever intellij, I know what im doing.
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -155,7 +161,9 @@ public class DuctBakedModel implements IDynamicBakedModel {
             if (retextured != null) {
                 List<BakedQuad> quads = retextured.get(dir);
                 // \o/ memory saved++
-                if (quads != null) return quads;
+                if (quads != null) {
+                    return quads;
+                }
             } else {
                 retextured = new HashMap<>();
                 cache.put(new TexColorWrapper(texture, color), retextured);
@@ -178,21 +186,25 @@ public class DuctBakedModel implements IDynamicBakedModel {
         }
     }
 
-    private List<BakedQuad> rebakeServo(Map<ResourceLocation, Map<Direction, List<BakedQuad>>> cache, Map<Direction, List<BakedQuad>> raw, @Nullable ResourceLocation texture, Direction dir) {
+    private List<BakedQuad> rebakeAttachment(Map<ResourceLocation, Map<Direction, List<BakedQuad>>> cache, Map<Direction, List<BakedQuad>> raw, @Nullable ResourceLocation texture, Direction dir) {
 
         // Easy bail if there are no quads.
-        List<BakedQuad> fillQuads = raw.get(dir);
-        if (fillQuads.isEmpty()) return ImmutableList.of();
-
+        List<BakedQuad> connQuads = raw.get(dir);
+        if (connQuads.isEmpty()) {
+            return ImmutableList.of();
+        }
         // Again if there is no texture.
-        if (texture == null) return fillQuads;
-
+        if (texture == null) {
+            return connQuads;
+        }
         // Is it cached already?
         Map<Direction, List<BakedQuad>> retextured = cache.get(texture);
         if (retextured != null) {
             List<BakedQuad> quads = retextured.get(dir);
             // Sure is!
-            if (quads != null) return quads;
+            if (quads != null) {
+                return quads;
+            }
         }
         // Whatever intellij, I know what im doing.
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -201,12 +213,13 @@ public class DuctBakedModel implements IDynamicBakedModel {
             if (retextured != null) {
                 List<BakedQuad> quads = retextured.get(dir);
                 // \o/ memory saved++
-                if (quads != null) return quads;
+                if (quads != null) {
+                    return quads;
+                }
             } else {
                 retextured = new HashMap<>();
                 cache.put(texture, retextured);
             }
-
             // Grab the sprite
             TextureAtlasSprite sprite = Minecraft.getInstance()
                     .getModelManager()
@@ -214,8 +227,8 @@ public class DuctBakedModel implements IDynamicBakedModel {
                     .getSprite(texture);
 
             // Retexture
-            List<BakedQuad> newQuads = new ArrayList<>(fillQuads.size());
-            for (BakedQuad quad : fillQuads) {
+            List<BakedQuad> newQuads = new ArrayList<>(connQuads.size());
+            for (BakedQuad quad : connQuads) {
                 newQuads.add(new RetexturedBakedQuad(quad, sprite));
             }
             // slap in cache.

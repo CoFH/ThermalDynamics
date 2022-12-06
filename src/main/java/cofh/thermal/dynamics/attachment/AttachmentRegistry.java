@@ -7,17 +7,32 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.util.Map;
 
+import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;
+import static cofh.thermal.dynamics.init.TDynIDs.ENERGY_LIMITER;
+import static cofh.thermal.dynamics.init.TDynIDs.FILTER;
+
 public class AttachmentRegistry {
 
-    public static final String ENERGY_LIMITER = "energy_limiter";
+    public static final IAttachmentFactory<IAttachment> FILTER_FACTORY = ((nbt, duct, side) -> {
+        if (duct.getGridType() == GRID_FLUID.get()) {
+            return new FluidFilterAttachment(duct, side);
+        }
+        return EmptyAttachment.INSTANCE;
+    });
 
-    public static final String FLUID_FILTER = "fluid_filter";
-    public static final String FLUID_SERVO = "fluid_servo";
+    public static final IAttachmentFactory<IAttachment> SERVO_FACTORY = ((nbt, duct, side) -> {
+        if (duct.getGridType() == GRID_FLUID.get()) {
+            return new FluidServoAttachment(duct, side);
+        }
+        return EmptyAttachment.INSTANCE;
+    });
 
     protected static final Map<String, IAttachmentFactory<? extends IAttachment>> ATTACHMENT_FACTORY_MAP = new Object2ObjectOpenHashMap<>();
 
     static {
         registerAttachmentFactory(ENERGY_LIMITER, EnergyLimiterAttachment.FACTORY);
+        registerAttachmentFactory(FILTER, FILTER_FACTORY);
+        // registerAttachmentFactory(SERVO, SERVO_FACTORY);
     }
 
     public static boolean registerAttachmentFactory(String type, IAttachmentFactory<?> factory) {

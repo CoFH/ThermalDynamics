@@ -5,7 +5,6 @@ import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.api.block.entity.IPacketHandlerTile;
 import cofh.thermal.dynamics.api.grid.IGridHostUpdateable;
-import cofh.thermal.dynamics.grid.fluid.FluidGrid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -86,7 +85,7 @@ public class FluidDuctGlassTile extends FluidDuctTile implements IGridHostUpdate
 
         super.getStatePacket(buffer);
 
-        renderFluid = ((FluidGrid) getGrid()).getRenderFluid();
+        renderFluid = getGrid().getRenderFluid();
         buffer.writeFluidStack(renderFluid);
 
         return buffer;

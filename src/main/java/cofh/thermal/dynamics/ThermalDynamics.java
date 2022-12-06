@@ -7,6 +7,7 @@ import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.client.DebugRenderer;
 import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
 import cofh.thermal.dynamics.client.gui.attachment.EnergyLimiterAttachmentScreen;
+import cofh.thermal.dynamics.client.gui.attachment.FluidFilterAttachmentScreen;
 import cofh.thermal.dynamics.handler.GridEvents;
 import cofh.thermal.dynamics.init.*;
 import cofh.thermal.dynamics.network.packet.client.AttachmentControlPacket;
@@ -33,8 +34,7 @@ import java.util.function.Supplier;
 import static cofh.core.network.packet.PacketIDs.*;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.core.ThermalCore.BLOCKS;
-import static cofh.thermal.dynamics.init.TDynContainers.ENERGY_LIMITER_ATTACHMENT_CONTAINER;
-import static cofh.thermal.dynamics.init.TDynContainers.ITEM_BUFFER_CONTAINER;
+import static cofh.thermal.dynamics.init.TDynContainers.*;
 import static cofh.thermal.dynamics.init.TDynIDs.*;
 import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;
 import static cofh.thermal.lib.common.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
@@ -123,6 +123,7 @@ public class ThermalDynamics {
         MenuScreens.register(ITEM_BUFFER_CONTAINER.get(), ItemBufferScreen::new);
 
         MenuScreens.register(ENERGY_LIMITER_ATTACHMENT_CONTAINER.get(), EnergyLimiterAttachmentScreen::new);
+        MenuScreens.register(FLUID_FILTER_ATTACHMENT_CONTAINER.get(), FluidFilterAttachmentScreen::new);
     }
 
     private void registerRenderLayers() {

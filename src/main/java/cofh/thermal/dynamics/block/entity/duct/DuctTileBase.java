@@ -1,5 +1,6 @@
 package cofh.thermal.dynamics.block.entity.duct;
 
+import cofh.core.network.packet.client.ModelUpdatePacket;
 import cofh.core.network.packet.client.TileRedstonePacket;
 import cofh.core.network.packet.client.TileStatePacket;
 import cofh.lib.api.block.entity.IPacketHandlerTile;
@@ -34,8 +35,7 @@ import javax.annotation.Nullable;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.lib.util.constants.NBTTags.*;
-import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.ALLOWED;
-import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.DISABLED;
+import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.*;
 
 public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> extends BlockEntity implements IDuct<G, N>, ITileLocation, IPacketHandlerTile {
 
@@ -119,6 +119,23 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         return true;
     }
 
+    public boolean attemptAttachmentInstall(Direction side, String type) {
+
+        if (attachments[side.ordinal()] != EmptyAttachment.INSTANCE) {
+            return false;
+        }
+        IAttachment attachment = AttachmentRegistry.getAttachment(type, new CompoundTag(), this, side);
+        if (attachment == null || attachment == EmptyAttachment.INSTANCE) {
+            return false;
+        }
+        attachments[side.ordinal()] = attachment;
+        connections[side.ordinal()] = FORCED;
+        setChanged();
+        callNeighborStateChange();
+        TileStatePacket.sendToClient(this);
+        return true;
+    }
+
     public boolean openDuctGui(Player player) {
 
         if (this instanceof MenuProvider provider) {
@@ -162,12 +179,9 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         if (modelUpdate) {
             for (Direction dir : DIRECTIONS) {
                 IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
-                if (adjacent != null) {
-                    modelData.setInternalConnection(dir, canConnectTo(adjacent, dir) && adjacent.canConnectTo(this, dir.getOpposite()));
-                } else {
-                    modelData.setInternalConnection(dir, false);
-                }
-                modelData.setExternalConnection(dir, canConnectToBlock(dir));
+                modelData.setInternalConnection(dir, adjacent != null && canConnectTo(adjacent, dir) && adjacent.canConnectTo(this, dir.getOpposite()));
+                modelData.setExternalConnection(dir, canConnectToBlock(dir) || connections[dir.ordinal()] == FORCED);
+                modelData.setAttachment(dir, attachments[dir.ordinal()].getTexture());
             }
             modelUpdate = false;
         }
@@ -331,7 +345,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
 
         setChanged();
         callNeighborStateChange();
-        // TileControlPacket.sendToClient(this);
+        ModelUpdatePacket.sendToClient(getLevel(), getBlockPos());
     }
 
     @Nonnull

@@ -22,7 +22,7 @@ public class DuctModelData implements IModelData {
     @Nullable
     private ResourceLocation fill;
     @Nullable
-    private ResourceLocation[] servos;
+    private ResourceLocation[] attachments;
 
     private int fillColor = 0xFFFFFF;
 
@@ -34,8 +34,8 @@ public class DuctModelData implements IModelData {
 
         state = other.state;
         fill = other.fill;
-        if (other.servos != null) {
-            servos = other.servos.clone();
+        if (other.attachments != null) {
+            attachments = other.attachments.clone();
         }
     }
 
@@ -59,12 +59,12 @@ public class DuctModelData implements IModelData {
         fillColor = color;
     }
 
-    public void setServo(Direction dir, @Nullable ResourceLocation loc) {
+    public void setAttachment(Direction dir, @Nullable ResourceLocation loc) {
 
-        if (servos == null) {
-            servos = new ResourceLocation[6];
+        if (attachments == null) {
+            attachments = new ResourceLocation[6];
         }
-        servos[dir.ordinal()] = null;
+        attachments[dir.ordinal()] = loc;
     }
 
     public boolean hasInternalConnection(Direction dir) {
@@ -110,11 +110,12 @@ public class DuctModelData implements IModelData {
     }
 
     @Nullable
-    public ResourceLocation getServo(Direction dir) {
+    public ResourceLocation getAttachment(Direction dir) {
 
-        if (servos == null) return null;
-
-        return servos[dir.ordinal()];
+        if (attachments == null) {
+            return null;
+        }
+        return attachments[dir.ordinal()];
     }
 
     public int getFillColor() {
@@ -138,7 +139,7 @@ public class DuctModelData implements IModelData {
 
         if (state != that.state) return false;
         if (!Objects.equals(fill, that.fill)) return false;
-        return Arrays.equals(servos, that.servos);
+        return Arrays.equals(attachments, that.attachments);
     }
 
     @Override
@@ -146,7 +147,7 @@ public class DuctModelData implements IModelData {
 
         int result = state;
         result = 31 * result + (fill != null ? fill.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(servos);
+        result = 31 * result + Arrays.hashCode(attachments);
         return result;
     }
 

@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -23,13 +24,16 @@ import java.util.Optional;
 import java.util.function.IntSupplier;
 
 import static cofh.lib.util.constants.NBTTags.*;
-import static cofh.thermal.dynamics.attachment.AttachmentRegistry.ENERGY_LIMITER;
+import static cofh.thermal.dynamics.client.TDynTextures.ENERGY_LIMITER_ATTACHMENT_ACTIVE_LOC;
+import static cofh.thermal.dynamics.client.TDynTextures.ENERGY_LIMITER_ATTACHMENT_LOC;
+import static cofh.thermal.dynamics.init.TDynIDs.ENERGY_LIMITER;
 
 public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttachment, IRedstoneControllableAttachment, MenuProvider {
 
     public static final IAttachmentFactory<IAttachment> FACTORY = (nbt, duct, side) -> new EnergyLimiterAttachment(duct, side).read(nbt);
 
     public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.energy_limiter");
+
     public static final int MAX_INPUT = 64000;
     public static final int MAX_OUTPUT = 64000;
 
@@ -75,6 +79,9 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
     @Override
     public IAttachment read(CompoundTag nbt) {
 
+        if (nbt.isEmpty()) {
+            return this;
+        }
         rsControl.read(nbt);
 
         amountInput = nbt.getInt(TAG_AMOUNT_IN);
@@ -94,6 +101,12 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
         nbt.putInt(TAG_AMOUNT_OUT, amountOutput);
 
         return nbt;
+    }
+
+    @Override
+    public ResourceLocation getTexture() {
+
+        return rsControl.getState() ? ENERGY_LIMITER_ATTACHMENT_ACTIVE_LOC : ENERGY_LIMITER_ATTACHMENT_LOC;
     }
 
     @Override

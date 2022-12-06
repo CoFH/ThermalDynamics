@@ -7,6 +7,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.thermal.core.ThermalCore.BLOCKS;
 import static cofh.thermal.core.ThermalCore.ITEMS;
+import static cofh.thermal.dynamics.init.TDynIDs.*;
 
 public class TDynItemModelProvider extends ItemModelProviderCoFH {
 
@@ -27,6 +28,11 @@ public class TDynItemModelProvider extends ItemModelProviderCoFH {
         registerBlockItemModels();
 
         var reg = ITEMS;
+
+        generated(reg.getSup(ID_ENERGY_LIMITER_ATTACHMENT));
+
+        generated(reg.getSup(ID_FILTER_ATTACHMENT));
+        generated(reg.getSup(ID_SERVO_ATTACHMENT));
     }
 
     private void registerBlockItemModels() {

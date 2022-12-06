@@ -4,10 +4,13 @@ import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.FluidFilter;
 import cofh.core.util.filter.IFilter;
 import cofh.thermal.dynamics.api.grid.IDuct;
+import cofh.thermal.dynamics.inventory.container.attachment.FluidFilterAttachmentContainer;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -24,9 +27,14 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static cofh.lib.util.constants.NBTTags.TAG_TYPE;
+import static cofh.thermal.dynamics.client.TDynTextures.FLUID_FILTER_ATTACHMENT_ACTIVE_LOC;
+import static cofh.thermal.dynamics.client.TDynTextures.FLUID_FILTER_ATTACHMENT_LOC;
+import static cofh.thermal.dynamics.init.TDynIDs.FILTER;
+
 public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
-    public static final Component DISPLAY_NAME = new TranslatableComponent("info.thermal.fluid_filter");
+    public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.filter");
 
     protected IFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
@@ -58,6 +66,9 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     @Override
     public IAttachment read(CompoundTag nbt) {
 
+        if (nbt.isEmpty()) {
+            return this;
+        }
         filter.read(nbt);
         rsControl.read(nbt);
 
@@ -67,10 +78,18 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     @Override
     public CompoundTag write(CompoundTag nbt) {
 
+        nbt.putString(TAG_TYPE, FILTER);
+
         filter.write(nbt);
         rsControl.write(nbt);
 
         return nbt;
+    }
+
+    @Override
+    public ResourceLocation getTexture() {
+
+        return rsControl.getState() ? FLUID_FILTER_ATTACHMENT_ACTIVE_LOC : FLUID_FILTER_ATTACHMENT_LOC;
     }
 
     @Override
@@ -83,7 +102,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
-        return null;
+        return new FluidFilterAttachmentContainer(i, player.getLevel(), pos(), side, inventory, player);
     }
 
     @Override
@@ -93,7 +112,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
             Optional<T> gridOpt = gridLazOpt.resolve();
             if (gridOpt.isPresent() && gridOpt.get() instanceof IFluidHandler handler) {
                 if (!gridCap.isPresent()) {
-                    gridCap = LazyOptional.of(() -> new WrappedFluidHandler(handler, e -> !rsControl.getState() || filter.valid(e)));
+                    gridCap = LazyOptional.of(() -> new WrappedFluidHandler(handler, e -> rsControl.getState() && filter.valid(e) || !rsControl.getState()));
                     gridLazOpt.addListener(e -> gridCap.invalidate());
                 }
                 return gridCap.cast();
@@ -109,7 +128,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
             Optional<T> extOpt = extLazOpt.resolve();
             if (extOpt.isPresent() && extOpt.get() instanceof IFluidHandler handler) {
                 if (!externalCap.isPresent()) {
-                    externalCap = LazyOptional.of(() -> new WrappedFluidHandler(handler, e -> !rsControl.getState() || filter.valid(e)));
+                    externalCap = LazyOptional.of(() -> new WrappedFluidHandler(handler, e -> rsControl.getState() && filter.valid(e) || !rsControl.getState()));
                     extLazOpt.addListener(e -> externalCap.invalidate());
                 }
                 return externalCap.cast();
@@ -123,6 +142,22 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     public IFilter getFilter() {
 
         return filter;
+    }
+    // endregion
+
+    // region IPacketHandlerAttachment
+    @Override
+    public FriendlyByteBuf getControlPacket(FriendlyByteBuf buffer) {
+
+        rsControl.writeToBuffer(buffer);
+
+        return buffer;
+    }
+
+    @Override
+    public void handleControlPacket(FriendlyByteBuf buffer) {
+
+        rsControl.readFromBuffer(buffer);
     }
     // endregion
 

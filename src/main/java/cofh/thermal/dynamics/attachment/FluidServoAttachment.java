@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 
 public class FluidServoAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
-    public static final Component DISPLAY_NAME = new TranslatableComponent("info.thermal.fluid_servo");
+    public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.servo");
 
     protected IFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);

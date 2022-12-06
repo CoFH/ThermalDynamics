@@ -9,6 +9,7 @@ import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.block.entity.duct.DuctTileBase;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
+import cofh.thermal.dynamics.item.AttachmentItem;
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -17,6 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -39,6 +41,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
+import static cofh.core.util.helpers.ItemHelper.consumeItem;
 import static cofh.lib.util.Constants.DIRECTIONS;
 
 public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterloggedBlock, IDismantleable {
@@ -111,7 +114,8 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
         if (hit instanceof VoxelShapeBlockHitResult advHit && worldIn.getBlockEntity(pos) instanceof DuctTileBase<?, ?> duct) {
-            if (Utils.isWrench(player.getItemInHand(handIn))) {
+            ItemStack heldStack = player.getItemInHand(handIn);
+            if (Utils.isWrench(heldStack)) {
                 if (Utils.isClientWorld(worldIn)) {
                     return InteractionResult.SUCCESS;
                 }
@@ -123,7 +127,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
                     duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 7]);
                 }
                 return InteractionResult.CONSUME;
-            } else if (player.getItemInHand(handIn).isEmpty()) {
+            } else if (heldStack.isEmpty()) {
                 if (Utils.isClientWorld(worldIn)) {
                     return InteractionResult.SUCCESS;
                 }
@@ -137,11 +141,25 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
                     }
                 }
                 return InteractionResult.CONSUME;
-            } else if (player.getItemInHand(handIn).isEmpty()) {
-                if (Utils.isClientWorld(worldIn)) {
+            } else if (heldStack.getItem() instanceof AttachmentItem attachmentItem) {
+                //                if (Utils.isClientWorld(worldIn)) {
+                //                    return InteractionResult.SUCCESS;
+                //                }
+                if (advHit.subHit == 0) {
+                    if (duct.attemptAttachmentInstall(advHit.getDirection(), attachmentItem.getAttachmentType(heldStack))) {
+                        if (!player.getAbilities().instabuild && Utils.isServerWorld(worldIn)) {
+                            player.setItemInHand(handIn, consumeItem(heldStack, 1));
+                        }
+                    }
+                    return InteractionResult.SUCCESS;
+                } else if (advHit.subHit >= 7) {
+                    if (duct.attemptAttachmentInstall(DIRECTIONS[advHit.subHit - 7], attachmentItem.getAttachmentType(heldStack))) {
+                        if (!player.getAbilities().instabuild && Utils.isServerWorld(worldIn)) {
+                            player.setItemInHand(handIn, consumeItem(heldStack, 1));
+                        }
+                    }
                     return InteractionResult.SUCCESS;
                 }
-                // TODO: Attachment installation
             }
         }
         return InteractionResult.PASS;
