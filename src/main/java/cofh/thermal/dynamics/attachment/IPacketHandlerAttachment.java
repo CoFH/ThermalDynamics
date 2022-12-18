@@ -12,6 +12,11 @@ public interface IPacketHandlerAttachment extends IAttachment {
     }
 
     // CONFIG
+    default boolean hasConfigPacket() {
+
+        return true;
+    }
+
     default FriendlyByteBuf getConfigPacket(FriendlyByteBuf buffer) {
 
         return buffer;
@@ -22,6 +27,11 @@ public interface IPacketHandlerAttachment extends IAttachment {
     }
 
     // CONTROL
+    default boolean hasControlPacket() {
+
+        return true;
+    }
+
     default FriendlyByteBuf getControlPacket(FriendlyByteBuf buffer) {
 
         return buffer;
@@ -32,6 +42,11 @@ public interface IPacketHandlerAttachment extends IAttachment {
     }
 
     // GUI
+    default boolean hasGuiPacket() {
+
+        return true;
+    }
+
     default FriendlyByteBuf getGuiPacket(FriendlyByteBuf buffer) {
 
         return buffer;

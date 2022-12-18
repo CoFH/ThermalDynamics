@@ -15,14 +15,14 @@ public class AttachmentRegistry {
 
     public static final IAttachmentFactory<IAttachment> FILTER_FACTORY = ((nbt, duct, side) -> {
         if (duct.getGridType() == GRID_FLUID.get()) {
-            return new FluidFilterAttachment(duct, side);
+            return new FluidFilterAttachment(duct, side).read(nbt);
         }
         return EmptyAttachment.INSTANCE;
     });
 
     public static final IAttachmentFactory<IAttachment> SERVO_FACTORY = ((nbt, duct, side) -> {
         if (duct.getGridType() == GRID_FLUID.get()) {
-            return new FluidServoAttachment(duct, side);
+            return new FluidServoAttachment(duct, side).read(nbt);
         }
         return EmptyAttachment.INSTANCE;
     });

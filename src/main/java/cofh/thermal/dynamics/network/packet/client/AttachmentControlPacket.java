@@ -61,7 +61,7 @@ public class AttachmentControlPacket extends PacketBase implements IPacketClient
 
     public static void sendToClient(IPacketHandlerAttachment attachment) {
 
-        if (attachment.world() == null || Utils.isClientWorld(attachment.world())) {
+        if (attachment.world() == null || Utils.isClientWorld(attachment.world()) || !attachment.hasControlPacket()) {
             return;
         }
         AttachmentControlPacket packet = new AttachmentControlPacket();

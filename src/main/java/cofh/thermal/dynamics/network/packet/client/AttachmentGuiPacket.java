@@ -61,7 +61,7 @@ public class AttachmentGuiPacket extends PacketBase implements IPacketClient {
 
     public static void sendToClient(IPacketHandlerAttachment attachment, ServerPlayer player) {
 
-        if (Utils.isClientWorld(player.getLevel())) {
+        if (Utils.isClientWorld(player.getLevel()) || !attachment.hasGuiPacket()) {
             return;
         }
         AttachmentGuiPacket packet = new AttachmentGuiPacket();

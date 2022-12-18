@@ -36,7 +36,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
 
     public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.filter");
 
-    protected IFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
+    protected BaseFluidFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
 
     protected final IDuct<?, ?> duct;
@@ -147,6 +147,22 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
 
     // region IPacketHandlerAttachment
     @Override
+    public FriendlyByteBuf getConfigPacket(FriendlyByteBuf buffer) {
+
+        buffer.writeBoolean(filter.getAllowList());
+        buffer.writeBoolean(filter.getCheckNBT());
+
+        return buffer;
+    }
+
+    @Override
+    public void handleConfigPacket(FriendlyByteBuf buffer) {
+
+        filter.setAllowList(buffer.readBoolean());
+        filter.setCheckNBT(buffer.readBoolean());
+    }
+
+    @Override
     public FriendlyByteBuf getControlPacket(FriendlyByteBuf buffer) {
 
         rsControl.writeToBuffer(buffer);
@@ -158,6 +174,12 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     public void handleControlPacket(FriendlyByteBuf buffer) {
 
         rsControl.readFromBuffer(buffer);
+    }
+
+    @Override
+    public boolean hasGuiPacket() {
+
+        return false;
     }
     // endregion
 

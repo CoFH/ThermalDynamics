@@ -57,6 +57,9 @@ public class AttachmentConfigPacket extends PacketBase implements IPacketServer 
 
     public static void sendToServer(IPacketHandlerAttachment attachment) {
 
+        if (!attachment.hasConfigPacket()) {
+            return;
+        }
         AttachmentConfigPacket packet = new AttachmentConfigPacket();
         packet.pos = attachment.pos();
         packet.side = attachment.side();

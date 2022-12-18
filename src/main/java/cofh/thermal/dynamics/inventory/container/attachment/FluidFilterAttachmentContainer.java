@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.inventory.container.attachment;
 
-import cofh.core.network.packet.server.ContainerConfigPacket;
+import cofh.core.network.packet.client.ContainerGuiPacket;
 import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.IFilterOptions;
 import cofh.lib.inventory.container.slot.SlotFalseCopy;
@@ -8,6 +8,7 @@ import cofh.lib.inventory.wrapper.InvWrapperFluids;
 import cofh.lib.util.helpers.MathHelper;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.attachment.FluidFilterAttachment;
+import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -72,23 +73,22 @@ public class FluidFilterAttachmentContainer extends AttachmentContainer implemen
         return filterInventory.getContainerSize();
     }
 
+    @Override
+    public void broadcastChanges() {
+
+        // This seems strange when the Attachment already has a Gui Packet, but the attachment doesn't know about the filter inventory.
+        super.broadcastChanges();
+        ContainerGuiPacket.sendToClient(this, player);
+    }
+
+    @Override
+    public void removed(Player playerIn) {
+
+        filter.setFluids(filterInventory.getStacks());
+        super.removed(playerIn);
+    }
+
     // region NETWORK
-    @Override
-    public FriendlyByteBuf getConfigPacket(FriendlyByteBuf buffer) {
-
-        buffer.writeBoolean(getAllowList());
-        buffer.writeBoolean(getCheckNBT());
-
-        return buffer;
-    }
-
-    @Override
-    public void handleConfigPacket(FriendlyByteBuf buffer) {
-
-        filter.setAllowList(buffer.readBoolean());
-        filter.setCheckNBT(buffer.readBoolean());
-    }
-
     @Override
     public FriendlyByteBuf getGuiPacket(FriendlyByteBuf buffer) {
 
@@ -123,7 +123,7 @@ public class FluidFilterAttachmentContainer extends AttachmentContainer implemen
     public boolean setAllowList(boolean allowList) {
 
         boolean ret = filter.setAllowList(allowList);
-        ContainerConfigPacket.sendToServer(this);
+        AttachmentConfigPacket.sendToServer(attachment);
         return ret;
     }
 
@@ -137,7 +137,7 @@ public class FluidFilterAttachmentContainer extends AttachmentContainer implemen
     public boolean setCheckNBT(boolean checkNBT) {
 
         boolean ret = filter.setCheckNBT(checkNBT);
-        ContainerConfigPacket.sendToServer(this);
+        AttachmentConfigPacket.sendToServer(attachment);
         return ret;
     }
     // endregion

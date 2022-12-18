@@ -15,7 +15,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 
@@ -65,8 +65,11 @@ public class DebugRenderer {
         MinecraftForge.EVENT_BUS.addListener(DebugRenderer::renderWorldLast);
     }
 
-    private static void renderWorldLast(RenderLevelLastEvent event) {
+    private static void renderWorldLast(RenderLevelStageEvent event) {
 
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+            return;
+        }
         PoseStack pStack = event.getPoseStack();
         pStack.pushPose();
 

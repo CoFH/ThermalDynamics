@@ -1,45 +1,59 @@
 package cofh.thermal.dynamics.inventory.container.attachment;
 
-import cofh.core.inventory.container.ContainerCoFH;
+import cofh.core.network.packet.client.ContainerGuiPacket;
 import cofh.core.network.packet.server.ContainerConfigPacket;
 import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.IFilterOptions;
 import cofh.lib.inventory.container.slot.SlotFalseCopy;
 import cofh.lib.inventory.wrapper.InvWrapperFluids;
 import cofh.lib.util.helpers.MathHelper;
+import cofh.thermal.dynamics.api.grid.IDuct;
+import cofh.thermal.dynamics.attachment.FluidServoAttachment;
+import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FluidServoAttachmentContainer extends ContainerCoFH implements IFilterOptions {
+import static cofh.thermal.dynamics.init.TDynContainers.FLUID_FILTER_ATTACHMENT_CONTAINER;
+
+public class FluidServoAttachmentContainer extends AttachmentContainer implements IFilterOptions {
+
+    public final FluidServoAttachment attachment;
 
     protected BaseFluidFilter filter;
     protected InvWrapperFluids filterInventory;
 
-    public FluidServoAttachmentContainer(int windowId, Inventory inventory, Player player) {
+    public FluidServoAttachmentContainer(int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
 
-        super(null, windowId, inventory, player);
-        // TODO: TYPE
+        super(FLUID_FILTER_ATTACHMENT_CONTAINER.get(), id, world, pos, side, inventory, player);
 
-        // TODO: Filter acquisition
-
+        if (hostTile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof FluidServoAttachment expectedAttachment) {
+            this.attachment = expectedAttachment;
+            this.filter = (BaseFluidFilter) attachment.getFilter();
+        } else {
+            this.attachment = null;
+        }
         allowSwap = false;
+        if (filter != null) {
+            int slots = filter.size();
+            filterInventory = new InvWrapperFluids(this, filter.getFluids(), slots);
 
-        int slots = filter.size();
-        filterInventory = new InvWrapperFluids(this, filter.getFluids(), slots);
+            int rows = MathHelper.clamp(slots / 3, 1, 3);
+            int rowSize = slots / rows;
 
-        int rows = MathHelper.clamp(slots / 3, 1, 3);
-        int rowSize = slots / rows;
+            int xOffset = 62 - 9 * rowSize;
+            int yOffset = 44 - 9 * rows;
 
-        int xOffset = 62 - 9 * rowSize;
-        int yOffset = 44 - 9 * rows;
-
-        for (int i = 0; i < filter.size(); ++i) {
-            addSlot(new SlotFalseCopy(filterInventory, i, xOffset + i % rowSize * 18, yOffset + i / rowSize * 18));
+            for (int i = 0; i < filter.size(); ++i) {
+                addSlot(new SlotFalseCopy(filterInventory, i, xOffset + i % rowSize * 18, yOffset + i / rowSize * 18));
+            }
         }
         bindPlayerInventory(inventory);
     }
@@ -61,29 +75,21 @@ public class FluidServoAttachmentContainer extends ContainerCoFH implements IFil
     }
 
     @Override
-    public boolean stillValid(Player player) {
+    public void broadcastChanges() {
 
-        // TODO: Attachment tile valid
-        return true;
+        // This seems strange when the Attachment already has a Gui Packet, but the attachment doesn't know about the filter inventory.
+        super.broadcastChanges();
+        ContainerGuiPacket.sendToClient(this, player);
+    }
+
+    @Override
+    public void removed(Player playerIn) {
+
+        filter.setFluids(filterInventory.getStacks());
+        super.removed(playerIn);
     }
 
     // region NETWORK
-    @Override
-    public FriendlyByteBuf getConfigPacket(FriendlyByteBuf buffer) {
-
-        buffer.writeBoolean(getAllowList());
-        buffer.writeBoolean(getCheckNBT());
-
-        return buffer;
-    }
-
-    @Override
-    public void handleConfigPacket(FriendlyByteBuf buffer) {
-
-        filter.setAllowList(buffer.readBoolean());
-        filter.setCheckNBT(buffer.readBoolean());
-    }
-
     @Override
     public FriendlyByteBuf getGuiPacket(FriendlyByteBuf buffer) {
 
@@ -118,7 +124,7 @@ public class FluidServoAttachmentContainer extends ContainerCoFH implements IFil
     public boolean setAllowList(boolean allowList) {
 
         boolean ret = filter.setAllowList(allowList);
-        ContainerConfigPacket.sendToServer(this);
+        AttachmentConfigPacket.sendToServer(attachment);
         return ret;
     }
 
@@ -132,7 +138,7 @@ public class FluidServoAttachmentContainer extends ContainerCoFH implements IFil
     public boolean setCheckNBT(boolean checkNBT) {
 
         boolean ret = filter.setCheckNBT(checkNBT);
-        ContainerConfigPacket.sendToServer(this);
+        AttachmentConfigPacket.sendToServer(attachment);
         return ret;
     }
     // endregion
