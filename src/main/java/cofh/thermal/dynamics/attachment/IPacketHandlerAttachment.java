@@ -41,19 +41,4 @@ public interface IPacketHandlerAttachment extends IAttachment {
 
     }
 
-    // GUI
-    default boolean hasGuiPacket() {
-
-        return true;
-    }
-
-    default FriendlyByteBuf getGuiPacket(FriendlyByteBuf buffer) {
-
-        return buffer;
-    }
-
-    default void handleGuiPacket(FriendlyByteBuf buffer) {
-
-    }
-
 }

@@ -38,8 +38,10 @@ import static cofh.thermal.dynamics.init.TDynIDs.ID_FILTER_ATTACHMENT;
 public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
     public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.fluid_filter");
+
     protected final IDuct<?, ?> duct;
     protected final Direction side;
+
     protected BaseFluidFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
     protected LazyOptional<IFluidHandler> gridCap = LazyOptional.empty();
@@ -182,12 +184,6 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     public void handleControlPacket(FriendlyByteBuf buffer) {
 
         rsControl.readFromBuffer(buffer);
-    }
-
-    @Override
-    public boolean hasGuiPacket() {
-
-        return false;
     }
     // endregion
 

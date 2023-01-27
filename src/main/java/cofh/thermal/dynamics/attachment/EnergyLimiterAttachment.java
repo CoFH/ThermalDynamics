@@ -31,18 +31,20 @@ import static cofh.thermal.dynamics.client.TDynTextures.ENERGY_LIMITER_ATTACHMEN
 import static cofh.thermal.dynamics.init.TDynIDs.ENERGY_LIMITER;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_LIMITER_ATTACHMENT;
 
-public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttachment, IRedstoneControllableAttachment, MenuProvider {
+public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllableAttachment, MenuProvider {
 
     public static final IAttachmentFactory<IAttachment> FACTORY = (nbt, duct, side) -> new EnergyLimiterAttachment(duct, side).read(nbt);
 
     public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.energy_limiter");
 
-    public static final int MAX_INPUT = 64000;
-    public static final int MAX_OUTPUT = 64000;
+    public final int MAX_TRANSFER = 64000;
+
     protected final IDuct<?, ?> duct;
     protected final Direction side;
-    public int amountInput = MAX_INPUT / 2;
-    public int amountOutput = MAX_OUTPUT / 2;
+
+    public int amountInput = MAX_TRANSFER / 2;
+    public int amountOutput = MAX_TRANSFER / 2;
+
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
     protected LazyOptional<IEnergyStorage> gridCap = LazyOptional.empty();
     protected LazyOptional<IEnergyStorage> externalCap = LazyOptional.empty();
@@ -53,14 +55,9 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
         this.side = side;
     }
 
-    public int getMaxInput() {
+    public int getMaxTransfer() {
 
-        return MAX_INPUT;
-    }
-
-    public int getMaxOutput() {
-
-        return MAX_OUTPUT;
+        return MAX_TRANSFER;
     }
 
     @Override
@@ -174,8 +171,8 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
     @Override
     public void handleConfigPacket(FriendlyByteBuf buffer) {
 
-        amountInput = MathHelper.clamp(buffer.readInt(), 0, getMaxInput());
-        amountOutput = MathHelper.clamp(buffer.readInt(), 0, getMaxOutput());
+        amountInput = MathHelper.clamp(buffer.readInt(), 0, getMaxTransfer());
+        amountOutput = MathHelper.clamp(buffer.readInt(), 0, getMaxTransfer());
     }
 
     @Override
@@ -190,22 +187,6 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
     public void handleControlPacket(FriendlyByteBuf buffer) {
 
         rsControl.readFromBuffer(buffer);
-    }
-
-    @Override
-    public FriendlyByteBuf getGuiPacket(FriendlyByteBuf buffer) {
-
-        buffer.writeInt(amountInput);
-        buffer.writeInt(amountOutput);
-
-        return buffer;
-    }
-
-    @Override
-    public void handleGuiPacket(FriendlyByteBuf buffer) {
-
-        amountInput = buffer.readInt();
-        amountOutput = buffer.readInt();
     }
     // endregion
 

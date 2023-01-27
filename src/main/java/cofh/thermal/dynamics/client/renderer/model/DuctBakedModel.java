@@ -111,7 +111,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
                     quads.addAll(filterBlank(sides.get(dir), !fillQuads.isEmpty()));
                     quads.addAll(filterBlank(fillQuads, false));
                     if (external) {
-                        quads.addAll(filterBlank(rebakeAttachment(attachmentCache, connections, attachment, dir), false));
+                        quads.addAll(filterBlank(rebakeAttachment(attachmentCache, connections, attachment, dir), true));
                     }
                 }
             }

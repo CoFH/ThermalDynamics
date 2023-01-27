@@ -76,7 +76,7 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
         if (!distArray[i].isLoaded()) {
             return false;
         }
-        distArray[i].tick();
+        distArray[i].distributionTick();
         if (getEnergy() <= 0) {
             distIndex = i + 1;
             if (curIndex == distIndex) {

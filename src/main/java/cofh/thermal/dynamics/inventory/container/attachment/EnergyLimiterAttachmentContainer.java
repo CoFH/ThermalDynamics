@@ -1,9 +1,11 @@
 package cofh.thermal.dynamics.inventory.container.attachment;
 
+import cofh.core.network.packet.client.ContainerGuiPacket;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.attachment.EnergyLimiterAttachment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -32,4 +34,29 @@ public class EnergyLimiterAttachmentContainer extends AttachmentContainer {
         return 0;
     }
 
+    @Override
+    public void broadcastChanges() {
+
+        super.broadcastChanges();
+
+        ContainerGuiPacket.sendToClient(this, player);
+    }
+
+    // region NETWORK
+    @Override
+    public FriendlyByteBuf getGuiPacket(FriendlyByteBuf buffer) {
+
+        buffer.writeInt(attachment.amountInput);
+        buffer.writeInt(attachment.amountOutput);
+
+        return buffer;
+    }
+
+    @Override
+    public void handleGuiPacket(FriendlyByteBuf buffer) {
+
+        attachment.amountInput = buffer.readInt();
+        attachment.amountOutput = buffer.readInt();
+    }
+    // endregion
 }

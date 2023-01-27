@@ -47,7 +47,7 @@ public class FluidServoAttachmentContainer extends AttachmentContainer implement
             int rows = MathHelper.clamp(slots / 3, 1, 3);
             int rowSize = slots / rows;
 
-            int xOffset = 62 - 9 * rowSize;
+            int xOffset = 53 - 9 * rowSize;
             int yOffset = 44 - 9 * rows;
 
             for (int i = 0; i < filter.size(); ++i) {
@@ -97,6 +97,8 @@ public class FluidServoAttachmentContainer extends AttachmentContainer implement
         for (int i = 0; i < size; ++i) {
             buffer.writeFluidStack(getFilterStacks().get(i));
         }
+        buffer.writeInt(attachment.amountTransfer);
+
         return buffer;
     }
 
@@ -109,6 +111,8 @@ public class FluidServoAttachmentContainer extends AttachmentContainer implement
             fluidStacks.add(buffer.readFluidStack());
         }
         filterInventory.readFromSource(fluidStacks);
+
+        attachment.amountTransfer = buffer.readInt();
     }
     // endregion
 

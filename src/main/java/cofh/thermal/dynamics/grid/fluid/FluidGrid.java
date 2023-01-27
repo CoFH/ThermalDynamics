@@ -55,7 +55,6 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
     public void tick() {
 
         storage.tick();
-        renderUpdate();
 
         if (distArray.length != getNodes().size()) {
             distArray = getNodes().values().toArray(new FluidGridNode[0]);
@@ -65,6 +64,14 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
         if (distIndex >= distArray.length) {
             distIndex = 0;
         }
+        for (int i = distIndex; i < distArray.length; ++i) {
+            rrPreNodeTick(i);
+        }
+        for (int i = 0; i < distIndex; ++i) {
+            rrPreNodeTick(i);
+        }
+        renderUpdate();
+
         for (int i = distIndex; i < distArray.length; ++i) {
             if (rrNodeTick(curIndex, i)) {
                 storage.postTick();
@@ -81,12 +88,19 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
         storage.postTick();
     }
 
+    private void rrPreNodeTick(int i) {
+
+        if (distArray[i].isLoaded()) {
+            distArray[i].attachmentTick();
+        }
+    }
+
     private boolean rrNodeTick(int curIndex, int i) {
 
         if (!distArray[i].isLoaded()) {
             return false;
         }
-        distArray[i].tick();
+        distArray[i].distributionTick();
         if (getFluid().isEmpty()) {
             distIndex = i + 1;
             if (curIndex == distIndex) {

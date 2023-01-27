@@ -12,7 +12,6 @@ import cofh.thermal.dynamics.client.gui.attachment.FluidServoAttachmentScreen;
 import cofh.thermal.dynamics.handler.GridEvents;
 import cofh.thermal.dynamics.init.*;
 import cofh.thermal.dynamics.network.packet.client.AttachmentControlPacket;
-import cofh.thermal.dynamics.network.packet.client.AttachmentGuiPacket;
 import cofh.thermal.dynamics.network.packet.client.GridDebugPacket;
 import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
 import cofh.thermal.dynamics.network.packet.server.AttachmentRedstoneControlPacket;
@@ -84,7 +83,6 @@ public class ThermalDynamics {
     private void registerPackets() {
 
         PACKET_HANDLER.registerPacket(PACKET_CONTROL, AttachmentControlPacket::new);
-        PACKET_HANDLER.registerPacket(PACKET_GUI, AttachmentGuiPacket::new);
         PACKET_HANDLER.registerPacket(PACKET_CONFIG, AttachmentConfigPacket::new);
         PACKET_HANDLER.registerPacket(PACKET_REDSTONE_CONTROL, AttachmentRedstoneControlPacket::new);
 

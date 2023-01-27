@@ -95,7 +95,7 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
             for (GridNode<?> node : nodes) {
                 assert node.isLoaded();
                 if (node instanceof ITickableGridNode) {
-                    ((ITickableGridNode) node).tick();
+                    ((ITickableGridNode) node).distributionTick();
                 }
             }
         }

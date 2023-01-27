@@ -28,8 +28,8 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
     public static final String TEX_PATH = ID_THERMAL + ":textures/gui/container/energy_limiter_attachment.png";
     public static final ResourceLocation TEXTURE = new ResourceLocation(TEX_PATH);
 
-    public static final String TEX_INPUT = ID_THERMAL + ":textures/gui/elements/info_to_grid.png";
-    public static final String TEX_OUTPUT = ID_THERMAL + ":textures/gui/elements/info_from_grid.png";
+    public static final String TEX_INPUT = ID_THERMAL + ":textures/gui/elements/info_to_energy_grid.png";
+    public static final String TEX_OUTPUT = ID_THERMAL + ":textures/gui/elements/info_from_energy_grid.png";
 
     public static final String TEX_INCREMENT = ID_COFH_CORE + ":textures/gui/elements/button_increment.png";
     public static final String TEX_DECREMENT = ID_COFH_CORE + ":textures/gui/elements/button_decrement.png";
@@ -170,7 +170,7 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
                 .setName("IncInput")
                 .setSize(14, 14)
                 .setTexture(TEX_INCREMENT, 42, 14)
-                .setEnabled(() -> attachment.amountInput < attachment.getMaxInput());
+                .setEnabled(() -> attachment.amountInput < attachment.getMaxTransfer());
 
         ElementBase decOutput = new ElementButton(this, 111, 56)
                 .setTooltipFactory((element, mouseX, mouseY) -> {
@@ -218,7 +218,7 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
                 .setName("IncOutput")
                 .setSize(14, 14)
                 .setTexture(TEX_INCREMENT, 42, 14)
-                .setEnabled(() -> attachment.amountOutput < attachment.getMaxOutput());
+                .setEnabled(() -> attachment.amountOutput < attachment.getMaxTransfer());
 
         addElement(decInput);
         addElement(incInput);

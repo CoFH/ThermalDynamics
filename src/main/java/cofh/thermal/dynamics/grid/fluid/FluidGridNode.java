@@ -35,7 +35,19 @@ public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridN
     }
 
     @Override
-    public void tick() {
+    public void attachmentTick() {
+
+        IDuct<?, ?> duct = gridHost();
+        if (duct == null) {
+            return;
+        }
+        for (Direction dir : DIRECTIONS) {
+            duct.getAttachment(dir).tick();
+        }
+    }
+
+    @Override
+    public void distributionTick() {
 
         if (!cached) {
             cacheConnections();
@@ -62,8 +74,6 @@ public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridN
             return;
         }
         IAttachment attachment = duct.getAttachment(dir);
-        attachment.tick();
-
         BlockEntity tile = world.getBlockEntity(pos.relative(dir));
         if (tile == null) {
             return;

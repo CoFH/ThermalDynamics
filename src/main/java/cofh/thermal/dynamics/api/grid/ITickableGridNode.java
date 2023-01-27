@@ -9,6 +9,8 @@ import cofh.thermal.dynamics.grid.GridNode;
  */
 public interface ITickableGridNode {
 
-    void tick();
+    void attachmentTick();
+
+    void distributionTick();
 
 }

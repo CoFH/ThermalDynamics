@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.DISABLED;
 
 public class EnergyGridNode extends GridNode<EnergyGrid> implements ITickableGridNode {
@@ -33,7 +34,19 @@ public class EnergyGridNode extends GridNode<EnergyGrid> implements ITickableGri
     }
 
     @Override
-    public void tick() {
+    public void attachmentTick() {
+
+        IDuct<?, ?> duct = gridHost();
+        if (duct == null) {
+            return;
+        }
+        for (Direction dir : DIRECTIONS) {
+            duct.getAttachment(dir).tick();
+        }
+    }
+
+    @Override
+    public void distributionTick() {
 
         if (!cached) {
             cacheConnections();
@@ -60,8 +73,6 @@ public class EnergyGridNode extends GridNode<EnergyGrid> implements ITickableGri
             return;
         }
         IAttachment attachment = duct.getAttachment(dir);
-        attachment.tick();
-
         BlockEntity tile = world.getBlockEntity(pos.relative(dir));
         if (tile == null) {
             return;
