@@ -12,8 +12,9 @@ public class TDynTextures {
 
     public static ResourceLocation ENERGY_LIMITER_ATTACHMENT_ACTIVE_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/energy_limiter_attachment_active");
     public static ResourceLocation ENERGY_LIMITER_ATTACHMENT_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/energy_limiter_attachment");
-
     public static ResourceLocation FLUID_FILTER_ATTACHMENT_ACTIVE_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/fluid_filter_attachment_active");
     public static ResourceLocation FLUID_FILTER_ATTACHMENT_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/fluid_filter_attachment");
+    public static ResourceLocation FLUID_SERVO_ATTACHMENT_ACTIVE_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/fluid_servo_attachment_active");
+    public static ResourceLocation FLUID_SERVO_ATTACHMENT_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/fluid_servo_attachment");
 
 }

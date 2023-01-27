@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " I ",
+    "IQI",
     "PCP",
     "IQI"
   ],
@@ -12,11 +12,11 @@
     "I": {
       "tag": "forge:ingots/tin"
     },
-    "P": {
-      "tag": "minecraft:planks"
-    },
     "Q": {
       "tag": "forge:gems/quartz"
+    },
+    "P": {
+      "tag": "minecraft:planks"
     }
   },
   "result": {

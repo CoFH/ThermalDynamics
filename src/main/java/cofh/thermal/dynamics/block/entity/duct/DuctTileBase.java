@@ -5,6 +5,7 @@ import cofh.core.network.packet.client.TileRedstonePacket;
 import cofh.core.network.packet.client.TileStatePacket;
 import cofh.lib.api.block.entity.IPacketHandlerTile;
 import cofh.lib.api.block.entity.ITileLocation;
+import cofh.lib.util.Utils;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.helper.GridHelper;
@@ -19,6 +20,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -39,14 +41,12 @@ import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.*;
 
 public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> extends BlockEntity implements IDuct<G, N>, ITileLocation, IPacketHandlerTile {
 
+    protected final DuctModelData modelData = new DuctModelData();
     // Only available server side.
     @Nullable
     protected G grid = null;
-
     protected ConnectionType[] connections = {ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED};
     protected IAttachment[] attachments = {EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE};
-
-    protected final DuctModelData modelData = new DuctModelData();
     protected boolean modelUpdate;
 
     protected int redstonePower;
@@ -56,31 +56,29 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         super(type, pos, state);
     }
 
-    public boolean attemptConnect(Direction dir) {
+    public boolean attemptConnect(Direction side) {
 
-        IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
-        if (adjacent instanceof DuctTileBase other) {
+        IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(side));
+        if (adjacent instanceof DuctTileBase<?, ?> other) {
             IGridContainer gridContainer = IGridContainer.getCapability(level);
-            if (gridContainer == null) {
+            if (gridContainer == null || other.connections[side.getOpposite().ordinal()] == FORCED) {
                 return false;
             }
+            connections[side.ordinal()] = ALLOWED;
+            other.connections[side.getOpposite().ordinal()] = ALLOWED;
 
-            connections[dir.ordinal()] = ALLOWED;
-            other.connections[dir.getOpposite().ordinal()] = ALLOWED;
-
-            if (!gridContainer.onDuctSideConnected(this, dir)) {
-                connections[dir.ordinal()] = DISABLED;
-                other.connections[dir.getOpposite().ordinal()] = DISABLED;
+            if (!gridContainer.onDuctSideConnected(this, side)) {
+                connections[side.ordinal()] = DISABLED;
+                other.connections[side.getOpposite().ordinal()] = DISABLED;
                 return false;
             }
-
             setChanged();
             other.setChanged();
 
             TileStatePacket.sendToClient(this);
             TileStatePacket.sendToClient(other);
         } else {
-            connections[dir.ordinal()] = ALLOWED;
+            connections[side.ordinal()] = ALLOWED;
             setChanged();
             callNeighborStateChange();
             TileStatePacket.sendToClient(this);
@@ -88,22 +86,21 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         return true;
     }
 
-    public boolean attemptDisconnect(Direction dir) {
+    public boolean attemptDisconnect(Direction side, Player player) {
 
-        // TODO Dismantle attachment
-        //        if (false) {
-        //            return true;
-        //        }
-        IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+        if (attemptAttachmentRemove(side, player)) {
+            return true;
+        }
+        IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(side));
         if (adjacent instanceof DuctTileBase<?, ?> other) { // TODO, This should be moved up to IGridHost as a common implementation for (eventual) multiparts.
             IGridContainer gridContainer = IGridContainer.getCapability(level);
             if (gridContainer == null) {
                 return false;
             }
-            gridContainer.onDuctSideDisconnecting(this, dir);
+            gridContainer.onDuctSideDisconnecting(this, side);
 
-            connections[dir.ordinal()] = DISABLED;
-            other.connections[dir.getOpposite().ordinal()] = DISABLED;
+            connections[side.ordinal()] = DISABLED;
+            other.connections[side.getOpposite().ordinal()] = DISABLED;
 
             setChanged();
             other.setChanged();
@@ -111,7 +108,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
             TileStatePacket.sendToClient(this);
             TileStatePacket.sendToClient(other);
         } else {
-            connections[dir.ordinal()] = DISABLED;
+            connections[side.ordinal()] = DISABLED;
             setChanged();
             callNeighborStateChange();
             TileStatePacket.sendToClient(this);
@@ -136,6 +133,23 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
         return true;
     }
 
+    public boolean attemptAttachmentRemove(Direction side, Player player) {
+
+        ItemStack attachmentItem = attachments[side.ordinal()].getItem();
+        if (!attachmentItem.isEmpty()) {
+            if (player == null || !player.addItem(attachmentItem)) {
+                Utils.dropDismantleStackIntoWorld(attachmentItem, level, worldPosition);
+            }
+            attachments[side.ordinal()] = EmptyAttachment.INSTANCE;
+            connections[side.ordinal()] = ALLOWED;
+            setChanged();
+            callNeighborStateChange();
+            TileStatePacket.sendToClient(this);
+            return true;
+        }
+        return false;
+    }
+
     public boolean openDuctGui(Player player) {
 
         if (this instanceof MenuProvider provider) {
@@ -152,6 +166,34 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
             return true;
         }
         return false;
+    }
+
+    public void dropAttachments() {
+
+        for (Direction dir : DIRECTIONS) {
+            ItemStack attachmentItem = attachments[dir.ordinal()].getItem();
+            if (!attachmentItem.isEmpty()) {
+                Utils.dropDismantleStackIntoWorld(attachmentItem, level, worldPosition);
+            }
+        }
+    }
+
+    /**
+     * To be used only on block dismantle.
+     *
+     * @param player The player to attempt to return attachments to.
+     */
+    public void dismantleAttachments(Player player, boolean returnDrops) {
+
+        for (Direction dir : DIRECTIONS) {
+            ItemStack attachmentItem = attachments[dir.ordinal()].getItem();
+            if (!attachmentItem.isEmpty()) {
+                if (!returnDrops || player == null || !player.addItem(attachmentItem)) {
+                    Utils.dropDismantleStackIntoWorld(attachmentItem, level, worldPosition);
+                }
+                attachments[dir.ordinal()] = EmptyAttachment.INSTANCE;
+            }
+        }
     }
 
     protected void callNeighborStateChange() {
@@ -251,8 +293,8 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
             }
         }
         for (int i = 0; i < 6; ++i) {
-            if (tag.contains("Attachment" + i)) {
-                CompoundTag attachmentTag = tag.getCompound("Attachment" + i);
+            if (tag.contains(TAG_ATTACHMENT + i)) {
+                CompoundTag attachmentTag = tag.getCompound(TAG_ATTACHMENT + i);
                 attachments[i] = AttachmentRegistry.getAttachment(attachmentTag.getString(TAG_TYPE), attachmentTag, this, DIRECTIONS[i]);
             } else {
                 attachments[i] = EmptyAttachment.INSTANCE;
@@ -277,7 +319,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
             CompoundTag attachmentTag = new CompoundTag();
             attachments[i].write(attachmentTag);
             if (!attachmentTag.isEmpty()) {
-                tag.put("Attachment" + i, attachmentTag);
+                tag.put(TAG_ATTACHMENT + i, attachmentTag);
             }
         }
     }

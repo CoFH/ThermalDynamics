@@ -1,23 +1,25 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "RRR",
-    "LGL",
-    "RRR"
+    "NGN",
+    "IRI"
   ],
   "key": {
     "G": {
       "tag": "forge:glass"
     },
-    "L": {
-      "tag": "forge:ingots/lead"
+    "I": {
+      "tag": "forge:ingots/electrum"
+    },
+    "N": {
+      "tag": "forge:nuggets/lead"
     },
     "R": {
       "tag": "forge:dusts/redstone"
     }
   },
   "result": {
-    "item": "thermal:energy_duct",
-    "count": 4
+    "item": "thermal:energy_limiter_attachment",
+    "count": 2
   }
 }

@@ -15,6 +15,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
@@ -28,20 +29,19 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static cofh.lib.util.constants.NBTTags.TAG_TYPE;
-import static cofh.thermal.dynamics.client.TDynTextures.FLUID_FILTER_ATTACHMENT_ACTIVE_LOC;
-import static cofh.thermal.dynamics.client.TDynTextures.FLUID_FILTER_ATTACHMENT_LOC;
+import static cofh.thermal.core.ThermalCore.ITEMS;
+import static cofh.thermal.dynamics.client.TDynTextures.FLUID_SERVO_ATTACHMENT_ACTIVE_LOC;
+import static cofh.thermal.dynamics.client.TDynTextures.FLUID_SERVO_ATTACHMENT_LOC;
+import static cofh.thermal.dynamics.init.TDynIDs.ID_SERVO_ATTACHMENT;
 import static cofh.thermal.dynamics.init.TDynIDs.SERVO;
 
 public class FluidServoAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
-    public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.servo");
-
-    protected BaseFluidFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
-    protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
-
+    public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.fluid_servo");
     protected final IDuct<?, ?> duct;
     protected final Direction side;
-
+    protected BaseFluidFilter filter = new BaseFluidFilter(FluidFilter.SIZE);
+    protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
     protected LazyOptional<IFluidHandler> gridCap = LazyOptional.empty();
     protected LazyOptional<IFluidHandler> externalCap = LazyOptional.empty();
 
@@ -92,9 +92,15 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     }
 
     @Override
+    public ItemStack getItem() {
+
+        return new ItemStack(ITEMS.get(ID_SERVO_ATTACHMENT));
+    }
+
+    @Override
     public ResourceLocation getTexture() {
 
-        return rsControl.getState() ? FLUID_FILTER_ATTACHMENT_ACTIVE_LOC : FLUID_FILTER_ATTACHMENT_LOC;
+        return rsControl.getState() ? FLUID_SERVO_ATTACHMENT_ACTIVE_LOC : FLUID_SERVO_ATTACHMENT_LOC;
     }
 
     @Override
@@ -114,12 +120,13 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     public <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridLazOpt) {
 
         if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            if (gridCap.isPresent()) {
+                return gridCap.cast();
+            }
             Optional<T> gridOpt = gridLazOpt.resolve();
             if (gridOpt.isPresent() && gridOpt.get() instanceof IFluidHandler handler) {
-                if (!gridCap.isPresent()) {
-                    gridCap = LazyOptional.of(() -> new WrappedFluidHandler(handler, e -> rsControl.getState() && filter.valid(e) || !rsControl.getState()));
-                    gridLazOpt.addListener(e -> gridCap.invalidate());
-                }
+                gridCap = LazyOptional.of(() -> new WrappedGridFluidHandler(handler));
+                gridLazOpt.addListener(e -> gridCap.invalidate());
                 return gridCap.cast();
             }
         }
@@ -130,12 +137,13 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     public <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> extLazOpt) {
 
         if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            if (externalCap.isPresent()) {
+                return externalCap.cast();
+            }
             Optional<T> extOpt = extLazOpt.resolve();
             if (extOpt.isPresent() && extOpt.get() instanceof IFluidHandler handler) {
-                if (!externalCap.isPresent()) {
-                    externalCap = LazyOptional.of(() -> new WrappedFluidHandler(handler, e -> rsControl.getState() && filter.valid(e) || !rsControl.getState()));
-                    extLazOpt.addListener(e -> externalCap.invalidate());
-                }
+                externalCap = LazyOptional.of(() -> new WrappedExternalFluidHandler(handler, e -> rsControl.getState() && filter.valid(e)));
+                extLazOpt.addListener(e -> externalCap.invalidate());
                 return externalCap.cast();
             }
         }
@@ -196,14 +204,14 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     }
     // endregion
 
-    // region WRAPPER CLASS
-    private static class WrappedFluidHandler implements IFluidHandler {
+    // region EXTERNAL WRAPPER CLASS
+    private static class WrappedExternalFluidHandler implements IFluidHandler {
 
         protected IFluidHandler wrappedHandler;
 
         protected Predicate<FluidStack> validator;
 
-        public WrappedFluidHandler(IFluidHandler wrappedHandler, Predicate<FluidStack> validator) {
+        public WrappedExternalFluidHandler(IFluidHandler wrappedHandler, Predicate<FluidStack> validator) {
 
             this.wrappedHandler = wrappedHandler;
             this.validator = validator;
@@ -252,6 +260,64 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
         public FluidStack drain(int maxDrain, FluidAction action) {
 
             return wrappedHandler.drain(maxDrain, action);
+        }
+
+    }
+    // endregion
+
+    // region GRID WRAPPER CLASS
+    private static class WrappedGridFluidHandler implements IFluidHandler {
+
+        protected IFluidHandler wrappedHandler;
+
+        public WrappedGridFluidHandler(IFluidHandler wrappedHandler) {
+
+            this.wrappedHandler = wrappedHandler;
+        }
+
+        @Override
+        public int getTanks() {
+
+            return wrappedHandler.getTanks();
+        }
+
+        @NotNull
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+
+            return wrappedHandler.getFluidInTank(tank);
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+
+            return wrappedHandler.getTankCapacity(tank);
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
+
+            return wrappedHandler.isFluidValid(tank, stack);
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+
+            return 0;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action) {
+
+            return FluidStack.EMPTY;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+
+            return FluidStack.EMPTY;
         }
 
     }

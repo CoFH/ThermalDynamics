@@ -24,6 +24,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -68,6 +70,14 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
             new IndexedVoxelShape(Block.box(0, 3.5, 3.5, 4.5, 12.5, 12.5), 11),
             new IndexedVoxelShape(Block.box(11.5, 3.5, 3.5, 16, 12.5, 12.5), 12)
     };
+    protected final Supplier<BlockEntityType<?>> blockEntityType;
+
+    public TileBlockDuct(Properties builder, Supplier<BlockEntityType<?>> blockEntityType) {
+
+        super(builder);
+        this.blockEntityType = blockEntityType;
+        this.registerDefaultState(this.stateDefinition.any().setValue(WATERLOGGED, false));
+    }
 
     private static VoxelShape getConnectionShape(int connectionState) {
 
@@ -86,15 +96,6 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
         MultiIndexedVoxelShape retShape = new MultiIndexedVoxelShape(cuboids.build());
         SHAPE_CACHE.put(connectionState, retShape);
         return retShape;
-    }
-
-    protected final Supplier<BlockEntityType<?>> blockEntityType;
-
-    public TileBlockDuct(Properties builder, Supplier<BlockEntityType<?>> blockEntityType) {
-
-        super(builder);
-        this.blockEntityType = blockEntityType;
-        this.registerDefaultState(this.stateDefinition.any().setValue(WATERLOGGED, false));
     }
 
     @Override
@@ -122,9 +123,9 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
                 if (advHit.subHit == 0) {
                     duct.attemptConnect(advHit.getDirection());
                 } else if (advHit.subHit < 7) {
-                    duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 1]);
+                    duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 1], player);
                 } else if (advHit.subHit < 13) {
-                    duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 7]);
+                    duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 7], player);
                 }
                 return InteractionResult.CONSUME;
             } else if (heldStack.isEmpty()) {
@@ -142,9 +143,6 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
                 }
                 return InteractionResult.CONSUME;
             } else if (heldStack.getItem() instanceof AttachmentItem attachmentItem) {
-                //                if (Utils.isClientWorld(worldIn)) {
-                //                    return InteractionResult.SUCCESS;
-                //                }
                 if (advHit.subHit == 0) {
                     if (duct.attemptAttachmentInstall(advHit.getDirection(), attachmentItem.getAttachmentType(heldStack))) {
                         if (!player.getAbilities().instabuild && Utils.isServerWorld(worldIn)) {
@@ -201,7 +199,8 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
 
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity tile = worldIn.getBlockEntity(pos);
-            if (tile instanceof IDuct<?, ?> host) {
+            if (tile instanceof DuctTileBase<?, ?> host) {
+                host.dropAttachments();
                 IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
                 if (gridContainer != null) {
                     gridContainer.onDuctRemoved(host);
@@ -215,7 +214,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
 
         BlockEntity tile = worldIn.getBlockEntity(pos);
-        if (tile instanceof DuctTileBase) {
+        if (tile instanceof DuctTileBase<?, ?>) {
             return getConnectionShape(((DuctModelData) (tile.getModelData())).getConnectionState());
         }
         return super.getShape(state, worldIn, pos, context);
@@ -243,11 +242,26 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
         }
         if (worldIn.isClientSide()) {
             BlockEntity tile = worldIn.getBlockEntity(currentPos);
-            if (tile instanceof DuctTileBase) {
+            if (tile instanceof DuctTileBase<?, ?>) {
                 tile.requestModelDataUpdate();
             }
         }
         return super.updateShape(stateIn, facing, facingState, worldIn, currentPos, facingPos);
     }
 
+    // region IDismantleable
+    @Override
+    public void dismantleBlock(Level world, BlockPos pos, BlockState state, HitResult target, Player player, boolean returnDrops) {
+
+        BlockEntity tile = world.getBlockEntity(pos);
+        if (tile instanceof DuctTileBase<?, ?> duct) {
+            duct.dismantleAttachments(player, returnDrops);
+        }
+        ItemStack dropBlock = this.getCloneItemStack(state, target, world, pos, player);
+        world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+        if (!returnDrops || player == null || !player.addItem(dropBlock)) {
+            Utils.dropDismantleStackIntoWorld(dropBlock, world, pos);
+        }
+    }
+    // endregion
 }

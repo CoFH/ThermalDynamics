@@ -14,6 +14,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
@@ -24,9 +25,11 @@ import java.util.Optional;
 import java.util.function.IntSupplier;
 
 import static cofh.lib.util.constants.NBTTags.*;
+import static cofh.thermal.core.ThermalCore.ITEMS;
 import static cofh.thermal.dynamics.client.TDynTextures.ENERGY_LIMITER_ATTACHMENT_ACTIVE_LOC;
 import static cofh.thermal.dynamics.client.TDynTextures.ENERGY_LIMITER_ATTACHMENT_LOC;
 import static cofh.thermal.dynamics.init.TDynIDs.ENERGY_LIMITER;
+import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_LIMITER_ATTACHMENT;
 
 public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttachment, IRedstoneControllableAttachment, MenuProvider {
 
@@ -36,15 +39,11 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
 
     public static final int MAX_INPUT = 64000;
     public static final int MAX_OUTPUT = 64000;
-
-    protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
-
     protected final IDuct<?, ?> duct;
     protected final Direction side;
-
     public int amountInput = MAX_INPUT / 2;
     public int amountOutput = MAX_OUTPUT / 2;
-
+    protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
     protected LazyOptional<IEnergyStorage> gridCap = LazyOptional.empty();
     protected LazyOptional<IEnergyStorage> externalCap = LazyOptional.empty();
 
@@ -104,6 +103,12 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
     }
 
     @Override
+    public ItemStack getItem() {
+
+        return new ItemStack(ITEMS.get(ID_ENERGY_LIMITER_ATTACHMENT));
+    }
+
+    @Override
     public ResourceLocation getTexture() {
 
         return rsControl.getState() ? ENERGY_LIMITER_ATTACHMENT_ACTIVE_LOC : ENERGY_LIMITER_ATTACHMENT_LOC;
@@ -126,12 +131,13 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
     public <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridLazOpt) {
 
         if (cap == ThermalEnergyHelper.getBaseEnergySystem()) {
+            if (gridCap.isPresent()) {
+                return gridCap.cast();
+            }
             Optional<T> gridOpt = gridLazOpt.resolve();
             if (gridOpt.isPresent() && gridOpt.get() instanceof IEnergyStorage storage) {
-                if (!gridCap.isPresent()) {
-                    gridCap = LazyOptional.of(() -> new WrappedEnergyStorage(storage, () -> rsControl.getState() ? amountInput : 0, () -> rsControl.getState() ? amountOutput : 0));
-                    gridLazOpt.addListener(e -> gridCap.invalidate());
-                }
+                gridCap = LazyOptional.of(() -> new WrappedEnergyStorage(storage, () -> rsControl.getState() ? amountInput : 0, () -> rsControl.getState() ? amountOutput : 0));
+                gridLazOpt.addListener(e -> gridCap.invalidate());
                 return gridCap.cast();
             }
         }
@@ -142,12 +148,13 @@ public class EnergyLimiterAttachment implements IAttachment, IPacketHandlerAttac
     public <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> extLazOpt) {
 
         if (cap == ThermalEnergyHelper.getBaseEnergySystem()) {
+            if (externalCap.isPresent()) {
+                return externalCap.cast();
+            }
             Optional<T> extOpt = extLazOpt.resolve();
             if (extOpt.isPresent() && extOpt.get() instanceof IEnergyStorage storage) {
-                if (!externalCap.isPresent()) {
-                    externalCap = LazyOptional.of(() -> new WrappedEnergyStorage(storage, () -> rsControl.getState() ? amountOutput : 0, () -> rsControl.getState() ? amountInput : 0));
-                    extLazOpt.addListener(e -> externalCap.invalidate());
-                }
+                externalCap = LazyOptional.of(() -> new WrappedEnergyStorage(storage, () -> rsControl.getState() ? amountOutput : 0, () -> rsControl.getState() ? amountInput : 0));
+                extLazOpt.addListener(e -> externalCap.invalidate());
                 return externalCap.cast();
             }
         }

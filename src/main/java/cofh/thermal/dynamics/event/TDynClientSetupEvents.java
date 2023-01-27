@@ -15,11 +15,11 @@ import static cofh.thermal.dynamics.client.TDynTextures.*;
 @Mod.EventBusSubscriber (value = Dist.CLIENT, modid = ID_THERMAL_DYNAMICS, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class TDynClientSetupEvents {
 
+    private static final String BLOCK_ATLAS = "minecraft:textures/atlas/blocks.png";
+
     private TDynClientSetupEvents() {
 
     }
-
-    private static final String BLOCK_ATLAS = "minecraft:textures/atlas/blocks.png";
 
     @SubscribeEvent
     public static void registerModels(final ModelRegistryEvent event) {
@@ -38,6 +38,9 @@ public class TDynClientSetupEvents {
 
         event.addSprite(FLUID_FILTER_ATTACHMENT_ACTIVE_LOC);
         event.addSprite(FLUID_FILTER_ATTACHMENT_LOC);
+
+        event.addSprite(FLUID_SERVO_ATTACHMENT_ACTIVE_LOC);
+        event.addSprite(FLUID_SERVO_ATTACHMENT_LOC);
     }
 
     @SubscribeEvent

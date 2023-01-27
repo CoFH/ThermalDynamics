@@ -4,6 +4,8 @@ import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.ElementFluid;
 import cofh.core.client.gui.element.SimpleTooltip;
+import cofh.core.client.gui.element.panel.RSControlPanel;
+import cofh.thermal.dynamics.attachment.FluidServoAttachment;
 import cofh.thermal.dynamics.inventory.container.attachment.FluidServoAttachmentContainer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -13,32 +15,35 @@ import net.minecraft.world.inventory.Slot;
 
 import static cofh.core.util.helpers.GuiHelper.createSlot;
 import static cofh.core.util.helpers.GuiHelper.generatePanelInfo;
-import static cofh.lib.util.Constants.PATH_ELEMENTS;
 import static cofh.lib.util.Constants.PATH_GUI;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 
 public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAttachmentContainer> {
 
     public static final ResourceLocation TEXTURE = new ResourceLocation(PATH_GUI + "generic.png");
-    public static final ResourceLocation SLOT_OVERLAY = new ResourceLocation(PATH_ELEMENTS + "locked_overlay_slot.png");
 
     public static final String TEX_DENY_LIST = PATH_GUI + "filters/filter_deny_list.png";
     public static final String TEX_ALLOW_LIST = PATH_GUI + "filters/filter_allow_list.png";
     public static final String TEX_IGNORE_NBT = PATH_GUI + "filters/filter_ignore_nbt.png";
     public static final String TEX_USE_NBT = PATH_GUI + "filters/filter_use_nbt.png";
 
+    protected final FluidServoAttachment attachment;
+
     public FluidServoAttachmentScreen(FluidServoAttachmentContainer container, Inventory inv, Component titleIn) {
 
         super(container, inv, titleIn);
 
         texture = TEXTURE;
-        info = generatePanelInfo("info.cofh_core.fluid_filter");
+        attachment = container.attachment;
+        info = generatePanelInfo("info.thermal.fluid_servo_attachment");
     }
 
     @Override
     public void init() {
 
         super.init();
+
+        addPanel(new RSControlPanel(this, attachment));
 
         for (int i = 0; i < menu.getFilterSize(); ++i) {
             Slot slot = menu.slots.get(i);

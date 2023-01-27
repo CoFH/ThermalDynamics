@@ -60,6 +60,11 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         this.world = world;
     }
 
+    private static boolean canConnectTo(IDuct<?, ?> from, IDuct<?, ?> to, Direction dir) {
+
+        return from.canConnectTo(to, dir) && to.canConnectTo(from, dir.getOpposite());
+    }
+
     @Override
     public void onDuctPlaced(IDuct<?, ?> duct, @Nullable Direction connectionPreference) {
 
@@ -85,8 +90,12 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             IDuct<?, ?> other = GridHelper.getGridHost(world, host.getHostPos().relative(dir));
             if (other == null) continue; // No host
             if (!canConnectTo(host, other, dir)) {
-                host.setConnectionType(dir, ConnectionType.DISABLED);
-                other.setConnectionType(dir.getOpposite(), ConnectionType.DISABLED);
+                if (host.getConnectionType(dir).allowDuctConnection()) {
+                    host.setConnectionType(dir, ConnectionType.DISABLED);
+                }
+                if (other.getConnectionType(dir.getOpposite()).allowDuctConnection()) {
+                    other.setConnectionType(dir.getOpposite(), ConnectionType.DISABLED);
+                }
                 continue; // Not allowed to connect.
             }
 
@@ -430,6 +439,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             }
         }
     }
+    // endregion
 
     public void onChunkUnload(ChunkAccess chunk) {
 
@@ -441,7 +451,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         }
         loadedGrids.keySet().removeAll(rem);
     }
-    // endregion
 
     @Nullable
     @Override
@@ -572,11 +581,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             }
         }
         return adjacentGrids;
-    }
-
-    private static boolean canConnectTo(IDuct<?, ?> from, IDuct<?, ?> to, Direction dir) {
-
-        return from.canConnectTo(to, dir) && to.canConnectTo(from, dir.getOpposite());
     }
 
     public <G extends Grid<G, ?>> G createAndAddGrid(UUID uuid, IGridType<G> gridType, boolean load) {

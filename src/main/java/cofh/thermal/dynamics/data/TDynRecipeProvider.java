@@ -9,6 +9,7 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.common.Tags;
 
 import java.util.function.Consumer;
@@ -76,6 +77,36 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .define('C', ItemTagsCoFH.INGOTS_BRONZE)
                 .pattern("CGC")
                 .unlockedBy("has_bronze", has(ItemTagsCoFH.INGOTS_BRONZE))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(reg.get(ID_ENERGY_LIMITER_ATTACHMENT), 2)
+                .define('G', Tags.Items.GLASS)
+                .define('I', ItemTagsCoFH.INGOTS_ELECTRUM)
+                .define('N', ItemTagsCoFH.NUGGETS_LEAD)
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .pattern("NGN")
+                .pattern("IRI")
+                .unlockedBy("has_duct", has(ThermalTags.Items.DUCTS))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(reg.get(ID_FILTER_ATTACHMENT), 2)
+                .define('G', Tags.Items.GLASS)
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('N', ItemTagsCoFH.NUGGETS_TIN)
+                .define('P', Items.PAPER)
+                .pattern("NGN")
+                .pattern("IPI")
+                .unlockedBy("has_duct", has(ThermalTags.Items.DUCTS))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(reg.get(ID_SERVO_ATTACHMENT), 2)
+                .define('G', Tags.Items.GLASS)
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('N', ItemTagsCoFH.NUGGETS_TIN)
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .pattern("NGN")
+                .pattern("IRI")
+                .unlockedBy("has_duct", has(ThermalTags.Items.DUCTS))
                 .save(consumer);
     }
 

@@ -1,7 +1,6 @@
 package cofh.thermal.dynamics.inventory.container.attachment;
 
 import cofh.core.network.packet.client.ContainerGuiPacket;
-import cofh.core.network.packet.server.ContainerConfigPacket;
 import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.IFilterOptions;
 import cofh.lib.inventory.container.slot.SlotFalseCopy;
@@ -21,7 +20,7 @@ import net.minecraftforge.fluids.FluidStack;
 import java.util.ArrayList;
 import java.util.List;
 
-import static cofh.thermal.dynamics.init.TDynContainers.FLUID_FILTER_ATTACHMENT_CONTAINER;
+import static cofh.thermal.dynamics.init.TDynContainers.FLUID_SERVO_ATTACHMENT_CONTAINER;
 
 public class FluidServoAttachmentContainer extends AttachmentContainer implements IFilterOptions {
 
@@ -32,7 +31,7 @@ public class FluidServoAttachmentContainer extends AttachmentContainer implement
 
     public FluidServoAttachmentContainer(int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
 
-        super(FLUID_FILTER_ATTACHMENT_CONTAINER.get(), id, world, pos, side, inventory, player);
+        super(FLUID_SERVO_ATTACHMENT_CONTAINER.get(), id, world, pos, side, inventory, player);
 
         if (hostTile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof FluidServoAttachment expectedAttachment) {
             this.attachment = expectedAttachment;

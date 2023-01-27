@@ -8,8 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.Map;
 
 import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;
-import static cofh.thermal.dynamics.init.TDynIDs.ENERGY_LIMITER;
-import static cofh.thermal.dynamics.init.TDynIDs.FILTER;
+import static cofh.thermal.dynamics.init.TDynIDs.*;
 
 public class AttachmentRegistry {
 
@@ -32,7 +31,7 @@ public class AttachmentRegistry {
     static {
         registerAttachmentFactory(ENERGY_LIMITER, EnergyLimiterAttachment.FACTORY);
         registerAttachmentFactory(FILTER, FILTER_FACTORY);
-        // registerAttachmentFactory(SERVO, SERVO_FACTORY);
+        registerAttachmentFactory(SERVO, SERVO_FACTORY);
     }
 
     public static boolean registerAttachmentFactory(String type, IAttachmentFactory<?> factory) {

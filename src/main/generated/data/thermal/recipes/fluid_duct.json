@@ -1,23 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "RRR",
-    "LGL",
-    "RRR"
+    "CLC"
   ],
   "key": {
-    "G": {
-      "tag": "forge:glass"
-    },
     "L": {
       "tag": "forge:ingots/lead"
     },
-    "R": {
-      "tag": "forge:dusts/redstone"
+    "C": {
+      "tag": "forge:ingots/bronze"
     }
   },
   "result": {
-    "item": "thermal:energy_duct",
+    "item": "thermal:fluid_duct",
     "count": 4
   }
 }

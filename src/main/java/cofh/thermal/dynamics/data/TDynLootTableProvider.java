@@ -5,8 +5,7 @@ import net.minecraft.data.DataGenerator;
 
 import static cofh.thermal.core.ThermalCore.BLOCKS;
 import static cofh.thermal.core.ThermalCore.ITEMS;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_DUCT;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_ITEM_BUFFER;
+import static cofh.thermal.dynamics.init.TDynIDs.*;
 
 public class TDynLootTableProvider extends LootTableProviderCoFH {
 
@@ -28,6 +27,8 @@ public class TDynLootTableProvider extends LootTableProviderCoFH {
         var regItems = ITEMS;
 
         createSimpleDropTable(regBlocks.get(ID_ENERGY_DUCT));
+        createSimpleDropTable(regBlocks.get(ID_FLUID_DUCT));
+        createSimpleDropTable(regBlocks.get(ID_FLUID_DUCT_GLASS));
 
         // createSyncDropTable(regBlocks.get(ID_ENERGY_DISTRIBUTOR));
 

@@ -22,6 +22,7 @@ public class TDynItems {
 
         registerItem(ID_ENERGY_LIMITER_ATTACHMENT, () -> new AttachmentItem(new Item.Properties().tab(group), ENERGY_LIMITER).setModId(ID_THERMAL_DYNAMICS));
         registerItem(ID_FILTER_ATTACHMENT, () -> new AttachmentItem(new Item.Properties().tab(group), FILTER).setModId(ID_THERMAL_DYNAMICS));
+        registerItem(ID_SERVO_ATTACHMENT, () -> new AttachmentItem(new Item.Properties().tab(group), SERVO).setModId(ID_THERMAL_DYNAMICS));
 
         registerTools();
     }
