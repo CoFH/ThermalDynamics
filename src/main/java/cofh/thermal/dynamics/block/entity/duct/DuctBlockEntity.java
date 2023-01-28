@@ -39,7 +39,7 @@ import static cofh.lib.util.constants.NBTTags.*;
 import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.*;
 import static cofh.thermal.dynamics.client.model.data.DuctModelData.DUCT_MODEL_DATA;
 
-public abstract class BaseDuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G>> extends BlockEntity implements IDuct<G, N>, ITileLocation, IPacketHandlerTile {
+public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G>> extends BlockEntity implements IDuct<G, N>, ITileLocation, IPacketHandlerTile {
 
     protected final DuctModelData modelData = new DuctModelData();
     // Only available server side.
@@ -51,7 +51,7 @@ public abstract class BaseDuctBlockEntity<G extends Grid<G, N>, N extends GridNo
 
     protected int redstonePower;
 
-    public BaseDuctBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public DuctBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 
         super(type, pos, state);
     }
@@ -62,7 +62,7 @@ public abstract class BaseDuctBlockEntity<G extends Grid<G, N>, N extends GridNo
             return false;
         }
         IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(side));
-        if (adjacent instanceof BaseDuctBlockEntity<?, ?> other) {
+        if (adjacent instanceof DuctBlockEntity<?, ?> other) {
             IGridContainer gridContainer = IGridContainer.getCapability(level);
             if (gridContainer == null || other.connections[side.getOpposite().ordinal()] == FORCED) {
                 return false;
@@ -98,7 +98,7 @@ public abstract class BaseDuctBlockEntity<G extends Grid<G, N>, N extends GridNo
             return false;
         }
         IDuct<?, ?> adjacent = GridHelper.getGridHost(level, getBlockPos().relative(side));
-        if (adjacent instanceof BaseDuctBlockEntity<?, ?> other) { // TODO: This should be moved up to IGridHost as a common implementation for (eventual) multiparts.
+        if (adjacent instanceof DuctBlockEntity<?, ?> other) { // TODO: This should be moved up to IGridHost as a common implementation for (eventual) multiparts.
             IGridContainer gridContainer = IGridContainer.getCapability(level);
             if (gridContainer == null) {
                 return false;

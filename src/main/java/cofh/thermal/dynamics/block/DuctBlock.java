@@ -7,7 +7,7 @@ import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
 import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
-import cofh.thermal.dynamics.block.entity.duct.BaseDuctBlockEntity;
+import cofh.thermal.dynamics.block.entity.duct.DuctBlockEntity;
 import cofh.thermal.dynamics.item.AttachmentItem;
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -114,7 +114,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
-        if (hit instanceof VoxelShapeBlockHitResult advHit && worldIn.getBlockEntity(pos) instanceof BaseDuctBlockEntity<?, ?> duct) {
+        if (hit instanceof VoxelShapeBlockHitResult advHit && worldIn.getBlockEntity(pos) instanceof DuctBlockEntity<?, ?> duct) {
             ItemStack heldStack = player.getItemInHand(handIn);
             if (Utils.isWrench(heldStack)) {
                 if (Utils.isClientWorld(worldIn)) {
@@ -199,7 +199,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity tile = worldIn.getBlockEntity(pos);
-            if (tile instanceof BaseDuctBlockEntity<?, ?> host) {
+            if (tile instanceof DuctBlockEntity<?, ?> host) {
                 host.dropAttachments();
                 IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
                 if (gridContainer != null) {
@@ -214,7 +214,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
 
         BlockEntity tile = worldIn.getBlockEntity(pos);
-        if (tile instanceof BaseDuctBlockEntity<?, ?>) {
+        if (tile instanceof DuctBlockEntity<?, ?>) {
             var ductModelData = tile.getModelData().get(DUCT_MODEL_DATA);
             if (ductModelData != null) {
                 return getConnectionShape(ductModelData.getConnectionState());
@@ -245,7 +245,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
         }
         if (worldIn.isClientSide()) {
             BlockEntity tile = worldIn.getBlockEntity(currentPos);
-            if (tile instanceof BaseDuctBlockEntity<?, ?>) {
+            if (tile instanceof DuctBlockEntity<?, ?>) {
                 tile.requestModelDataUpdate();
             }
         }
@@ -257,7 +257,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
     public void dismantleBlock(Level world, BlockPos pos, BlockState state, HitResult target, Player player, boolean returnDrops) {
 
         BlockEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof BaseDuctBlockEntity<?, ?> duct) {
+        if (tile instanceof DuctBlockEntity<?, ?> duct) {
             duct.dismantleAttachments(player, returnDrops);
         }
         ItemStack dropBlock = this.getCloneItemStack(state, target, world, pos, player);
