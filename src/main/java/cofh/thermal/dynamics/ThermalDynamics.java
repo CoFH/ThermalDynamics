@@ -47,8 +47,8 @@ public class ThermalDynamics {
 
     public static final PacketHandler PACKET_HANDLER = new PacketHandler(new ResourceLocation(ID_THERMAL_DYNAMICS, "general"));
 
-    public static final DeferredRegisterCoFH<IGridType<?>> GRIDS =
-            DeferredRegisterCoFH.create(new ResourceLocation(ID_THERMAL_DYNAMICS, ID_GRID_TYPE), ID_THERMAL_DYNAMICS);
+    public static final ResourceLocation GRID_REGISTRY_LOC = new ResourceLocation(ID_THERMAL_DYNAMICS, ID_GRID_TYPE);
+    public static final DeferredRegisterCoFH<IGridType<?>> GRIDS = DeferredRegisterCoFH.create(GRID_REGISTRY_LOC, ID_THERMAL_DYNAMICS);
 
     public static final Supplier<IForgeRegistry<IGridType<?>>> GRID_TYPE_REGISTRY =
             GRIDS.makeRegistry(SneakyUtils.unsafeCast(IGridType.class), () -> new RegistryBuilder<IGridType<?>>()
