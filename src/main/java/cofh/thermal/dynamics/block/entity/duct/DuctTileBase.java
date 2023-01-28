@@ -26,8 +26,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.ModelDataManager;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.network.NetworkHooks;
@@ -163,7 +162,7 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
     public boolean openDuctGui(Player player) {
 
         if (this instanceof MenuProvider provider) {
-            NetworkHooks.openGui((ServerPlayer) player, provider, pos());
+            NetworkHooks.openScreen((ServerPlayer) player, provider, pos());
             return true;
         }
         return false;
@@ -220,13 +219,16 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
 
         if (this.level != null && level.isClientSide) {
             modelUpdate = true;
-            ModelDataManager.requestModelDataRefresh(this);
+            var modelDataManager = level.getModelDataManager();
+            if (modelDataManager != null) {
+                modelDataManager.requestRefresh(this);
+            }
         }
     }
 
     @Nonnull
     @Override
-    public IModelData getModelData() {
+    public ModelData getModelData() {
 
         if (modelUpdate) {
             for (Direction dir : DIRECTIONS) {

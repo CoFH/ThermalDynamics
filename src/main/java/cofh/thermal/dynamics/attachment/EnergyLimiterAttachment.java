@@ -8,7 +8,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -35,7 +34,7 @@ public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllab
 
     public static final IAttachmentFactory<IAttachment> FACTORY = (nbt, duct, side) -> new EnergyLimiterAttachment(duct, side).read(nbt);
 
-    public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.energy_limiter");
+    public static final Component DISPLAY_NAME = Component.translatable("attachment.thermal.energy_limiter");
 
     public final int MAX_TRANSFER = 64000;
 

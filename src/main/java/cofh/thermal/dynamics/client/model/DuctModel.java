@@ -17,8 +17,9 @@ import net.minecraft.util.GsonHelper;
 import net.minecraftforge.client.model.IModelBuilder;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.IModelLoader;
-import net.minecraftforge.client.model.geometry.IModelGeometry;
+import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 import net.minecraftforge.client.model.geometry.IModelGeometryPart;
+import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -27,7 +28,7 @@ import java.util.function.Supplier;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
 
-public class DuctModel implements IModelGeometry<DuctModel> {
+public class DuctModel implements IUnbakedGeometry<DuctModel> {
 
     private final Map<String, Map<String, BlockElement>> parts;
 
@@ -46,9 +47,9 @@ public class DuctModel implements IModelGeometry<DuctModel> {
     }
 
     @Override
-    public BakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
+    public BakedModel bake(IGeometryBakingContext context, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
 
-        boolean isInventory = owner.getPartVisibility(INV, false);
+        boolean isInventory = context.isComponentVisible(INV, false);
         // Map<Face, List(FrontFace, BackFace)>
         EnumMap<Direction, List<BakedQuad>> center = buildCenter(owner, spriteGetter, modelTransform, modelLocation);
         // Map<Face, List(FrontFace, BackFace)>
@@ -66,7 +67,7 @@ public class DuctModel implements IModelGeometry<DuctModel> {
     }
 
     @Override
-    public Collection<Material> getTextures(IModelConfiguration owner, Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
+    public Collection<Material> getMaterials(IGeometryBakingContext context, Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
 
         List<Material> materials = new LinkedList<>();
         for (Map<String, BlockElement> namedPart : parts.values()) {

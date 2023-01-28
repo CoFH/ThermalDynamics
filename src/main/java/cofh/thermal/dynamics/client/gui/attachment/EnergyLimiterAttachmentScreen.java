@@ -5,23 +5,20 @@ import cofh.core.client.gui.element.ElementBase;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.ElementTexture;
 import cofh.core.client.gui.element.panel.RSControlPanel;
+import cofh.core.util.helpers.GuiHelper;
 import cofh.thermal.dynamics.attachment.EnergyLimiterAttachment;
 import cofh.thermal.dynamics.inventory.container.attachment.EnergyLimiterAttachmentContainer;
 import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
-import java.util.Collections;
-
-import static cofh.core.util.helpers.GuiHelper.generatePanelInfo;
+import static cofh.core.util.helpers.GuiHelper.*;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 import static cofh.lib.util.helpers.StringHelper.format;
-import static cofh.lib.util.helpers.StringHelper.localize;
 
 public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLimiterAttachmentContainer> {
 
@@ -67,155 +64,99 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
         String input = format(attachment.amountInput);
         String output = format(attachment.amountOutput);
 
-        getFontRenderer().draw(matrixStack, input, getCenteredOffset(input, 50), 42, 0x404040);
-        getFontRenderer().draw(matrixStack, output, getCenteredOffset(output, 126), 42, 0x404040);
+        fontRenderer().draw(matrixStack, input, getCenteredOffset(input, 50), 42, 0x404040);
+        fontRenderer().draw(matrixStack, output, getCenteredOffset(output, 126), 42, 0x404040);
 
         super.renderLabels(matrixStack, mouseX, mouseY);
     }
 
     // region ELEMENTS
-    @Override
-    public boolean handleElementButtonClick(String buttonName, int mouseButton) {
-
-        int change = 1000;
-        float pitch = 0.7F;
-
-        if (hasShiftDown()) {
-            change *= 10;
-            pitch += 0.1F;
-        }
-        if (hasControlDown()) {
-            change /= 100;
-            pitch -= 0.2F;
-        }
-        if (mouseButton == 1) {
-            change /= 10;
-            pitch -= 0.1F;
-        }
-        int curInput = attachment.amountInput;
-        int curOutput = attachment.amountOutput;
-
-        switch (buttonName) {
-            case "DecInput" -> {
-                attachment.amountInput -= change;
-                pitch -= 0.1F;
-            }
-            case "IncInput" -> {
-                attachment.amountInput += change;
-                pitch += 0.1F;
-            }
-            case "DecOutput" -> {
-                attachment.amountOutput -= change;
-                pitch -= 0.1F;
-            }
-            case "IncOutput" -> {
-                attachment.amountOutput += change;
-                pitch += 0.1F;
-            }
-        }
-        playClickSound(pitch);
-
-        AttachmentConfigPacket.sendToServer(attachment);
-
-        attachment.amountInput = curInput;
-        attachment.amountOutput = curOutput;
-        return true;
-    }
-
     protected void addButtons() {
 
-        ElementBase decInput = new ElementButton(this, 35, 56)
-                .setTooltipFactory((element, mouseX, mouseY) -> {
+        ElementBase decInput = new ElementButton(this, 35, 56) {
 
-                    if (element.enabled()) {
-                        int change = 1000;
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                        if (hasShiftDown()) {
-                            change *= 10;
-                        }
-                        if (hasControlDown()) {
-                            change /= 100;
-                        }
-                        return Collections.singletonList(new TextComponent(
-                                localize("info.cofh.decrease_by")
-                                        + " " + format(change)
-                                        + "/" + format(change / 10)));
-                    }
-                    return Collections.emptyList();
-                })
-                .setName("DecInput")
+                int change = getChangeAmount(mouseButton);
+                float pitch = getPitch(mouseButton);
+                pitch -= 0.1F;
+                playClickSound(pitch);
+
+                int curInput = attachment.amountInput;
+                attachment.amountInput -= change;
+                AttachmentConfigPacket.sendToServer(attachment);
+                attachment.amountInput = curInput;
+                return true;
+            }
+        }
+                .setTooltipFactory(GuiHelper::createDecControlTooltip)
                 .setSize(14, 14)
                 .setTexture(TEX_DECREMENT, 42, 14)
                 .setEnabled(() -> attachment.amountInput > 0);
 
-        ElementBase incInput = new ElementButton(this, 51, 56)
-                .setTooltipFactory((element, mouseX, mouseY) -> {
+        ElementBase incInput = new ElementButton(this, 51, 56) {
 
-                    if (element.enabled()) {
-                        int change = 1000;
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                        if (hasShiftDown()) {
-                            change *= 10;
-                        }
-                        if (hasControlDown()) {
-                            change /= 100;
-                        }
-                        return Collections.singletonList(new TextComponent(
-                                localize("info.cofh.increase_by")
-                                        + " " + format(change)
-                                        + "/" + format(change / 10)));
-                    }
-                    return Collections.emptyList();
-                })
-                .setName("IncInput")
+                int change = getChangeAmount(mouseButton);
+                float pitch = getPitch(mouseButton);
+                pitch += 0.1F;
+                playClickSound(pitch);
+
+                int curInput = attachment.amountInput;
+                attachment.amountInput += change;
+                AttachmentConfigPacket.sendToServer(attachment);
+                attachment.amountInput = curInput;
+                return true;
+            }
+        }
+                .setTooltipFactory(GuiHelper::createIncControlTooltip)
                 .setSize(14, 14)
                 .setTexture(TEX_INCREMENT, 42, 14)
                 .setEnabled(() -> attachment.amountInput < attachment.getMaxTransfer());
 
-        ElementBase decOutput = new ElementButton(this, 111, 56)
-                .setTooltipFactory((element, mouseX, mouseY) -> {
+        ElementBase decOutput = new ElementButton(this, 111, 56) {
 
-                    if (element.enabled()) {
-                        int change = 1000;
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                        if (hasShiftDown()) {
-                            change *= 10;
-                        }
-                        if (hasControlDown()) {
-                            change /= 100;
-                        }
-                        return Collections.singletonList(new TextComponent(
-                                localize("info.cofh.decrease_by")
-                                        + " " + format(change)
-                                        + "/" + format(change / 10)));
-                    }
-                    return Collections.emptyList();
-                })
-                .setName("DecOutput")
+                int change = getChangeAmount(mouseButton);
+                float pitch = getPitch(mouseButton);
+                pitch -= 0.1F;
+                playClickSound(pitch);
+
+                int curInput = attachment.amountOutput;
+                attachment.amountOutput -= change;
+                AttachmentConfigPacket.sendToServer(attachment);
+                attachment.amountOutput = curInput;
+                return true;
+            }
+        }
+                .setTooltipFactory(GuiHelper::createDecControlTooltip)
                 .setSize(14, 14)
                 .setTexture(TEX_DECREMENT, 42, 14)
                 .setEnabled(() -> attachment.amountOutput > 0);
 
-        ElementBase incOutput = new ElementButton(this, 127, 56)
-                .setTooltipFactory((element, mouseX, mouseY) -> {
+        ElementBase incOutput = new ElementButton(this, 127, 56) {
 
-                    if (element.enabled()) {
-                        int change = 1000;
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                        if (hasShiftDown()) {
-                            change *= 10;
-                        }
-                        if (hasControlDown()) {
-                            change /= 100;
-                        }
-                        return Collections.singletonList(new TextComponent(
-                                localize("info.cofh.increase_by")
-                                        + " " + format(change)
-                                        + "/" + format(change / 10)));
-                    }
-                    return Collections.emptyList();
-                })
-                .setName("IncOutput")
+                int change = getChangeAmount(mouseButton);
+                float pitch = getPitch(mouseButton);
+                pitch += 0.1F;
+                playClickSound(pitch);
+
+                int curInput = attachment.amountOutput;
+                attachment.amountOutput += change;
+                AttachmentConfigPacket.sendToServer(attachment);
+                attachment.amountOutput = curInput;
+                return true;
+            }
+        }
+                .setTooltipFactory(GuiHelper::createIncControlTooltip)
                 .setSize(14, 14)
                 .setTexture(TEX_INCREMENT, 42, 14)
                 .setEnabled(() -> attachment.amountOutput < attachment.getMaxTransfer());

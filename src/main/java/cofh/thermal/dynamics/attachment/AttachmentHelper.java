@@ -14,7 +14,7 @@ public class AttachmentHelper {
 
     public static void openAttachmentScreen(ServerPlayer player, MenuProvider containerSupplier, BlockPos pos, Direction side) {
 
-        NetworkHooks.openGui(player, containerSupplier, buf -> {
+        NetworkHooks.openScreen(player, containerSupplier, buf -> {
             buf.writeBlockPos(pos);
             buf.writeEnum(side);
         });

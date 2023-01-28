@@ -15,7 +15,6 @@ plugins {
     id 'net.covers1624.signing' version '1.1.4'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
-
 apply plugin: 'net.minecraftforge.gradle'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -98,7 +97,7 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:22.0.0'
 
     implementation fg.deobf("com.teamcofh:cofh_core:${mc_version}-${cofh_core_version}")
-    implementation fg.deobf("com.teamcofh:thermal_foundation:${mc_version}-${thermal_foundation_version}")
+    implementation fg.deobf("com.teamcofh:thermal_core:${mc_version}-${thermal_core_version}")
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

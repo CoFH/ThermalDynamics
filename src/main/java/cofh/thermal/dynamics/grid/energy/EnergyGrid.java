@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.grid.energy;
 
-import cofh.core.capability.IRedstoneFluxStorage;
+import cofh.lib.energy.IRedstoneFluxStorage;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.Grid;
 import cofh.thermal.lib.util.ThermalEnergyHelper;

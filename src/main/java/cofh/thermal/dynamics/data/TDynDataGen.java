@@ -2,9 +2,9 @@ package cofh.thermal.dynamics.data;
 
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 
@@ -14,29 +14,18 @@ public class TDynDataGen {
     @SubscribeEvent
     public static void gatherData(final GatherDataEvent event) {
 
-        if (event.includeServer()) {
-            registerServerProviders(event);
-        }
-        if (event.includeClient()) {
-            registerClientProviders(event);
-        }
-    }
-
-    private static void registerServerProviders(GatherDataEvent event) {
-
         DataGenerator gen = event.getGenerator();
         ExistingFileHelper exFileHelper = event.getExistingFileHelper();
 
-        gen.addProvider(new TDynLootTableProvider(gen));
-        gen.addProvider(new TDynRecipeProvider(gen));
-    }
+        TDynTagsProvider.Block blockTags = new TDynTagsProvider.Block(gen, exFileHelper);
 
-    private static void registerClientProviders(GatherDataEvent event) {
+        gen.addProvider(event.includeServer(), blockTags);
+        gen.addProvider(event.includeServer(), new TDynTagsProvider.Item(gen, blockTags, exFileHelper));
 
-        DataGenerator gen = event.getGenerator();
-        ExistingFileHelper exFileHelper = event.getExistingFileHelper();
+        gen.addProvider(event.includeServer(), new TDynLootTableProvider(gen));
+        gen.addProvider(event.includeServer(), new TDynRecipeProvider(gen));
 
-        gen.addProvider(new TDynItemModelProvider(gen, exFileHelper));
+        gen.addProvider(event.includeClient(), new TDynItemModelProvider(gen, exFileHelper));
     }
 
 }

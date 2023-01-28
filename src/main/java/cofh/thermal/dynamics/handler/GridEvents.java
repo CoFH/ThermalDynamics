@@ -6,7 +6,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.event.level.ChunkEvent;
 
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 
@@ -25,9 +25,9 @@ public class GridEvents {
         event.addCapability(new ResourceLocation(ID_THERMAL_DYNAMICS, "grid_container"), new GridContainerCapProvider(new GridContainer(event.getObject())));
     }
 
-    private static void onWorldTick(TickEvent.WorldTickEvent event) {
+    private static void onWorldTick(TickEvent.LevelTickEvent event) {
 
-        IGridContainer gridContainer = IGridContainer.getCapability(event.world);
+        IGridContainer gridContainer = IGridContainer.getCapability(event.level);
         if (gridContainer != null) {
             ((GridContainer) gridContainer).onWorldTick(event.phase);
         }
@@ -35,7 +35,7 @@ public class GridEvents {
 
     private static void onChunkLoad(ChunkEvent.Load event) {
 
-        IGridContainer gridContainer = IGridContainer.getCapability(event.getWorld());
+        IGridContainer gridContainer = IGridContainer.getCapability(event.getLevel());
         if (gridContainer != null) {
             ((GridContainer) gridContainer).onChunkLoad(event.getChunk());
         }
@@ -43,7 +43,7 @@ public class GridEvents {
 
     private static void onChunkUnload(ChunkEvent.Unload event) {
 
-        IGridContainer gridContainer = IGridContainer.getCapability(event.getWorld());
+        IGridContainer gridContainer = IGridContainer.getCapability(event.getLevel());
         if (gridContainer != null) {
             ((GridContainer) gridContainer).onChunkUnload(event.getChunk());
         }

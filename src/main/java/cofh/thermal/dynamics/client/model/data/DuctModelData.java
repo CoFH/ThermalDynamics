@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.client.model.data;
 
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 
 import javax.annotation.Nullable;
@@ -12,7 +12,7 @@ import java.util.Objects;
 /**
  * Created by covers1624 on 12/26/21.
  */
-public class DuctModelData implements IModelData {
+public class DuctModelData implements ModelData {
 
     // I - Internal connection
     // E - External connection

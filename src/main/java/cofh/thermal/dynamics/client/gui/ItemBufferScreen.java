@@ -5,7 +5,6 @@ import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.SimpleTooltip;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
@@ -56,7 +55,7 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
         }
                 .setSize(20, 20)
                 .setTexture(TEX_MODE_LATCH_OFF, 40, 20)
-                .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.thermal.item_buffer.mode.0")))
+                .setTooltipFactory(new SimpleTooltip(Component.translatable("info.thermal.item_buffer.mode.0")))
                 .setVisible(() -> !menu.tile.getLatchMode()));
 
         addElement(new ElementButton(this, 78, 27) {
@@ -71,7 +70,7 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
         }
                 .setSize(20, 20)
                 .setTexture(TEX_MODE_LATCH_ON, 40, 20)
-                .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.thermal.item_buffer.mode.1")))
+                .setTooltipFactory(new SimpleTooltip(Component.translatable("info.thermal.item_buffer.mode.1")))
                 .setVisible(() -> menu.tile.getLatchMode()));
 
         addElement(new ElementButton(this, 78, 51) {
@@ -86,7 +85,7 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
         }
                 .setSize(20, 20)
                 .setTexture(TEX_IGNORE_NBT, 40, 20)
-                .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.cofh.filter.checkNBT.0")))
+                .setTooltipFactory(new SimpleTooltip(Component.translatable("info.cofh.filter.checkNBT.0")))
                 .setVisible(() -> !menu.tile.getCheckNBT()));
 
         addElement(new ElementButton(this, 78, 51) {
@@ -101,7 +100,7 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
         }
                 .setSize(20, 20)
                 .setTexture(TEX_USE_NBT, 40, 20)
-                .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.cofh.filter.checkNBT.1")))
+                .setTooltipFactory(new SimpleTooltip(Component.translatable("info.cofh.filter.checkNBT.1")))
                 .setVisible(() -> menu.tile.getCheckNBT()));
     }
     // endregion

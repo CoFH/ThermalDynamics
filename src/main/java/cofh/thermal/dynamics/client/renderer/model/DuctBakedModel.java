@@ -1,8 +1,8 @@
 package cofh.thermal.dynamics.client.renderer.model;
 
 import cofh.core.util.helpers.RenderHelper;
-import cofh.lib.client.renderer.model.BackfaceBakedQuad;
-import cofh.lib.client.renderer.model.RetexturedBakedQuad;
+import cofh.lib.client.renderer.block.model.BackfaceBakedQuad;
+import cofh.lib.client.renderer.block.model.RetexturedBakedQuad;
 import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -73,7 +73,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
 
     @Nonnull
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull IModelData extraData) {
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull ModelData extraData) {
 
         if (side != null) {
             return Collections.emptyList();

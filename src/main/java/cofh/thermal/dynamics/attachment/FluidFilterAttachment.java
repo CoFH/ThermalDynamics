@@ -9,7 +9,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -37,7 +36,7 @@ import static cofh.thermal.dynamics.init.TDynIDs.ID_FILTER_ATTACHMENT;
 
 public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
-    public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.fluid_filter");
+    public static final Component DISPLAY_NAME = Component.translatable("attachment.thermal.fluid_filter");
 
     protected final IDuct<?, ?> duct;
     protected final Direction side;

@@ -28,6 +28,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.function.Supplier;
 
@@ -45,7 +47,8 @@ import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_NULLIFIER;
 @Mod (ID_THERMAL_DYNAMICS)
 public class ThermalDynamics {
 
-    public static final PacketHandler PACKET_HANDLER = new PacketHandler(new ResourceLocation(ID_THERMAL_DYNAMICS, "general"));
+    public static final Logger LOG = LogManager.getLogger(ID_THERMAL_DYNAMICS);
+    public static final PacketHandler PACKET_HANDLER = new PacketHandler(new ResourceLocation(ID_THERMAL_DYNAMICS, "general"), LOG);
 
     public static final DeferredRegisterCoFH<IGridType<?>> GRIDS =
             DeferredRegisterCoFH.create(new ResourceLocation(ID_THERMAL_DYNAMICS, ID_GRID_TYPE), ID_THERMAL_DYNAMICS);
