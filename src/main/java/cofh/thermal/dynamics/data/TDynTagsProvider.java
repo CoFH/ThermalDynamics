@@ -32,13 +32,13 @@ public class TDynTagsProvider {
             // region TILE BLOCKS
             tag(BlockTags.MINEABLE_WITH_PICKAXE).add(BLOCKS.get(ID_ENERGY_DUCT));
             tag(BlockTags.MINEABLE_WITH_PICKAXE).add(BLOCKS.get(ID_FLUID_DUCT));
-            tag(BlockTags.MINEABLE_WITH_PICKAXE).add(BLOCKS.get(ID_FLUID_DUCT_GLASS));
+            tag(BlockTags.MINEABLE_WITH_PICKAXE).add(BLOCKS.get(ID_FLUID_DUCT_WINDOWED));
 
             tag(BlockTags.MINEABLE_WITH_AXE).add(BLOCKS.get(ID_ITEM_BUFFER));
 
             tag(ThermalTags.Blocks.DUCTS).add(BLOCKS.get(ID_ENERGY_DUCT));
             tag(ThermalTags.Blocks.DUCTS).add(BLOCKS.get(ID_FLUID_DUCT));
-            tag(ThermalTags.Blocks.DUCTS).add(BLOCKS.get(ID_FLUID_DUCT_GLASS));
+            tag(ThermalTags.Blocks.DUCTS).add(BLOCKS.get(ID_FLUID_DUCT_WINDOWED));
             // endregion
         }
 

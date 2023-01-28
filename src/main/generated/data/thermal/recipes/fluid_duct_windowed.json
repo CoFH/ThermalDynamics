@@ -12,7 +12,7 @@
     }
   },
   "result": {
-    "item": "thermal:fluid_duct_glass",
+    "item": "thermal:fluid_duct_windowed",
     "count": 4
   }
 }

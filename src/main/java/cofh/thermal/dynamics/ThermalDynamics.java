@@ -75,7 +75,7 @@ public class ThermalDynamics {
         TDynGrids.register();
 
         TDynContainers.register();
-        TDynTileEntities.register();
+        TDynBlockEntities.register();
 
         GridEvents.register();
     }
@@ -139,7 +139,7 @@ public class ThermalDynamics {
 
         ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_ENERGY_DUCT), cutout);
         ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_FLUID_DUCT), cutout);
-        ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_FLUID_DUCT_GLASS), cutout);
+        ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_FLUID_DUCT_WINDOWED), cutout);
     }
     // endregion
 }

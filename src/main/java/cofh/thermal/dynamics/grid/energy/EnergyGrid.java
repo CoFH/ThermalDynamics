@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-import static cofh.thermal.dynamics.init.TDynGrids.GRID_ENERGY;
+import static cofh.thermal.dynamics.init.TDynGrids.ENERGY_GRID;
 
 /**
  * @author covers1624
@@ -33,7 +33,7 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
 
     public EnergyGrid(UUID id, Level world) {
 
-        super(GRID_ENERGY.get(), id, world);
+        super(ENERGY_GRID.get(), id, world);
     }
 
     @Override

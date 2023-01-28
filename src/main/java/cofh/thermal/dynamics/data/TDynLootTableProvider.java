@@ -28,7 +28,7 @@ public class TDynLootTableProvider extends LootTableProviderCoFH {
 
         createSimpleDropTable(regBlocks.get(ID_ENERGY_DUCT));
         createSimpleDropTable(regBlocks.get(ID_FLUID_DUCT));
-        createSimpleDropTable(regBlocks.get(ID_FLUID_DUCT_GLASS));
+        createSimpleDropTable(regBlocks.get(ID_FLUID_DUCT_WINDOWED));
 
         // createSyncDropTable(regBlocks.get(ID_ENERGY_DISTRIBUTOR));
 

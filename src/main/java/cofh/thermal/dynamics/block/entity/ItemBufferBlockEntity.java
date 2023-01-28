@@ -29,9 +29,9 @@ import javax.annotation.Nullable;
 import static cofh.lib.api.StorageGroup.*;
 import static cofh.lib.util.constants.BlockStatePropertiesCoFH.FACING_ALL;
 import static cofh.lib.util.constants.NBTTags.*;
-import static cofh.thermal.dynamics.init.TDynTileEntities.ITEM_BUFFER_TILE;
+import static cofh.thermal.dynamics.init.TDynBlockEntities.ITEM_BUFFER_BLOCK_ENTITY;
 
-public class ItemBufferTile extends ThermalTileSecurable implements MenuProvider {
+public class ItemBufferBlockEntity extends ThermalTileSecurable implements MenuProvider {
 
     protected IOItemInv inventory = new IOItemInv(this, TAG_ITEM_INV);
 
@@ -41,9 +41,9 @@ public class ItemBufferTile extends ThermalTileSecurable implements MenuProvider
     protected boolean inputLock;
     protected boolean outputLock;
 
-    public ItemBufferTile(BlockPos pos, BlockState state) {
+    public ItemBufferBlockEntity(BlockPos pos, BlockState state) {
 
-        super(ITEM_BUFFER_TILE.get(), pos, state);
+        super(ITEM_BUFFER_BLOCK_ENTITY.get(), pos, state);
 
         StackValidatedItemStorage[] accessible = new StackValidatedItemStorage[9];
         ItemStorageCoFH[] internal = new ItemStorageCoFH[9];

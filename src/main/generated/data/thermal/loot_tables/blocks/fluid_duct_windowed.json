@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "thermal:fluid_duct_glass"
+          "name": "thermal:fluid_duct_windowed"
         }
       ],
       "conditions": [

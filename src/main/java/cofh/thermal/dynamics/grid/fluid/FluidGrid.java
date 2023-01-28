@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static cofh.lib.util.Constants.BUCKET_VOLUME;
-import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;
+import static cofh.thermal.dynamics.init.TDynGrids.FLUID_GRID;
 
 /**
  * @author King Lemming
@@ -42,7 +42,7 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
 
     public FluidGrid(UUID id, Level world) {
 
-        super(GRID_FLUID.get(), id, world);
+        super(FLUID_GRID.get(), id, world);
     }
 
     @Override
