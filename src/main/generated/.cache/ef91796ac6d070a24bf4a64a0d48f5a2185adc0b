@@ -1,0 +1,8 @@
+// 1.19.2	2023-01-27T22:03:37.7798156	Thermal Dynamics: Recipes
+09b0c814b0bd7e65a5e19d924ae53575f934ae9c data/thermal/recipes/energy_duct.json
+f7663403673951c0bc04f0243375bf8d6073049c data/thermal/recipes/energy_limiter_attachment.json
+3d91c56879da95db1dd54e1bc4347c80bd5267a3 data/thermal/recipes/filter_attachment.json
+6af93623d3680727f18b73793a516c4492d36326 data/thermal/recipes/fluid_duct.json
+1aeed5e3937d37ab0ef797e319b27ccdc0a2219c data/thermal/recipes/fluid_duct_glass.json
+c32e34e654d16d2f5cd21608d7f8cad4ae73757e data/thermal/recipes/item_buffer.json
+cfd8b4290828be0071f53b4570356b706671fcf6 data/thermal/recipes/servo_attachment.json

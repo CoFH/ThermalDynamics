@@ -9,24 +9,26 @@ import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.IModelConfiguration;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IDynamicBakedModel;
+import net.minecraftforge.client.model.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
+import static cofh.thermal.dynamics.client.model.data.DuctModelData.DUCT_MODEL_DATA;
 import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
 
 public class DuctBakedModel implements IDynamicBakedModel {
@@ -46,7 +48,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
         attachmentCache.clear();
     }
 
-    private final IModelConfiguration config;
+    private final IGeometryBakingContext context;
     private final TextureAtlasSprite particle;
     private final Map<Direction, List<BakedQuad>> centerModel;
     private final Map<Direction, List<BakedQuad>> centerFill;
@@ -59,9 +61,9 @@ public class DuctBakedModel implements IDynamicBakedModel {
     private final Map<TexColorWrapper, Map<Direction, List<BakedQuad>>> fillCache = new Object2ObjectOpenHashMap<>();
     private final Map<ResourceLocation, Map<Direction, List<BakedQuad>>> attachmentCache = new Object2ObjectOpenHashMap<>();
 
-    public DuctBakedModel(IModelConfiguration config, TextureAtlasSprite particle, EnumMap<Direction, List<BakedQuad>> centerModel, EnumMap<Direction, List<BakedQuad>> centerFill, EnumMap<Direction, List<BakedQuad>> sides, EnumMap<Direction, List<BakedQuad>> fill, EnumMap<Direction, List<BakedQuad>> connections, boolean isInventory) {
+    public DuctBakedModel(IGeometryBakingContext context, TextureAtlasSprite particle, EnumMap<Direction, List<BakedQuad>> centerModel, EnumMap<Direction, List<BakedQuad>> centerFill, EnumMap<Direction, List<BakedQuad>> sides, EnumMap<Direction, List<BakedQuad>> fill, EnumMap<Direction, List<BakedQuad>> connections, boolean isInventory) {
 
-        this.config = config;
+        this.context = context;
         this.particle = particle;
         this.centerModel = ImmutableMap.copyOf(centerModel);
         this.centerFill = ImmutableMap.copyOf(centerFill);
@@ -71,20 +73,21 @@ public class DuctBakedModel implements IDynamicBakedModel {
         this.isInventory = isInventory;
     }
 
-    @Nonnull
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull ModelData extraData) {
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData extraData, @Nullable RenderType renderType) {
 
         if (side != null) {
             return Collections.emptyList();
         }
         if (isInventory) {
-            extraData = INV_DATA;
+            extraData = ModelData.builder()
+                    .with(DUCT_MODEL_DATA, INV_DATA)
+                    .build();
         }
-        if (!(extraData instanceof DuctModelData modelData)) {
+        if (!(extraData.has(DUCT_MODEL_DATA))) {
             return ImmutableList.of();
         }
-        return getModelFor(modelData);
+        return getModelFor(extraData.get(DUCT_MODEL_DATA));
     }
 
     private List<BakedQuad> getModelFor(DuctModelData modelData) {
@@ -257,13 +260,12 @@ public class DuctBakedModel implements IDynamicBakedModel {
     }
 
     //@formatter:off
-    @Override public boolean useAmbientOcclusion() { return config.useSmoothLighting(); }
-    @Override public boolean isGui3d() { return config.isShadedInGui(); }
-    @Override public boolean usesBlockLight() { return config.isSideLit(); }
-    @Override public ItemTransforms getTransforms() { return config.getCameraTransforms(); }
+    @Override public boolean useAmbientOcclusion() { return context.useAmbientOcclusion(); }
+    @Override public boolean isGui3d() { return context.isGui3d(); }
+    @Override public boolean usesBlockLight() { return context.useBlockLight(); }
+    @Override public ItemTransforms getTransforms() { return context.getTransforms(); }
     @Override public boolean isCustomRenderer() { return false; }
     @Override public TextureAtlasSprite getParticleIcon() { return particle; }
-    @Override public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, Random rand) { return getQuads(state, side, rand, EmptyModelData.INSTANCE); }
     @Override public ItemOverrides getOverrides() { return ItemOverrides.EMPTY; }
     //@formatter:on
 }

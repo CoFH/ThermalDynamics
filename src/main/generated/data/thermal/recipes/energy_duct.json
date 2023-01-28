@@ -1,10 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "RRR",
-    "LGL",
-    "RRR"
-  ],
   "key": {
     "G": {
       "tag": "forge:glass"
@@ -16,8 +11,13 @@
       "tag": "forge:dusts/redstone"
     }
   },
+  "pattern": [
+    "RRR",
+    "LGL",
+    "RRR"
+  ],
   "result": {
-    "item": "thermal:energy_duct",
-    "count": 4
+    "count": 4,
+    "item": "thermal:energy_duct"
   }
 }

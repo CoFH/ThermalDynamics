@@ -8,7 +8,6 @@ import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.block.entity.duct.DuctTileBase;
-import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import cofh.thermal.dynamics.item.AttachmentItem;
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -45,6 +44,7 @@ import java.util.function.Supplier;
 
 import static cofh.core.util.helpers.ItemHelper.consumeItem;
 import static cofh.lib.util.Constants.DIRECTIONS;
+import static cofh.thermal.dynamics.client.model.data.DuctModelData.DUCT_MODEL_DATA;
 
 public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterloggedBlock, IDismantleable {
 
@@ -215,7 +215,10 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
 
         BlockEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof DuctTileBase<?, ?>) {
-            return getConnectionShape(((DuctModelData) (tile.getModelData())).getConnectionState());
+            var ductModelData = tile.getModelData().get(DUCT_MODEL_DATA);
+            if (ductModelData != null) {
+                return getConnectionShape(ductModelData.getConnectionState());
+            }
         }
         return super.getShape(state, worldIn, pos, context);
     }

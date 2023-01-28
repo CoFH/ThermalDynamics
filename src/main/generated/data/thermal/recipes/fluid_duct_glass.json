@@ -1,18 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": {
+      "tag": "forge:ingots/bronze"
+    },
+    "G": {
+      "tag": "thermal:glass/hardened"
+    }
+  },
   "pattern": [
     "CGC"
   ],
-  "key": {
-    "G": {
-      "tag": "thermal:glass/hardened"
-    },
-    "C": {
-      "tag": "forge:ingots/bronze"
-    }
-  },
   "result": {
-    "item": "thermal:fluid_duct_glass",
-    "count": 4
+    "count": 4,
+    "item": "thermal:fluid_duct_glass"
   }
 }

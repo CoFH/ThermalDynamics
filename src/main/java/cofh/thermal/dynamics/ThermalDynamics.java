@@ -15,7 +15,6 @@ import cofh.thermal.dynamics.network.packet.client.AttachmentControlPacket;
 import cofh.thermal.dynamics.network.packet.client.GridDebugPacket;
 import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
 import cofh.thermal.dynamics.network.packet.server.AttachmentRedstoneControlPacket;
-import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -50,11 +49,11 @@ public class ThermalDynamics {
     public static final Logger LOG = LogManager.getLogger(ID_THERMAL_DYNAMICS);
     public static final PacketHandler PACKET_HANDLER = new PacketHandler(new ResourceLocation(ID_THERMAL_DYNAMICS, "general"), LOG);
 
-    public static final DeferredRegisterCoFH<IGridType<?>> GRIDS =
-            DeferredRegisterCoFH.create(new ResourceLocation(ID_THERMAL_DYNAMICS, ID_GRID_TYPE), ID_THERMAL_DYNAMICS);
+    public static final ResourceLocation GRID_REGISTRY_LOC = new ResourceLocation(ID_THERMAL_DYNAMICS, ID_GRID_TYPE);
+    public static final DeferredRegisterCoFH<IGridType<?>> GRIDS = DeferredRegisterCoFH.create(GRID_REGISTRY_LOC, ID_THERMAL_DYNAMICS);
 
     public static final Supplier<IForgeRegistry<IGridType<?>>> GRID_TYPE_REGISTRY =
-            GRIDS.makeRegistry(SneakyUtils.unsafeCast(IGridType.class), () -> new RegistryBuilder<IGridType<?>>()
+            GRIDS.makeRegistry(() -> new RegistryBuilder<IGridType<?>>()
                     .disableOverrides() // GridTypes can't be overriden.
                     .disableSaving()    // GridTypes don't need id's saved to disk.
             );

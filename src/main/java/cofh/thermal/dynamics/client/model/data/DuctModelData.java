@@ -2,7 +2,6 @@ package cofh.thermal.dynamics.client.model.data;
 
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 
 import javax.annotation.Nullable;
@@ -12,7 +11,9 @@ import java.util.Objects;
 /**
  * Created by covers1624 on 12/26/21.
  */
-public class DuctModelData implements ModelData {
+public class DuctModelData {
+
+    public static final ModelProperty<DuctModelData> DUCT_MODEL_DATA = new ModelProperty<>();
 
     // I - Internal connection
     // E - External connection
@@ -122,12 +123,6 @@ public class DuctModelData implements ModelData {
 
         return fillColor;
     }
-
-    //@formatter:off
-    @Override public boolean hasProperty(ModelProperty<?> prop) { return false; }
-    @Nullable @Override public <T> T getData(ModelProperty<T> prop) { return null; }
-    @Nullable @Override public <T> T setData(ModelProperty<T> prop, T data) { return null; }
-    //@formatter:on
 
     @Override
     public boolean equals(Object o) {

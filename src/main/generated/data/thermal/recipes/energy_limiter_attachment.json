@@ -1,9 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "NGN",
-    "IRI"
-  ],
   "key": {
     "G": {
       "tag": "forge:glass"
@@ -18,8 +14,12 @@
       "tag": "forge:dusts/redstone"
     }
   },
+  "pattern": [
+    "NGN",
+    "IRI"
+  ],
   "result": {
-    "item": "thermal:energy_limiter_attachment",
-    "count": 2
+    "count": 2,
+    "item": "thermal:energy_limiter_attachment"
   }
 }

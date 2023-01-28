@@ -1,0 +1,4 @@
+// 1.19.2	2023-01-27T22:03:37.7818147	Thermal Dynamics: Item Models
+02d5d6f799d56163dcc2c5f4ee1880a4e0d31611 assets/thermal/models/item/energy_limiter_attachment.json
+3ba8041a561f759286ab2d6a8beadfff2ef41bc0 assets/thermal/models/item/filter_attachment.json
+bcf338fe1b872824efd3422071467deeaa496e05 assets/thermal/models/item/servo_attachment.json

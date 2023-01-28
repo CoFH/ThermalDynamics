@@ -478,7 +478,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             Grid<?, ?> grid = entry.getValue();
             CompoundTag tag = new CompoundTag();
             tag.putUUID("id", entry.getKey());
-            tag.putString("type", grid.getGridType().getRegistryName().toString());
+            tag.putString("type", ThermalDynamics.GRID_TYPE_REGISTRY.get().getKey(grid.getGridType()).toString());
             tag.merge(grid.serializeNBT());
             grids.add(tag);
         }

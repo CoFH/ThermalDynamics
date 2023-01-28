@@ -20,27 +20,27 @@ Contains various logistic options for technical gameplay!
 [[dependencies.thermal_dynamics]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18.2,1.19)"
+versionRange = "[1.19,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.thermal_dynamics]]
 modId = "forge"
 mandatory = true
-versionRange = "[40.1.76,)"
+versionRange = "[43.1.0,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.thermal_dynamics]]
 modId = "cofh_core"
 mandatory = true
-versionRange = "[9.2,9.3]"
+versionRange = "[10.0, 10.1]"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.thermal_dynamics]]
 modId = "thermal"
 mandatory = true
-versionRange = "[9.2,9.3]"
+versionRange = "[10.0, 10.1]"
 ordering = "AFTER"
 side = "BOTH"

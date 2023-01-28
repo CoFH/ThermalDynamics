@@ -1,9 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "NGN",
-    "IPI"
-  ],
   "key": {
     "G": {
       "tag": "forge:glass"
@@ -18,8 +14,12 @@
       "item": "minecraft:paper"
     }
   },
+  "pattern": [
+    "NGN",
+    "IPI"
+  ],
   "result": {
-    "item": "thermal:filter_attachment",
-    "count": 2
+    "count": 2,
+    "item": "thermal:filter_attachment"
   }
 }

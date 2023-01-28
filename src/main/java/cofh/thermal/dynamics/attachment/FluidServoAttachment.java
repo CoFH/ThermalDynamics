@@ -283,7 +283,6 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
 
-
             return validator.test(wrappedHandler.drain(maxDrain, SIMULATE)) ? wrappedHandler.drain(maxDrain, action) : FluidStack.EMPTY;
         }
 

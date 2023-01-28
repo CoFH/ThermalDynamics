@@ -1,0 +1,4 @@
+// 1.19.2	2023-01-27T22:03:37.7828154	Thermal Expansion: Block Tags
+612734457d0852f03ea63aa53d3cf78d1023672e data/minecraft/tags/blocks/mineable/axe.json
+a5afe8d541b7b40cceeec631a1b1628424145e50 data/minecraft/tags/blocks/mineable/pickaxe.json
+a5afe8d541b7b40cceeec631a1b1628424145e50 data/thermal/tags/blocks/ducts.json

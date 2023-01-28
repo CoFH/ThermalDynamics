@@ -1,10 +1,11 @@
 package cofh.thermal.dynamics.client.model;
 
-import cofh.lib.client.renderer.model.BackfaceBakedQuad;
+import cofh.lib.client.renderer.block.model.BackfaceBakedQuad;
 import cofh.thermal.dynamics.client.renderer.model.DuctBakedModel;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -12,13 +13,9 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
-import net.minecraftforge.client.model.IModelBuilder;
-import net.minecraftforge.client.model.IModelConfiguration;
-import net.minecraftforge.client.model.IModelLoader;
 import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.IModelGeometryPart;
+import net.minecraftforge.client.model.geometry.IGeometryLoader;
 import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 
 import javax.annotation.Nullable;
@@ -49,19 +46,19 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
     @Override
     public BakedModel bake(IGeometryBakingContext context, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
 
-        boolean isInventory = context.isComponentVisible(INV, false);
+        boolean isInventory = context.isComponentVisible("inv", false);
         // Map<Face, List(FrontFace, BackFace)>
-        EnumMap<Direction, List<BakedQuad>> center = buildCenter(owner, spriteGetter, modelTransform, modelLocation);
+        EnumMap<Direction, List<BakedQuad>> center = buildCenter(context, spriteGetter, modelState, modelLocation);
         // Map<Face, List(FrontFace, BackFace)>
-        EnumMap<Direction, List<BakedQuad>> centerFill = buildCenterFill(owner, spriteGetter, modelTransform, modelLocation);
+        EnumMap<Direction, List<BakedQuad>> centerFill = buildCenterFill(context, spriteGetter, modelState, modelLocation);
         // Map<Connection Side, List(FrontFaces & BackFaces)>
-        EnumMap<Direction, List<BakedQuad>> ductSides = buildGroupParts("duct", owner, spriteGetter, modelTransform, modelLocation);
+        EnumMap<Direction, List<BakedQuad>> ductSides = buildGroupParts("duct", context, spriteGetter, modelState, modelLocation);
         // Map<Connection Side, List(FrontFaces & BackFaces)>
-        EnumMap<Direction, List<BakedQuad>> ductFill = buildGroupParts("fill", owner, spriteGetter, modelTransform, modelLocation);
+        EnumMap<Direction, List<BakedQuad>> ductFill = buildGroupParts("fill", context, spriteGetter, modelState, modelLocation);
         // Map<Connection Side, List(FrontFaces & BackFaces)>
-        EnumMap<Direction, List<BakedQuad>> connections = buildGroupParts("attach", owner, spriteGetter, modelTransform, modelLocation);
+        EnumMap<Direction, List<BakedQuad>> connections = buildGroupParts("attach", context, spriteGetter, modelState, modelLocation);
 
-        DuctBakedModel model = new DuctBakedModel(owner, spriteGetter.apply(owner.resolveTexture("particle")), center, centerFill, ductSides, ductFill, connections, isInventory);
+        DuctBakedModel model = new DuctBakedModel(context, spriteGetter.apply(context.getMaterial("particle")), center, centerFill, ductSides, ductFill, connections, isInventory);
         bakedModels.add(model);
         return model;
     }
@@ -73,9 +70,9 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
         for (Map<String, BlockElement> namedPart : parts.values()) {
             for (BlockElement part : namedPart.values()) {
                 for (BlockElementFace face : part.faces.values()) {
-                    Material mat = owner.resolveTexture(face.texture);
+                    Material mat = context.getMaterial(face.texture);
                     if (MissingTextureAtlasSprite.getLocation().equals(mat.texture())) {
-                        missingTextureErrors.add(Pair.of(face.texture, owner.getModelName()));
+                        missingTextureErrors.add(Pair.of(face.texture, context.getModelName()));
                     }
                     materials.add(mat);
                 }
@@ -85,23 +82,23 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
     }
 
     // region HELPERS
-    private EnumMap<Direction, List<BakedQuad>> buildCenter(IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
+    private EnumMap<Direction, List<BakedQuad>> buildCenter(IGeometryBakingContext context, Function<Material, TextureAtlasSprite> spriteFunc, ModelState modelState, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
 
         BlockElement front = getPart("center/duct", "frontface");
         if (front != null) {
-            EnumMap<Direction, List<BakedQuad>> baked = bake(front, owner, spriteFunc, transform, modelLoc);
+            EnumMap<Direction, List<BakedQuad>> baked = bake(front, context, spriteFunc, modelState, modelLoc);
             merge(quads, baked);
         }
         BlockElement frontFill = getPart("center/fill", "frontface");
         if (frontFill != null) {
-            EnumMap<Direction, List<BakedQuad>> baked = bake(frontFill, owner, spriteFunc, transform, modelLoc);
+            EnumMap<Direction, List<BakedQuad>> baked = bake(frontFill, context, spriteFunc, modelState, modelLoc);
             merge(quads, baked);
         }
         BlockElement back = getPart("center/duct", "backface");
         if (back != null) {
-            EnumMap<Direction, List<BakedQuad>> baked = bakeBack(back, owner, spriteFunc, transform, modelLoc);
+            EnumMap<Direction, List<BakedQuad>> baked = bakeBack(back, context, spriteFunc, modelState, modelLoc);
             // These are inverse in the json.
             flip(baked);
             merge(quads, baked);
@@ -109,18 +106,18 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
         return quads;
     }
 
-    private EnumMap<Direction, List<BakedQuad>> buildCenterFill(IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
+    private EnumMap<Direction, List<BakedQuad>> buildCenterFill(IGeometryBakingContext context, Function<Material, TextureAtlasSprite> spriteFunc, ModelState modelState, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
         BlockElement frontFill = getPart("center/fill", "frontface");
         if (frontFill != null) {
-            EnumMap<Direction, List<BakedQuad>> baked = bake(frontFill, owner, spriteFunc, transform, modelLoc);
+            EnumMap<Direction, List<BakedQuad>> baked = bake(frontFill, context, spriteFunc, modelState, modelLoc);
             merge(quads, baked);
         }
         return quads;
     }
 
-    private EnumMap<Direction, List<BakedQuad>> buildGroupParts(String groupPart, IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
+    private EnumMap<Direction, List<BakedQuad>> buildGroupParts(String groupPart, IGeometryBakingContext context, Function<Material, TextureAtlasSprite> spriteFunc, ModelState modelState, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
         fill(quads, Arrays.asList(DIRECTIONS), LinkedList::new);
@@ -132,7 +129,7 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
 
             List<BakedQuad> list = quads.get(dir);
             for (BlockElement part : groupParts.values()) {
-                Map<Direction, List<BakedQuad>> baked = bake(part, owner, spriteFunc, transform, modelLoc);
+                Map<Direction, List<BakedQuad>> baked = bake(part, context, spriteFunc, modelState, modelLoc);
                 flatMerge(list, baked);
             }
         }
@@ -140,7 +137,7 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
         return quads;
     }
 
-    private EnumMap<Direction, List<BakedQuad>> bake(BlockElement part, IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
+    private EnumMap<Direction, List<BakedQuad>> bake(BlockElement part, IGeometryBakingContext context, Function<Material, TextureAtlasSprite> spriteFunc, ModelState modelState, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
         fill(quads, part.faces.keySet(), LinkedList::new);
@@ -148,13 +145,13 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
         for (Map.Entry<Direction, BlockElementFace> entry : part.faces.entrySet()) {
             Direction dir = entry.getKey();
             BlockElementFace face = entry.getValue();
-            TextureAtlasSprite sprite = spriteFunc.apply(owner.resolveTexture(face.texture));
-            quads.get(dir).add(BlockModel.makeBakedQuad(part, face, sprite, dir, transform, modelLoc));
+            TextureAtlasSprite sprite = spriteFunc.apply(context.getMaterial(face.texture));
+            quads.get(dir).add(BlockModel.bakeFace(part, face, sprite, dir, modelState, modelLoc));
         }
         return quads;
     }
 
-    private EnumMap<Direction, List<BakedQuad>> bakeBack(BlockElement part, IModelConfiguration owner, Function<Material, TextureAtlasSprite> spriteFunc, ModelState transform, ResourceLocation modelLoc) {
+    private EnumMap<Direction, List<BakedQuad>> bakeBack(BlockElement part, IGeometryBakingContext context, Function<Material, TextureAtlasSprite> spriteFunc, ModelState modelState, ResourceLocation modelLoc) {
 
         EnumMap<Direction, List<BakedQuad>> quads = new EnumMap<>(Direction.class);
         fill(quads, part.faces.keySet(), LinkedList::new);
@@ -162,8 +159,8 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
         for (Map.Entry<Direction, BlockElementFace> entry : part.faces.entrySet()) {
             Direction dir = entry.getKey();
             BlockElementFace face = entry.getValue();
-            TextureAtlasSprite sprite = spriteFunc.apply(owner.resolveTexture(face.texture));
-            quads.get(dir).add(BackfaceBakedQuad.from(BlockModel.makeBakedQuad(part, face, sprite, dir, transform, modelLoc)));
+            TextureAtlasSprite sprite = spriteFunc.apply(context.getMaterial(face.texture));
+            quads.get(dir).add(BackfaceBakedQuad.from(BlockModel.bakeFace(part, face, sprite, dir, modelState, modelLoc)));
         }
         return quads;
     }
@@ -212,15 +209,8 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
     }
     // endregion
 
-    //@formatter:off
-    private static final IModelGeometryPart INV = new IModelGeometryPart() {
-        @Override public String name() { return "inv"; }
-        @Override public void addQuads(IModelConfiguration owner, IModelBuilder<?> modelBuilder, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ResourceLocation modelLocation) { }
-    };
-    //@formatter:on
-
     // region LOADER
-    public static class Loader implements IModelLoader<DuctModel> {
+    public static class Loader implements IGeometryLoader<DuctModel> {
 
         private Map<String, Map<String, BlockElement>> parseElements(JsonDeserializationContext ctx, JsonObject model) {
 
@@ -239,14 +229,9 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
         }
 
         @Override
-        public void onResourceManagerReload(ResourceManager resourceManager) {
+        public DuctModel read(JsonObject jsonObject, JsonDeserializationContext deserializationContext) throws JsonParseException {
 
-        }
-
-        @Override
-        public DuctModel read(JsonDeserializationContext deserializationContext, JsonObject modelContents) {
-
-            return new DuctModel(parseElements(deserializationContext, modelContents));
+            return new DuctModel(parseElements(deserializationContext, jsonObject));
         }
 
     }

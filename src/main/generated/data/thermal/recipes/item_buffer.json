@@ -1,10 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "IQI",
-    "PCP",
-    "IQI"
-  ],
   "key": {
     "C": {
       "tag": "forge:ingots/signalum"
@@ -12,13 +7,18 @@
     "I": {
       "tag": "forge:ingots/tin"
     },
-    "Q": {
-      "tag": "forge:gems/quartz"
-    },
     "P": {
       "tag": "minecraft:planks"
+    },
+    "Q": {
+      "tag": "forge:gems/quartz"
     }
   },
+  "pattern": [
+    "IQI",
+    "PCP",
+    "IQI"
+  ],
   "result": {
     "item": "thermal:item_buffer"
   }

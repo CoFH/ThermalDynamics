@@ -37,6 +37,7 @@ import javax.annotation.Nullable;
 import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.lib.util.constants.NBTTags.*;
 import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.*;
+import static cofh.thermal.dynamics.client.model.data.DuctModelData.DUCT_MODEL_DATA;
 
 public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> extends BlockEntity implements IDuct<G, N>, ITileLocation, IPacketHandlerTile {
 
@@ -239,7 +240,9 @@ public abstract class DuctTileBase<G extends Grid<G, N>, N extends GridNode<G>> 
             }
             modelUpdate = false;
         }
-        return modelData;
+        return ModelData.builder()
+                .with(DUCT_MODEL_DATA, modelData)
+                .build();
     }
 
     // region NETWORK
