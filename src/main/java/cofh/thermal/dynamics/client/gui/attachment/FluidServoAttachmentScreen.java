@@ -3,27 +3,23 @@ package cofh.thermal.dynamics.client.gui.attachment;
 import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.*;
 import cofh.core.client.gui.element.panel.RSControlPanel;
+import cofh.core.util.helpers.GuiHelper;
 import cofh.thermal.dynamics.attachment.FluidServoAttachment;
 import cofh.thermal.dynamics.inventory.container.attachment.FluidServoAttachmentContainer;
 import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 
-import java.util.Collections;
-
-import static cofh.core.util.helpers.GuiHelper.createSlot;
-import static cofh.core.util.helpers.GuiHelper.generatePanelInfo;
+import static cofh.core.util.helpers.GuiHelper.*;
 import static cofh.lib.util.Constants.PATH_GUI;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 import static cofh.lib.util.helpers.StringHelper.format;
-import static cofh.lib.util.helpers.StringHelper.localize;
 
 public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAttachmentContainer> {
 
@@ -82,44 +78,6 @@ public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAt
     }
 
     // region ELEMENTS
-    @Override
-    public boolean handleElementButtonClick(String buttonName, int mouseButton) {
-
-        int change = 1000;
-        float pitch = 0.7F;
-
-        if (hasShiftDown()) {
-            change *= 10;
-            pitch += 0.1F;
-        }
-        if (hasControlDown()) {
-            change /= 100;
-            pitch -= 0.2F;
-        }
-        if (mouseButton == 1) {
-            change /= 10;
-            pitch -= 0.1F;
-        }
-        int curTransfer = attachment.amountTransfer;
-
-        switch (buttonName) {
-            case "DecOutput" -> {
-                attachment.amountTransfer -= change;
-                pitch -= 0.1F;
-            }
-            case "IncOutput" -> {
-                attachment.amountTransfer += change;
-                pitch += 0.1F;
-            }
-        }
-        playClickSound(pitch);
-
-        AttachmentConfigPacket.sendToServer(attachment);
-
-        attachment.amountTransfer = curTransfer;
-        return true;
-    }
-
     protected void addButtons() {
 
         addElement(new ElementButton(this, 105, 22) {
@@ -182,56 +140,52 @@ public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAt
                 .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.cofh.filter.checkNBT.1")))
                 .setVisible(() -> menu.getCheckNBT()));
 
-        ElementBase decOutput = new ElementButton(this, 136, 56)
-                .setTooltipFactory((element, mouseX, mouseY) -> {
+        ElementBase decTransfer = new ElementButton(this, 136, 56) {
 
-                    if (element.enabled()) {
-                        int change = 1000;
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                        if (hasShiftDown()) {
-                            change *= 10;
-                        }
-                        if (hasControlDown()) {
-                            change /= 100;
-                        }
-                        return Collections.singletonList(new TextComponent(
-                                localize("info.cofh.decrease_by")
-                                        + " " + format(change)
-                                        + "/" + format(change / 10)));
-                    }
-                    return Collections.emptyList();
-                })
-                .setName("DecOutput")
+                int change = getChangeAmount(mouseButton);
+                float pitch = getPitch(mouseButton);
+                pitch -= 0.1F;
+                playClickSound(pitch);
+
+                int curTransfer = attachment.amountTransfer;
+                attachment.amountTransfer -= change;
+                AttachmentConfigPacket.sendToServer(attachment);
+                attachment.amountTransfer = curTransfer;
+                return true;
+            }
+        }
+                .setTooltipFactory(GuiHelper::createDecControlTooltip)
                 .setSize(14, 14)
                 .setTexture(TEX_DECREMENT, 42, 14)
                 .setEnabled(() -> attachment.amountTransfer > 0);
 
-        ElementBase incOutput = new ElementButton(this, 152, 56)
-                .setTooltipFactory((element, mouseX, mouseY) -> {
+        ElementBase incTransfer = new ElementButton(this, 152, 56) {
 
-                    if (element.enabled()) {
-                        int change = 1000;
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                        if (hasShiftDown()) {
-                            change *= 10;
-                        }
-                        if (hasControlDown()) {
-                            change /= 100;
-                        }
-                        return Collections.singletonList(new TextComponent(
-                                localize("info.cofh.increase_by")
-                                        + " " + format(change)
-                                        + "/" + format(change / 10)));
-                    }
-                    return Collections.emptyList();
-                })
-                .setName("IncOutput")
+                int change = getChangeAmount(mouseButton);
+                float pitch = getPitch(mouseButton);
+                pitch += 0.1F;
+                playClickSound(pitch);
+
+                int curTransfer = attachment.amountTransfer;
+                attachment.amountTransfer += change;
+                AttachmentConfigPacket.sendToServer(attachment);
+                attachment.amountTransfer = curTransfer;
+                return true;
+            }
+        }
+                .setTooltipFactory(GuiHelper::createIncControlTooltip)
                 .setSize(14, 14)
                 .setTexture(TEX_INCREMENT, 42, 14)
                 .setEnabled(() -> attachment.amountTransfer < attachment.getMaxTransfer());
 
-        addElement(decOutput);
-        addElement(incOutput);
+        addElement(decTransfer);
+        addElement(incTransfer);
     }
     // endregion
 }
