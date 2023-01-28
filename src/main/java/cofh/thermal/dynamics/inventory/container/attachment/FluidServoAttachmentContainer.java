@@ -42,7 +42,13 @@ public class FluidServoAttachmentContainer extends AttachmentContainer implement
         allowSwap = false;
         if (filter != null) {
             int slots = filter.size();
-            filterInventory = new InvWrapperFluids(this, filter.getFluids(), slots);
+            filterInventory = new InvWrapperFluids(this, filter.getFluids(), slots) {
+                @Override
+                public void setChanged() {
+
+                    filter.setFluids(filterInventory.getStacks());
+                }
+            };
 
             int rows = MathHelper.clamp(slots / 3, 1, 3);
             int rowSize = slots / rows;

@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import static cofh.thermal.dynamics.init.TDynBlockEntities.ENERGY_DUCT_BLOCK_ENTITY;
 import static cofh.thermal.dynamics.init.TDynGrids.ENERGY_GRID;
 
-public class EnergyDuctBlockEntity extends BaseDuctBlockEntity<EnergyGrid, EnergyGridNode> {
+public class EnergyDuctBlockEntity extends DuctBlockEntity<EnergyGrid, EnergyGridNode> {
 
     public EnergyDuctBlockEntity(BlockPos pos, BlockState state) {
 

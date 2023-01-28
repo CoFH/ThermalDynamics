@@ -112,6 +112,9 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     @Override
     public void tick() {
 
+        if (!rsControl.getState()) {
+            return;
+        }
         if (!internalGridCap.isPresent()) {
             internalGridCap = duct.getGrid().getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
         }
@@ -283,7 +286,6 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
         @NotNull
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
-
 
             return validator.test(wrappedHandler.drain(maxDrain, SIMULATE)) ? wrappedHandler.drain(maxDrain, action) : FluidStack.EMPTY;
         }

@@ -17,7 +17,7 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import static cofh.thermal.dynamics.init.TDynBlockEntities.FLUID_DUCT_BLOCK_ENTITY;
 import static cofh.thermal.dynamics.init.TDynGrids.FLUID_GRID;
 
-public class FluidDuctBlockEntity extends BaseDuctBlockEntity<FluidGrid, FluidGridNode> {
+public class FluidDuctBlockEntity extends DuctBlockEntity<FluidGrid, FluidGridNode> {
 
     public FluidDuctBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 

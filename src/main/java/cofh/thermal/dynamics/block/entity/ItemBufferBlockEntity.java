@@ -1,11 +1,11 @@
 package cofh.thermal.dynamics.block.entity;
 
+import cofh.core.block.entity.SecurableBlockEntity;
 import cofh.core.network.packet.server.TileConfigPacket;
 import cofh.lib.inventory.IOItemInv;
 import cofh.lib.inventory.ItemStorageCoFH;
 import cofh.lib.inventory.StackValidatedItemStorage;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
-import cofh.thermal.lib.tileentity.ThermalTileSecurable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -31,7 +31,7 @@ import static cofh.lib.util.constants.BlockStatePropertiesCoFH.FACING_ALL;
 import static cofh.lib.util.constants.NBTTags.*;
 import static cofh.thermal.dynamics.init.TDynBlockEntities.ITEM_BUFFER_BLOCK_ENTITY;
 
-public class ItemBufferBlockEntity extends ThermalTileSecurable implements MenuProvider {
+public class ItemBufferBlockEntity extends SecurableBlockEntity implements MenuProvider {
 
     protected IOItemInv inventory = new IOItemInv(this, TAG_ITEM_INV);
 
