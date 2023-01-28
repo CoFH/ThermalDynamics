@@ -72,7 +72,7 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .unlockedBy("has_bronze", has(ItemTagsCoFH.INGOTS_BRONZE))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT_GLASS), 4)
+        ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT_WINDOWED), 4)
                 .define('G', ThermalTags.Items.HARDENED_GLASS)
                 .define('C', ItemTagsCoFH.INGOTS_BRONZE)
                 .pattern("CGC")

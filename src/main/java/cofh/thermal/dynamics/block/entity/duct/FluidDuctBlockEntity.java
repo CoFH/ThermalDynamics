@@ -14,19 +14,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
+import static cofh.thermal.dynamics.init.TDynBlockEntities.FLUID_DUCT_BLOCK_ENTITY;
 import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;
-import static cofh.thermal.dynamics.init.TDynTileEntities.DUCT_FLUID_TILE;
 
-public class FluidDuctTile extends DuctTileBase<FluidGrid, FluidGridNode> {
+public class FluidDuctBlockEntity extends BaseDuctBlockEntity<FluidGrid, FluidGridNode> {
 
-    public FluidDuctTile(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public FluidDuctBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 
         super(type, pos, state);
     }
 
-    public FluidDuctTile(BlockPos pos, BlockState state) {
+    public FluidDuctBlockEntity(BlockPos pos, BlockState state) {
 
-        super(DUCT_FLUID_TILE.get(), pos, state);
+        super(FLUID_DUCT_BLOCK_ENTITY.get(), pos, state);
     }
 
     @Override

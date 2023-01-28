@@ -7,7 +7,7 @@ import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
 import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
-import cofh.thermal.dynamics.block.entity.duct.DuctTileBase;
+import cofh.thermal.dynamics.block.entity.duct.BaseDuctBlockEntity;
 import cofh.thermal.dynamics.item.AttachmentItem;
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -46,7 +46,7 @@ import static cofh.core.util.helpers.ItemHelper.consumeItem;
 import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.thermal.dynamics.client.model.data.DuctModelData.DUCT_MODEL_DATA;
 
-public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterloggedBlock, IDismantleable {
+public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBlock, IDismantleable {
 
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
@@ -72,7 +72,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
     };
     protected final Supplier<BlockEntityType<?>> blockEntityType;
 
-    public TileBlockDuct(Properties builder, Supplier<BlockEntityType<?>> blockEntityType) {
+    public DuctBlock(Properties builder, Supplier<BlockEntityType<?>> blockEntityType) {
 
         super(builder);
         this.blockEntityType = blockEntityType;
@@ -114,7 +114,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
-        if (hit instanceof VoxelShapeBlockHitResult advHit && worldIn.getBlockEntity(pos) instanceof DuctTileBase<?, ?> duct) {
+        if (hit instanceof VoxelShapeBlockHitResult advHit && worldIn.getBlockEntity(pos) instanceof BaseDuctBlockEntity<?, ?> duct) {
             ItemStack heldStack = player.getItemInHand(handIn);
             if (Utils.isWrench(heldStack)) {
                 if (Utils.isClientWorld(worldIn)) {
@@ -199,7 +199,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
 
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity tile = worldIn.getBlockEntity(pos);
-            if (tile instanceof DuctTileBase<?, ?> host) {
+            if (tile instanceof BaseDuctBlockEntity<?, ?> host) {
                 host.dropAttachments();
                 IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
                 if (gridContainer != null) {
@@ -214,7 +214,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
 
         BlockEntity tile = worldIn.getBlockEntity(pos);
-        if (tile instanceof DuctTileBase<?, ?>) {
+        if (tile instanceof BaseDuctBlockEntity<?, ?>) {
             var ductModelData = tile.getModelData().get(DUCT_MODEL_DATA);
             if (ductModelData != null) {
                 return getConnectionShape(ductModelData.getConnectionState());
@@ -245,7 +245,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
         }
         if (worldIn.isClientSide()) {
             BlockEntity tile = worldIn.getBlockEntity(currentPos);
-            if (tile instanceof DuctTileBase<?, ?>) {
+            if (tile instanceof BaseDuctBlockEntity<?, ?>) {
                 tile.requestModelDataUpdate();
             }
         }
@@ -257,7 +257,7 @@ public class TileBlockDuct extends Block implements EntityBlock, SimpleWaterlogg
     public void dismantleBlock(Level world, BlockPos pos, BlockState state, HitResult target, Player player, boolean returnDrops) {
 
         BlockEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof DuctTileBase<?, ?> duct) {
+        if (tile instanceof BaseDuctBlockEntity<?, ?> duct) {
             duct.dismantleAttachments(player, returnDrops);
         }
         ItemStack dropBlock = this.getCloneItemStack(state, target, world, pos, player);

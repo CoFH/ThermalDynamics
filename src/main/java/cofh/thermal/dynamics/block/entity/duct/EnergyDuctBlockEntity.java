@@ -10,14 +10,14 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import static cofh.thermal.dynamics.init.TDynBlockEntities.ENERGY_DUCT_BLOCK_ENTITY;
 import static cofh.thermal.dynamics.init.TDynGrids.GRID_ENERGY;
-import static cofh.thermal.dynamics.init.TDynTileEntities.DUCT_ENERGY_TILE;
 
-public class EnergyDuctTile extends DuctTileBase<EnergyGrid, EnergyGridNode> {
+public class EnergyDuctBlockEntity extends BaseDuctBlockEntity<EnergyGrid, EnergyGridNode> {
 
-    public EnergyDuctTile(BlockPos pos, BlockState state) {
+    public EnergyDuctBlockEntity(BlockPos pos, BlockState state) {
 
-        super(DUCT_ENERGY_TILE.get(), pos, state);
+        super(ENERGY_DUCT_BLOCK_ENTITY.get(), pos, state);
     }
 
     @Override

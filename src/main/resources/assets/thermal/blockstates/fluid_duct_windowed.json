@@ -2,7 +2,7 @@
   "variants": {
     "": [
       {
-        "model": "thermal:block/fluid_duct_glass"
+        "model": "thermal:block/fluid_duct_windowed"
       }
     ]
   }
