@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static cofh.lib.util.constants.NBTTags.TAG_RENDER_FLUID;
-import static cofh.thermal.dynamics.init.TDynBlockEntities.FLUID_DUCT_GLASS_BLOCK_ENTITY;
+import static cofh.thermal.dynamics.init.TDynBlockEntities.FLUID_DUCT_WINDOWED_BLOCK_ENTITY;
 import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
 
 public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implements IGridHostUpdateable, IPacketHandlerTile {
@@ -26,7 +26,7 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
 
     public FluidDuctWindowedBlockEntity(BlockPos pos, BlockState state) {
 
-        super(FLUID_DUCT_GLASS_BLOCK_ENTITY.get(), pos, state);
+        super(FLUID_DUCT_WINDOWED_BLOCK_ENTITY.get(), pos, state);
     }
 
     @Override

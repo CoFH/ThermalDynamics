@@ -41,7 +41,7 @@ public class TDynBlocks {
                 () -> new DuctBlock(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), FLUID_DUCT_BLOCK_ENTITY),
                 () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
         registerBlockAndItem(ID_FLUID_DUCT_WINDOWED,
-                () -> new DuctBlock(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), FLUID_DUCT_GLASS_BLOCK_ENTITY),
+                () -> new DuctBlock(of(Material.METAL).sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), FLUID_DUCT_WINDOWED_BLOCK_ENTITY),
                 () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT_WINDOWED), new Item.Properties().tab(THERMAL_DEVICES)).setModId(ID_THERMAL_DYNAMICS));
 
 

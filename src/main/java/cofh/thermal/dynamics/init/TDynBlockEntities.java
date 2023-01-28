@@ -23,7 +23,7 @@ public class TDynBlockEntities {
 
     public static final RegistryObject<BlockEntityType<?>> ENERGY_DUCT_BLOCK_ENTITY = TILE_ENTITIES.register(ID_ENERGY_DUCT, () -> BlockEntityType.Builder.of(EnergyDuctBlockEntity::new, BLOCKS.get(ID_ENERGY_DUCT)).build(null));
     public static final RegistryObject<BlockEntityType<?>> FLUID_DUCT_BLOCK_ENTITY = TILE_ENTITIES.register(ID_FLUID_DUCT, () -> BlockEntityType.Builder.of(FluidDuctBlockEntity::new, BLOCKS.get(ID_FLUID_DUCT)).build(null));
-    public static final RegistryObject<BlockEntityType<?>> FLUID_DUCT_GLASS_BLOCK_ENTITY = TILE_ENTITIES.register(ID_FLUID_DUCT_WINDOWED, () -> BlockEntityType.Builder.of(FluidDuctWindowedBlockEntity::new, BLOCKS.get(ID_FLUID_DUCT_WINDOWED)).build(null));
+    public static final RegistryObject<BlockEntityType<?>> FLUID_DUCT_WINDOWED_BLOCK_ENTITY = TILE_ENTITIES.register(ID_FLUID_DUCT_WINDOWED, () -> BlockEntityType.Builder.of(FluidDuctWindowedBlockEntity::new, BLOCKS.get(ID_FLUID_DUCT_WINDOWED)).build(null));
 
     //        TILE_ENTITIES.register(ID_ENERGY_DISTRIBUTOR, () -> TileEntityType.Builder.of(EnergyDistributorTile::new, ENERGY_DISTRIBUTOR_BLOCK).build(null));
 
