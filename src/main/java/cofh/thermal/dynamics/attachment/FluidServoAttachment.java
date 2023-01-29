@@ -34,8 +34,8 @@ import static cofh.lib.util.Constants.TANK_MEDIUM;
 import static cofh.lib.util.constants.NBTTags.TAG_AMOUNT;
 import static cofh.lib.util.constants.NBTTags.TAG_TYPE;
 import static cofh.thermal.core.ThermalCore.ITEMS;
-import static cofh.thermal.dynamics.client.TDynTextures.FLUID_SERVO_ATTACHMENT_ACTIVE_LOC;
-import static cofh.thermal.dynamics.client.TDynTextures.FLUID_SERVO_ATTACHMENT_LOC;
+import static cofh.thermal.dynamics.client.TDynTextures.SERVO_ATTACHMENT_ACTIVE_LOC;
+import static cofh.thermal.dynamics.client.TDynTextures.SERVO_ATTACHMENT_LOC;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_SERVO_ATTACHMENT;
 import static cofh.thermal.dynamics.init.TDynIDs.SERVO;
 import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
@@ -130,7 +130,7 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     @Override
     public ResourceLocation getTexture() {
 
-        return rsControl.getState() ? FLUID_SERVO_ATTACHMENT_ACTIVE_LOC : FLUID_SERVO_ATTACHMENT_LOC;
+        return rsControl.getState() ? SERVO_ATTACHMENT_ACTIVE_LOC : SERVO_ATTACHMENT_LOC;
     }
 
     @Override
@@ -232,6 +232,64 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     }
     // endregion
 
+    // region GRID WRAPPER CLASS
+    private static class WrappedGridFluidHandler implements IFluidHandler {
+
+        protected IFluidHandler wrappedHandler;
+
+        public WrappedGridFluidHandler(IFluidHandler wrappedHandler) {
+
+            this.wrappedHandler = wrappedHandler;
+        }
+
+        @Override
+        public int getTanks() {
+
+            return wrappedHandler.getTanks();
+        }
+
+        @NotNull
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+
+            return wrappedHandler.getFluidInTank(tank);
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+
+            return wrappedHandler.getTankCapacity(tank);
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
+
+            return wrappedHandler.isFluidValid(tank, stack);
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+
+            return 0;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action) {
+
+            return FluidStack.EMPTY;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+
+            return FluidStack.EMPTY;
+        }
+
+    }
+    // endregion
+
     // region EXTERNAL WRAPPER CLASS
     private static class WrappedExternalFluidHandler implements IFluidHandler {
 
@@ -288,64 +346,6 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
         public FluidStack drain(int maxDrain, FluidAction action) {
 
             return validator.test(wrappedHandler.drain(maxDrain, SIMULATE)) ? wrappedHandler.drain(maxDrain, action) : FluidStack.EMPTY;
-        }
-
-    }
-    // endregion
-
-    // region GRID WRAPPER CLASS
-    private static class WrappedGridFluidHandler implements IFluidHandler {
-
-        protected IFluidHandler wrappedHandler;
-
-        public WrappedGridFluidHandler(IFluidHandler wrappedHandler) {
-
-            this.wrappedHandler = wrappedHandler;
-        }
-
-        @Override
-        public int getTanks() {
-
-            return wrappedHandler.getTanks();
-        }
-
-        @NotNull
-        @Override
-        public FluidStack getFluidInTank(int tank) {
-
-            return wrappedHandler.getFluidInTank(tank);
-        }
-
-        @Override
-        public int getTankCapacity(int tank) {
-
-            return wrappedHandler.getTankCapacity(tank);
-        }
-
-        @Override
-        public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
-
-            return wrappedHandler.isFluidValid(tank, stack);
-        }
-
-        @Override
-        public int fill(FluidStack resource, FluidAction action) {
-
-            return 0;
-        }
-
-        @NotNull
-        @Override
-        public FluidStack drain(FluidStack resource, FluidAction action) {
-
-            return FluidStack.EMPTY;
-        }
-
-        @NotNull
-        @Override
-        public FluidStack drain(int maxDrain, FluidAction action) {
-
-            return FluidStack.EMPTY;
         }
 
     }

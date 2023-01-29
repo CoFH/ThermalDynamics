@@ -1,5 +1,7 @@
 8fcd61b6c8c1cd64cbf2c3d2e1ff12a28abbedfe assets/thermal/models/item/energy_limiter_attachment.json
 9b81ae7fbf26aaf1424fa8030c2fd4e38cdb9177 assets/thermal/models/item/filter_attachment.json
+900ce63b52562f27c3deea04286fb08e532b35e0 assets/thermal/models/item/input_filter_attachment.json
+53ce2fab764b17576d67fe6ef0226ea22e53c0a4 assets/thermal/models/item/output_filter_attachment.json
 bd2521c3c78489aea4a160ad29b16d7971f835fd assets/thermal/models/item/servo_attachment.json
 b0a83b7d0aaa369a32a92eb40f89a90a36efa18f data/thermal/loot_tables/blocks/energy_duct.json
 e253cc206184d3580ac478780640b01f61c9f768 data/thermal/loot_tables/blocks/fluid_duct.json

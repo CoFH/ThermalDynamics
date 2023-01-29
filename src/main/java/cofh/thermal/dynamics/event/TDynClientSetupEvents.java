@@ -36,11 +36,17 @@ public class TDynClientSetupEvents {
         event.addSprite(ENERGY_LIMITER_ATTACHMENT_ACTIVE_LOC);
         event.addSprite(ENERGY_LIMITER_ATTACHMENT_LOC);
 
-        event.addSprite(FLUID_FILTER_ATTACHMENT_ACTIVE_LOC);
-        event.addSprite(FLUID_FILTER_ATTACHMENT_LOC);
+        event.addSprite(FILTER_ATTACHMENT_ACTIVE_LOC);
+        event.addSprite(FILTER_ATTACHMENT_LOC);
 
-        event.addSprite(FLUID_SERVO_ATTACHMENT_ACTIVE_LOC);
-        event.addSprite(FLUID_SERVO_ATTACHMENT_LOC);
+        event.addSprite(INPUT_FILTER_ATTACHMENT_ACTIVE_LOC);
+        event.addSprite(INPUT_FILTER_ATTACHMENT_LOC);
+
+        event.addSprite(OUTPUT_FILTER_ATTACHMENT_ACTIVE_LOC);
+        event.addSprite(OUTPUT_FILTER_ATTACHMENT_LOC);
+
+        event.addSprite(SERVO_ATTACHMENT_ACTIVE_LOC);
+        event.addSprite(SERVO_ATTACHMENT_LOC);
     }
 
     @SubscribeEvent
