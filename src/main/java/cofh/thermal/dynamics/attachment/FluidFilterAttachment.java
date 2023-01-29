@@ -29,10 +29,11 @@ import java.util.function.Predicate;
 
 import static cofh.lib.util.constants.NBTTags.TAG_TYPE;
 import static cofh.thermal.core.ThermalCore.ITEMS;
-import static cofh.thermal.dynamics.client.TDynTextures.FLUID_FILTER_ATTACHMENT_ACTIVE_LOC;
-import static cofh.thermal.dynamics.client.TDynTextures.FLUID_FILTER_ATTACHMENT_LOC;
+import static cofh.thermal.dynamics.client.TDynTextures.FILTER_ATTACHMENT_ACTIVE_LOC;
+import static cofh.thermal.dynamics.client.TDynTextures.FILTER_ATTACHMENT_LOC;
 import static cofh.thermal.dynamics.init.TDynIDs.FILTER;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_FILTER_ATTACHMENT;
+import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE;
 
 public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
@@ -96,7 +97,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     @Override
     public ResourceLocation getTexture() {
 
-        return rsControl.getState() ? FLUID_FILTER_ATTACHMENT_ACTIVE_LOC : FLUID_FILTER_ATTACHMENT_LOC;
+        return rsControl.getState() ? FILTER_ATTACHMENT_ACTIVE_LOC : FILTER_ATTACHMENT_LOC;
     }
 
     @Override
@@ -242,14 +243,14 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
 
-            return wrappedHandler.drain(resource, action);
+            return validator.test(resource) ? wrappedHandler.drain(resource, action) : FluidStack.EMPTY;
         }
 
         @NotNull
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
 
-            return wrappedHandler.drain(maxDrain, action);
+            return validator.test(wrappedHandler.drain(maxDrain, SIMULATE)) ? wrappedHandler.drain(maxDrain, action) : FluidStack.EMPTY;
         }
 
     }
