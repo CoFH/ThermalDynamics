@@ -63,21 +63,21 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .pattern("LGL")
                 .pattern("RRR")
                 .unlockedBy("has_lead", has(ItemTagsCoFH.INGOTS_LEAD))
-                .save(consumer);
+                .save(consumer, ID_THERMAL + ":energy_duct_4");
 
         ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT), 4)
                 .define('L', ItemTagsCoFH.INGOTS_LEAD)
                 .define('C', ItemTagsCoFH.INGOTS_BRONZE)
                 .pattern("CLC")
                 .unlockedBy("has_bronze", has(ItemTagsCoFH.INGOTS_BRONZE))
-                .save(consumer);
+                .save(consumer, ID_THERMAL + ":fluid_duct_4");
 
         ShapedRecipeBuilder.shaped(reg.get(ID_FLUID_DUCT_WINDOWED), 4)
                 .define('G', ThermalTags.Items.HARDENED_GLASS)
                 .define('C', ItemTagsCoFH.INGOTS_BRONZE)
                 .pattern("CGC")
                 .unlockedBy("has_bronze", has(ItemTagsCoFH.INGOTS_BRONZE))
-                .save(consumer);
+                .save(consumer, ID_THERMAL + ":fluid_duct_windowed_4");
 
         ShapedRecipeBuilder.shaped(reg.get(ID_ENERGY_LIMITER_ATTACHMENT), 2)
                 .define('G', Tags.Items.GLASS)
@@ -87,7 +87,7 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .pattern("NGN")
                 .pattern("IRI")
                 .unlockedBy("has_duct", has(ThermalTags.Items.DUCTS))
-                .save(consumer);
+                .save(consumer, ID_THERMAL + ":energy_limiter_attachment_2");
 
         ShapedRecipeBuilder.shaped(reg.get(ID_FILTER_ATTACHMENT), 2)
                 .define('G', Tags.Items.GLASS)
@@ -97,7 +97,7 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .pattern("NGN")
                 .pattern("IPI")
                 .unlockedBy("has_duct", has(ThermalTags.Items.DUCTS))
-                .save(consumer);
+                .save(consumer, ID_THERMAL + ":filter_attachment_2");
 
         ShapedRecipeBuilder.shaped(reg.get(ID_SERVO_ATTACHMENT), 2)
                 .define('G', Tags.Items.GLASS)
@@ -107,7 +107,7 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .pattern("NGN")
                 .pattern("IRI")
                 .unlockedBy("has_duct", has(ThermalTags.Items.DUCTS))
-                .save(consumer);
+                .save(consumer, ID_THERMAL + ":servo_attachment_2");
     }
 
 }

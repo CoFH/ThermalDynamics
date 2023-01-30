@@ -120,7 +120,6 @@ public class ThermalDynamics {
     // region HELPERS
     private void registerGuiFactories() {
 
-        // ScreenManager.register(ENERGY_DISTRIBUTOR_CONTAINER, EnergyDistributorScreen::new);
         MenuScreens.register(ITEM_BUFFER_CONTAINER.get(), ItemBufferScreen::new);
 
         MenuScreens.register(ENERGY_LIMITER_ATTACHMENT_CONTAINER.get(), EnergyLimiterAttachmentScreen::new);
