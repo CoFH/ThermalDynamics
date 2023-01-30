@@ -6,7 +6,9 @@ import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.client.DebugRenderer;
 import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
-import cofh.thermal.dynamics.client.gui.attachment.*;
+import cofh.thermal.dynamics.client.gui.attachment.EnergyLimiterAttachmentScreen;
+import cofh.thermal.dynamics.client.gui.attachment.FluidFilterAttachmentScreen;
+import cofh.thermal.dynamics.client.gui.attachment.FluidServoAttachmentScreen;
 import cofh.thermal.dynamics.handler.GridEvents;
 import cofh.thermal.dynamics.init.*;
 import cofh.thermal.dynamics.network.packet.client.AttachmentControlPacket;
@@ -120,8 +122,6 @@ public class ThermalDynamics {
 
         MenuScreens.register(ENERGY_LIMITER_ATTACHMENT_CONTAINER.get(), EnergyLimiterAttachmentScreen::new);
         MenuScreens.register(FLUID_FILTER_ATTACHMENT_CONTAINER.get(), FluidFilterAttachmentScreen::new);
-        MenuScreens.register(FLUID_INPUT_FILTER_ATTACHMENT_CONTAINER.get(), FluidInputFilterAttachmentScreen::new);
-        MenuScreens.register(FLUID_OUTPUT_FILTER_ATTACHMENT_CONTAINER.get(), FluidOutputFilterAttachmentScreen::new);
         MenuScreens.register(FLUID_SERVO_ATTACHMENT_CONTAINER.get(), FluidServoAttachmentScreen::new);
     }
 

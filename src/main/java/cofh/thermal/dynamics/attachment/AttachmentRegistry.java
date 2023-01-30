@@ -19,20 +19,6 @@ public class AttachmentRegistry {
         return EmptyAttachment.INSTANCE;
     });
 
-    public static final IAttachmentFactory<IAttachment> INPUT_FILTER_FACTORY = ((nbt, duct, side) -> {
-        if (duct.getGridType() == FLUID_GRID.get()) {
-            return new FluidInputFilterAttachment(duct, side).read(nbt);
-        }
-        return EmptyAttachment.INSTANCE;
-    });
-
-    public static final IAttachmentFactory<IAttachment> OUTPUT_FILTER_FACTORY = ((nbt, duct, side) -> {
-        if (duct.getGridType() == FLUID_GRID.get()) {
-            return new FluidOutputFilterAttachment(duct, side).read(nbt);
-        }
-        return EmptyAttachment.INSTANCE;
-    });
-
     public static final IAttachmentFactory<IAttachment> SERVO_FACTORY = ((nbt, duct, side) -> {
         if (duct.getGridType() == FLUID_GRID.get()) {
             return new FluidServoAttachment(duct, side).read(nbt);
@@ -45,8 +31,6 @@ public class AttachmentRegistry {
     static {
         registerAttachmentFactory(ENERGY_LIMITER, EnergyLimiterAttachment.FACTORY);
         registerAttachmentFactory(FILTER, FILTER_FACTORY);
-        registerAttachmentFactory(INPUT_FILTER, INPUT_FILTER_FACTORY);
-        registerAttachmentFactory(OUTPUT_FILTER, OUTPUT_FILTER_FACTORY);
         registerAttachmentFactory(SERVO, SERVO_FACTORY);
     }
 

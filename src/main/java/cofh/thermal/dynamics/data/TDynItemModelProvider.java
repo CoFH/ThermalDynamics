@@ -32,8 +32,6 @@ public class TDynItemModelProvider extends ItemModelProviderCoFH {
         generated(reg.getSup(ID_ENERGY_LIMITER_ATTACHMENT));
 
         generated(reg.getSup(ID_FILTER_ATTACHMENT));
-        generated(reg.getSup(ID_INPUT_FILTER_ATTACHMENT));
-        generated(reg.getSup(ID_OUTPUT_FILTER_ATTACHMENT));
 
         generated(reg.getSup(ID_SERVO_ATTACHMENT));
     }

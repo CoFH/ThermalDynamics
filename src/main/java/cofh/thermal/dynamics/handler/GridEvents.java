@@ -27,6 +27,9 @@ public class GridEvents {
 
     private static void onWorldTick(TickEvent.WorldTickEvent event) {
 
+        if (event.side.isClient()) {
+            return;
+        }
         IGridContainer gridContainer = IGridContainer.getCapability(event.world);
         if (gridContainer != null) {
             ((GridContainer) gridContainer).onWorldTick(event.phase);

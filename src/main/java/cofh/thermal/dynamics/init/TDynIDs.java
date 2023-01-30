@@ -25,19 +25,13 @@ public class TDynIDs {
 
     public static final String ID_ENERGY_LIMITER_ATTACHMENT = "energy_limiter_attachment";
     public static final String ID_FILTER_ATTACHMENT = "filter_attachment";
-    public static final String ID_INPUT_FILTER_ATTACHMENT = "input_filter_attachment";
-    public static final String ID_OUTPUT_FILTER_ATTACHMENT = "output_filter_attachment";
     public static final String ID_SERVO_ATTACHMENT = "servo_attachment";
 
     public static final String ID_FLUID_FILTER_ATTACHMENT = "fluid_filter_attachment";
-    public static final String ID_FLUID_INPUT_FILTER_ATTACHMENT = "fluid_input_filter_attachment";
-    public static final String ID_FLUID_OUTPUT_FILTER_ATTACHMENT = "fluid_output_filter_attachment";
     public static final String ID_FLUID_SERVO_ATTACHMENT = "fluid_servo_attachment";
 
     public static final String ENERGY_LIMITER = "energy_limiter";
     public static final String FILTER = "filter";
-    public static final String INPUT_FILTER = "input_filter";
-    public static final String OUTPUT_FILTER = "output_filter";
     public static final String SERVO = "servo";
 
 }
