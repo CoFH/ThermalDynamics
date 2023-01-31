@@ -36,13 +36,17 @@ import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.SIM
 
 public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
-    public static final Component DISPLAY_NAME = Component.translatable("attachment.thermal.fluid_filter");
+    public static final Component DISPLAY_NAME = Component.translatable("attachment.thermal.filter");
 
     protected final IDuct<?, ?> duct;
     protected final Direction side;
 
+    // 0 -> bidirectional, 1 -> input, 2 -> output
+    protected byte mode;
+
     protected BaseFluidFilter filter = new BaseFluidFilter(15);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
+
     protected LazyOptional<IFluidHandler> gridCap = LazyOptional.empty();
     protected LazyOptional<IFluidHandler> externalCap = LazyOptional.empty();
 
@@ -121,7 +125,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
             }
             Optional<T> gridOpt = gridLazOpt.resolve();
             if (gridOpt.isPresent() && gridOpt.get() instanceof IFluidHandler handler) {
-                gridCap = LazyOptional.of(() -> new WrappedFluidHandler(handler, e -> rsControl.getState() && filter.valid(e) || !rsControl.getState()));
+                gridCap = LazyOptional.of(() -> new WrappedGridFluidHandler(handler, e -> rsControl.getState() && filter.valid(e) || !rsControl.getState()));
                 gridLazOpt.addListener(e -> gridCap.invalidate());
                 return gridCap.cast();
             }
@@ -138,7 +142,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
             }
             Optional<T> extOpt = extLazOpt.resolve();
             if (extOpt.isPresent() && extOpt.get() instanceof IFluidHandler handler) {
-                externalCap = LazyOptional.of(() -> new WrappedFluidHandler(handler, e -> rsControl.getState() && filter.valid(e) || !rsControl.getState()));
+                externalCap = LazyOptional.of(() -> new WrappedExternalFluidHandler(handler, e -> rsControl.getState() && filter.valid(e) || !rsControl.getState()));
                 extLazOpt.addListener(e -> externalCap.invalidate());
                 return externalCap.cast();
             }
@@ -194,14 +198,14 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     }
     // endregion
 
-    // region WRAPPER CLASS
-    private static class WrappedFluidHandler implements IFluidHandler {
+    // region GRID WRAPPER CLASS
+    private class WrappedGridFluidHandler implements IFluidHandler {
 
         protected IFluidHandler wrappedHandler;
 
         protected Predicate<FluidStack> validator;
 
-        public WrappedFluidHandler(IFluidHandler wrappedHandler, Predicate<FluidStack> validator) {
+        public WrappedGridFluidHandler(IFluidHandler wrappedHandler, Predicate<FluidStack> validator) {
 
             this.wrappedHandler = wrappedHandler;
             this.validator = validator;
@@ -229,12 +233,18 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
 
+            if (mode == 1) {
+                return wrappedHandler.isFluidValid(tank, stack);
+            }
             return validator.test(stack) && wrappedHandler.isFluidValid(tank, stack);
         }
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
 
+            if (mode == 1) {
+                return 0;
+            }
             return validator.test(resource) ? wrappedHandler.fill(resource, action) : 0;
         }
 
@@ -242,6 +252,9 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
 
+            if (mode == 2) {
+                return FluidStack.EMPTY;
+            }
             return validator.test(resource) ? wrappedHandler.drain(resource, action) : FluidStack.EMPTY;
         }
 
@@ -249,6 +262,82 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
 
+            if (mode == 2) {
+                return FluidStack.EMPTY;
+            }
+            return validator.test(wrappedHandler.drain(maxDrain, SIMULATE)) ? wrappedHandler.drain(maxDrain, action) : FluidStack.EMPTY;
+        }
+
+    }
+    // endregion
+
+    // region EXTERNAL WRAPPER CLASS
+    private class WrappedExternalFluidHandler implements IFluidHandler {
+
+        protected IFluidHandler wrappedHandler;
+
+        protected Predicate<FluidStack> validator;
+
+        public WrappedExternalFluidHandler(IFluidHandler wrappedHandler, Predicate<FluidStack> validator) {
+
+            this.wrappedHandler = wrappedHandler;
+            this.validator = validator;
+        }
+
+        @Override
+        public int getTanks() {
+
+            return wrappedHandler.getTanks();
+        }
+
+        @NotNull
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+
+            return wrappedHandler.getFluidInTank(tank);
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+
+            return wrappedHandler.getTankCapacity(tank);
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
+
+            if (mode == 2) {
+                return wrappedHandler.isFluidValid(tank, stack);
+            }
+            return validator.test(stack) && wrappedHandler.isFluidValid(tank, stack);
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+
+            if (mode == 2) {
+                return 0;
+            }
+            return validator.test(resource) ? wrappedHandler.fill(resource, action) : 0;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action) {
+
+            if (mode == 1) {
+                return FluidStack.EMPTY;
+            }
+            return validator.test(resource) ? wrappedHandler.drain(resource, action) : FluidStack.EMPTY;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+
+            if (mode == 1) {
+                return FluidStack.EMPTY;
+            }
             return validator.test(wrappedHandler.drain(maxDrain, SIMULATE)) ? wrappedHandler.drain(maxDrain, action) : FluidStack.EMPTY;
         }
 

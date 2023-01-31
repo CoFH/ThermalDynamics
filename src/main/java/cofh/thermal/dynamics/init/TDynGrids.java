@@ -19,7 +19,7 @@ public class TDynGrids {
 
     }
 
-    public static final RegistryObject<IGridType<EnergyGrid>> GRID_ENERGY = GRIDS.register(ID_ENERGY_GRID, () -> IGridType.of(EnergyGrid::new));
-    public static final RegistryObject<IGridType<FluidGrid>> GRID_FLUID = GRIDS.register(ID_FLUID_GRID, () -> IGridType.of(FluidGrid::new));
+    public static final RegistryObject<IGridType<EnergyGrid>> ENERGY_GRID = GRIDS.register(ID_ENERGY_GRID, () -> IGridType.of(EnergyGrid::new));
+    public static final RegistryObject<IGridType<FluidGrid>> FLUID_GRID = GRIDS.register(ID_FLUID_GRID, () -> IGridType.of(FluidGrid::new));
 
 }

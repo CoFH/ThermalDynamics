@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "G": {
+      "tag": "forge:glass"
+    },
+    "I": {
+      "tag": "forge:ingots/invar"
+    },
+    "N": {
+      "tag": "forge:nuggets/lead"
+    },
+    "R": {
+      "item": "thermal:redstone_servo"
+    }
+  },
+  "pattern": [
+    "NGN",
+    "IRI"
+  ],
+  "result": {
+    "count": 2,
+    "item": "thermal:turbo_servo_attachment"
+  }
+}

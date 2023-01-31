@@ -5,6 +5,7 @@ import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import cofh.thermal.dynamics.inventory.container.attachment.EnergyLimiterAttachmentContainer;
 import cofh.thermal.dynamics.inventory.container.attachment.FluidFilterAttachmentContainer;
 import cofh.thermal.dynamics.inventory.container.attachment.FluidServoAttachmentContainer;
+import cofh.thermal.dynamics.inventory.container.attachment.FluidTurboServoAttachmentContainer;
 import net.minecraft.core.Direction;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
@@ -31,5 +32,6 @@ public class TDynContainers {
 
     public static final RegistryObject<MenuType<FluidFilterAttachmentContainer>> FLUID_FILTER_ATTACHMENT_CONTAINER = CONTAINERS.register(ID_FLUID_FILTER_ATTACHMENT, () -> IForgeMenuType.create((windowId, inv, data) -> new FluidFilterAttachmentContainer(windowId, ProxyUtils.getClientWorld(), data.readBlockPos(), data.readEnum(Direction.class), inv, ProxyUtils.getClientPlayer())));
     public static final RegistryObject<MenuType<FluidServoAttachmentContainer>> FLUID_SERVO_ATTACHMENT_CONTAINER = CONTAINERS.register(ID_FLUID_SERVO_ATTACHMENT, () -> IForgeMenuType.create((windowId, inv, data) -> new FluidServoAttachmentContainer(windowId, ProxyUtils.getClientWorld(), data.readBlockPos(), data.readEnum(Direction.class), inv, ProxyUtils.getClientPlayer())));
+    public static final RegistryObject<MenuType<FluidTurboServoAttachmentContainer>> FLUID_TURBO_SERVO_ATTACHMENT_CONTAINER = CONTAINERS.register(ID_FLUID_TURBO_SERVO_ATTACHMENT, () -> IForgeMenuType.create((windowId, inv, data) -> new FluidTurboServoAttachmentContainer(windowId, ProxyUtils.getClientWorld(), data.readBlockPos(), data.readEnum(Direction.class), inv, ProxyUtils.getClientPlayer())));
 
 }

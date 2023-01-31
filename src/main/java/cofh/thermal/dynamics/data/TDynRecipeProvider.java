@@ -108,6 +108,16 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
                 .pattern("IRI")
                 .unlockedBy("has_duct", has(ThermalTags.Items.DUCTS))
                 .save(consumer, ID_THERMAL + ":servo_attachment_2");
+
+        ShapedRecipeBuilder.shaped(reg.get(ID_TURBO_SERVO_ATTACHMENT), 2)
+                .define('G', Tags.Items.GLASS)
+                .define('I', ItemTagsCoFH.INGOTS_INVAR)
+                .define('N', ItemTagsCoFH.NUGGETS_LEAD)
+                .define('R', redstoneServo)
+                .pattern("NGN")
+                .pattern("IRI")
+                .unlockedBy("has_duct", has(ThermalTags.Items.DUCTS))
+                .save(consumer, ID_THERMAL + ":turbo_servo_attachment_2");
     }
 
 }

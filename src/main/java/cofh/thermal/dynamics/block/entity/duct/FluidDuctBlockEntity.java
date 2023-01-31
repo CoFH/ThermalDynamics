@@ -15,7 +15,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import static cofh.thermal.dynamics.init.TDynBlockEntities.FLUID_DUCT_BLOCK_ENTITY;
-import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;
+import static cofh.thermal.dynamics.init.TDynGrids.FLUID_GRID;
 
 public class FluidDuctBlockEntity extends DuctBlockEntity<FluidGrid, FluidGridNode> {
 
@@ -46,7 +46,7 @@ public class FluidDuctBlockEntity extends DuctBlockEntity<FluidGrid, FluidGridNo
     @Override
     public IGridType<FluidGrid> getGridType() {
 
-        return GRID_FLUID.get();
+        return FLUID_GRID.get();
     }
 
     @Override

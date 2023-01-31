@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import static cofh.thermal.dynamics.init.TDynBlockEntities.ENERGY_DUCT_BLOCK_ENTITY;
-import static cofh.thermal.dynamics.init.TDynGrids.GRID_ENERGY;
+import static cofh.thermal.dynamics.init.TDynGrids.ENERGY_GRID;
 
 public class EnergyDuctBlockEntity extends DuctBlockEntity<EnergyGrid, EnergyGridNode> {
 
@@ -36,7 +36,7 @@ public class EnergyDuctBlockEntity extends DuctBlockEntity<EnergyGrid, EnergyGri
     @Override
     public IGridType<EnergyGrid> getGridType() {
 
-        return GRID_ENERGY.get();
+        return ENERGY_GRID.get();
     }
 
 }

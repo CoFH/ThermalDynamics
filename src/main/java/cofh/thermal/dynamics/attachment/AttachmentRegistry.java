@@ -7,21 +7,28 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.util.Map;
 
-import static cofh.thermal.dynamics.init.TDynGrids.GRID_FLUID;
+import static cofh.thermal.dynamics.init.TDynGrids.FLUID_GRID;
 import static cofh.thermal.dynamics.init.TDynIDs.*;
 
 public class AttachmentRegistry {
 
     public static final IAttachmentFactory<IAttachment> FILTER_FACTORY = ((nbt, duct, side) -> {
-        if (duct.getGridType() == GRID_FLUID.get()) {
+        if (duct.getGridType() == FLUID_GRID.get()) {
             return new FluidFilterAttachment(duct, side).read(nbt);
         }
         return EmptyAttachment.INSTANCE;
     });
 
     public static final IAttachmentFactory<IAttachment> SERVO_FACTORY = ((nbt, duct, side) -> {
-        if (duct.getGridType() == GRID_FLUID.get()) {
+        if (duct.getGridType() == FLUID_GRID.get()) {
             return new FluidServoAttachment(duct, side).read(nbt);
+        }
+        return EmptyAttachment.INSTANCE;
+    });
+
+    public static final IAttachmentFactory<IAttachment> TURBO_SERVO_FACTORY = ((nbt, duct, side) -> {
+        if (duct.getGridType() == FLUID_GRID.get()) {
+            return new FluidTurboServoAttachment(duct, side).read(nbt);
         }
         return EmptyAttachment.INSTANCE;
     });
@@ -32,6 +39,7 @@ public class AttachmentRegistry {
         registerAttachmentFactory(ENERGY_LIMITER, EnergyLimiterAttachment.FACTORY);
         registerAttachmentFactory(FILTER, FILTER_FACTORY);
         registerAttachmentFactory(SERVO, SERVO_FACTORY);
+        registerAttachmentFactory(TURBO_SERVO, TURBO_SERVO_FACTORY);
     }
 
     public static boolean registerAttachmentFactory(String type, IAttachmentFactory<?> factory) {
