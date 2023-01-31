@@ -47,6 +47,9 @@ public class TDynClientSetupEvents {
 
         event.addSprite(SERVO_ATTACHMENT_ACTIVE_LOC);
         event.addSprite(SERVO_ATTACHMENT_LOC);
+
+        event.addSprite(TURBO_SERVO_ATTACHMENT_ACTIVE_LOC);
+        event.addSprite(TURBO_SERVO_ATTACHMENT_LOC);
     }
 
     @SubscribeEvent

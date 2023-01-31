@@ -1,13 +1,12 @@
 package cofh.thermal.dynamics.client.gui.attachment;
 
 import cofh.core.client.gui.ContainerScreenCoFH;
-import cofh.core.client.gui.element.ElementButton;
-import cofh.core.client.gui.element.ElementFluid;
-import cofh.core.client.gui.element.ElementTexture;
-import cofh.core.client.gui.element.SimpleTooltip;
+import cofh.core.client.gui.element.*;
 import cofh.core.client.gui.element.panel.RSControlPanel;
-import cofh.thermal.dynamics.attachment.FluidServoAttachment;
-import cofh.thermal.dynamics.inventory.container.attachment.FluidServoAttachmentContainer;
+import cofh.core.util.helpers.GuiHelper;
+import cofh.thermal.dynamics.attachment.FluidTurboServoAttachment;
+import cofh.thermal.dynamics.inventory.container.attachment.FluidTurboServoAttachmentContainer;
+import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -15,15 +14,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 
-import static cofh.core.util.helpers.GuiHelper.createSlot;
-import static cofh.core.util.helpers.GuiHelper.generatePanelInfo;
+import static cofh.core.util.helpers.GuiHelper.*;
 import static cofh.lib.util.Constants.PATH_GUI;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 import static cofh.lib.util.helpers.StringHelper.format;
 
-public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAttachmentContainer> {
+public class FluidTurboServoAttachmentScreen extends ContainerScreenCoFH<FluidTurboServoAttachmentContainer> {
 
     public static final ResourceLocation TEXTURE = new ResourceLocation(PATH_GUI + "generic.png");
 
@@ -37,15 +35,15 @@ public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAt
     public static final String TEX_IGNORE_NBT = PATH_GUI + "filters/filter_ignore_nbt.png";
     public static final String TEX_USE_NBT = PATH_GUI + "filters/filter_use_nbt.png";
 
-    protected final FluidServoAttachment attachment;
+    protected final FluidTurboServoAttachment attachment;
 
-    public FluidServoAttachmentScreen(FluidServoAttachmentContainer container, Inventory inv, Component titleIn) {
+    public FluidTurboServoAttachmentScreen(FluidTurboServoAttachmentContainer container, Inventory inv, Component titleIn) {
 
         super(container, inv, titleIn);
 
         texture = TEXTURE;
         attachment = container.attachment;
-        info = generatePanelInfo("info.thermal.fluid_servo_attachment");
+        info = generatePanelInfo("info.thermal.fluid_turbo_servo_attachment");
     }
 
     @Override
@@ -72,7 +70,7 @@ public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAt
     @Override
     protected void renderLabels(PoseStack matrixStack, int mouseX, int mouseY) {
 
-        String output = format(attachment.getTransfer());
+        String output = format(attachment.amountTransfer);
 
         getFontRenderer().draw(matrixStack, output, getCenteredOffset(output, 151), 42, 0x404040);
 
@@ -141,6 +139,53 @@ public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAt
                 .setTexture(TEX_USE_NBT, 40, 20)
                 .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.cofh.filter.checkNBT.1")))
                 .setVisible(() -> menu.getCheckNBT()));
+
+        ElementBase decTransfer = new ElementButton(this, 136, 56) {
+
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+
+                int change = getChangeAmount(mouseButton);
+                float pitch = getPitch(mouseButton);
+                pitch -= 0.1F;
+                playClickSound(pitch);
+
+                int curTransfer = attachment.amountTransfer;
+                attachment.amountTransfer -= change;
+                AttachmentConfigPacket.sendToServer(attachment);
+                attachment.amountTransfer = curTransfer;
+                return true;
+            }
+        }
+                .setTooltipFactory(GuiHelper::createDecControlTooltip)
+                .setSize(14, 14)
+                .setTexture(TEX_DECREMENT, 42, 14)
+                .setEnabled(() -> attachment.amountTransfer > 0);
+
+        ElementBase incTransfer = new ElementButton(this, 152, 56) {
+
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+
+                int change = getChangeAmount(mouseButton);
+                float pitch = getPitch(mouseButton);
+                pitch += 0.1F;
+                playClickSound(pitch);
+
+                int curTransfer = attachment.amountTransfer;
+                attachment.amountTransfer += change;
+                AttachmentConfigPacket.sendToServer(attachment);
+                attachment.amountTransfer = curTransfer;
+                return true;
+            }
+        }
+                .setTooltipFactory(GuiHelper::createIncControlTooltip)
+                .setSize(14, 14)
+                .setTexture(TEX_INCREMENT, 42, 14)
+                .setEnabled(() -> attachment.amountTransfer < attachment.getMaxTransfer());
+
+        addElement(decTransfer);
+        addElement(incTransfer);
     }
     // endregion
 }

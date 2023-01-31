@@ -2,8 +2,9 @@ package cofh.thermal.dynamics.attachment;
 
 import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.IFilter;
+import cofh.lib.util.helpers.MathHelper;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.inventory.container.attachment.FluidServoAttachmentContainer;
+import cofh.thermal.dynamics.inventory.container.attachment.FluidTurboServoAttachmentContainer;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -27,40 +28,45 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static cofh.lib.util.Constants.BUCKET_VOLUME;
+import static cofh.lib.util.Constants.TANK_MEDIUM;
+import static cofh.lib.util.constants.NBTTags.TAG_AMOUNT;
 import static cofh.lib.util.constants.NBTTags.TAG_TYPE;
 import static cofh.thermal.core.ThermalCore.ITEMS;
-import static cofh.thermal.dynamics.client.TDynTextures.SERVO_ATTACHMENT_ACTIVE_LOC;
-import static cofh.thermal.dynamics.client.TDynTextures.SERVO_ATTACHMENT_LOC;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_SERVO_ATTACHMENT;
-import static cofh.thermal.dynamics.init.TDynIDs.SERVO;
+import static cofh.thermal.dynamics.client.TDynTextures.TURBO_SERVO_ATTACHMENT_ACTIVE_LOC;
+import static cofh.thermal.dynamics.client.TDynTextures.TURBO_SERVO_ATTACHMENT_LOC;
+import static cofh.thermal.dynamics.init.TDynIDs.ID_TURBO_SERVO_ATTACHMENT;
+import static cofh.thermal.dynamics.init.TDynIDs.TURBO_SERVO;
 import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
 import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE;
 
-public class FluidServoAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
+public class FluidTurboServoAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
-    public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.servo");
+    public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.turbo_servo");
 
-    public static final int TRANSFER = 50;
+    public static final int MAX_TRANSFER = TANK_MEDIUM;
 
     protected final IDuct<?, ?> duct;
     protected final Direction side;
 
-    protected BaseFluidFilter filter = new BaseFluidFilter(15);
+    public int amountTransfer = BUCKET_VOLUME;
+
+    protected BaseFluidFilter filter = new BaseFluidFilter(1);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
 
     protected LazyOptional<IFluidHandler> internalGridCap = LazyOptional.empty();
     protected LazyOptional<IFluidHandler> gridCap = LazyOptional.empty();
     protected LazyOptional<IFluidHandler> externalCap = LazyOptional.empty();
 
-    public FluidServoAttachment(IDuct<?, ?> duct, Direction side) {
+    public FluidTurboServoAttachment(IDuct<?, ?> duct, Direction side) {
 
         this.duct = duct;
         this.side = side;
     }
 
-    public final int getTransfer() {
+    public int getMaxTransfer() {
 
-        return TRANSFER;
+        return MAX_TRANSFER;
     }
 
     @Override
@@ -81,6 +87,8 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
         if (nbt.isEmpty()) {
             return this;
         }
+        amountTransfer = nbt.getInt(TAG_AMOUNT);
+
         filter.read(nbt);
         rsControl.read(nbt);
 
@@ -90,7 +98,8 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     @Override
     public CompoundTag write(CompoundTag nbt) {
 
-        nbt.putString(TAG_TYPE, SERVO);
+        nbt.putString(TAG_TYPE, TURBO_SERVO);
+        nbt.putInt(TAG_AMOUNT, amountTransfer);
 
         filter.write(nbt);
         rsControl.write(nbt);
@@ -107,19 +116,19 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
         if (!internalGridCap.isPresent()) {
             internalGridCap = duct.getGrid().getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
         }
-        externalCap.ifPresent(e -> internalGridCap.ifPresent(i -> i.fill(e.drain(i.fill(e.drain(getTransfer(), SIMULATE), SIMULATE), EXECUTE), EXECUTE)));
+        externalCap.ifPresent(e -> internalGridCap.ifPresent(i -> i.fill(e.drain(i.fill(e.drain(amountTransfer, SIMULATE), SIMULATE), EXECUTE), EXECUTE)));
     }
 
     @Override
     public ItemStack getItem() {
 
-        return new ItemStack(ITEMS.get(ID_SERVO_ATTACHMENT));
+        return new ItemStack(ITEMS.get(ID_TURBO_SERVO_ATTACHMENT));
     }
 
     @Override
     public ResourceLocation getTexture() {
 
-        return rsControl.getState() ? SERVO_ATTACHMENT_ACTIVE_LOC : SERVO_ATTACHMENT_LOC;
+        return rsControl.getState() ? TURBO_SERVO_ATTACHMENT_ACTIVE_LOC : TURBO_SERVO_ATTACHMENT_LOC;
     }
 
     @Override
@@ -132,7 +141,7 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
-        return new FluidServoAttachmentContainer(i, player.getLevel(), pos(), side, inventory, player);
+        return new FluidTurboServoAttachmentContainer(i, player.getLevel(), pos(), side, inventory, player);
     }
 
     @Override
@@ -181,6 +190,8 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     @Override
     public FriendlyByteBuf getConfigPacket(FriendlyByteBuf buffer) {
 
+        buffer.writeInt(amountTransfer);
+
         buffer.writeBoolean(filter.getAllowList());
         buffer.writeBoolean(filter.getCheckNBT());
 
@@ -189,6 +200,8 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
 
     @Override
     public void handleConfigPacket(FriendlyByteBuf buffer) {
+
+        amountTransfer = MathHelper.clamp(buffer.readInt(), 0, MAX_TRANSFER);
 
         filter.setAllowList(buffer.readBoolean());
         filter.setCheckNBT(buffer.readBoolean());

@@ -158,6 +158,7 @@ public class ItemBufferBlockEntity extends SecurableBlockEntity implements MenuP
         } else {
             inputLock = outputLock = false;
         }
+        markChunkUnsaved();
     }
 
     // GUI

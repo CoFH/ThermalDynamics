@@ -26,12 +26,20 @@ public class AttachmentRegistry {
         return EmptyAttachment.INSTANCE;
     });
 
+    public static final IAttachmentFactory<IAttachment> TURBO_SERVO_FACTORY = ((nbt, duct, side) -> {
+        if (duct.getGridType() == FLUID_GRID.get()) {
+            return new FluidTurboServoAttachment(duct, side).read(nbt);
+        }
+        return EmptyAttachment.INSTANCE;
+    });
+
     protected static final Map<String, IAttachmentFactory<? extends IAttachment>> ATTACHMENT_FACTORY_MAP = new Object2ObjectOpenHashMap<>();
 
     static {
         registerAttachmentFactory(ENERGY_LIMITER, EnergyLimiterAttachment.FACTORY);
         registerAttachmentFactory(FILTER, FILTER_FACTORY);
         registerAttachmentFactory(SERVO, SERVO_FACTORY);
+        registerAttachmentFactory(TURBO_SERVO, TURBO_SERVO_FACTORY);
     }
 
     public static boolean registerAttachmentFactory(String type, IAttachmentFactory<?> factory) {
