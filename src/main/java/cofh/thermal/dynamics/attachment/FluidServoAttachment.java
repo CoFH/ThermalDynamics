@@ -316,7 +316,8 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
         @Override
         public int fill(FluidStack resource, FluidAction action) {
 
-            return validator.test(resource) ? wrappedHandler.fill(resource, action) : 0;
+            return 0;
+            // return validator.test(resource) ? wrappedHandler.fill(resource, action) : 0;
         }
 
         @NotNull

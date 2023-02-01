@@ -4,6 +4,7 @@ import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.IFilter;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.inventory.container.attachment.FluidFilterAttachmentContainer;
+import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -27,23 +28,28 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static cofh.lib.util.constants.NBTTags.TAG_MODE;
 import static cofh.lib.util.constants.NBTTags.TAG_TYPE;
 import static cofh.thermal.core.ThermalCore.ITEMS;
-import static cofh.thermal.dynamics.client.TDynTextures.FILTER_ATTACHMENT_ACTIVE_LOC;
-import static cofh.thermal.dynamics.client.TDynTextures.FILTER_ATTACHMENT_LOC;
+import static cofh.thermal.dynamics.client.TDynTextures.*;
 import static cofh.thermal.dynamics.init.TDynIDs.FILTER;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_FILTER_ATTACHMENT;
 import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE;
 
 public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
 
+    public enum FilterMode {
+        BIDIRECTIONAL, TO_EXTERNAL_ONLY, TO_GRID_ONLY;
+
+        public static final FilterMode[] VALUES = values();
+    }
+
     public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.filter");
 
     protected final IDuct<?, ?> duct;
     protected final Direction side;
 
-    // 0 -> bidirectional, 1 -> input, 2 -> output
-    protected byte mode;
+    protected FilterMode mode = FilterMode.BIDIRECTIONAL;
 
     protected BaseFluidFilter filter = new BaseFluidFilter(15);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
@@ -55,6 +61,17 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
 
         this.duct = duct;
         this.side = side;
+    }
+
+    public FilterMode getFilterMode() {
+
+        return mode;
+    }
+
+    public void setFilterMode(FilterMode mode) {
+
+        this.mode = mode;
+        AttachmentConfigPacket.sendToServer(this);
     }
 
     @Override
@@ -75,6 +92,8 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         if (nbt.isEmpty()) {
             return this;
         }
+        mode = FilterMode.VALUES[nbt.getByte(TAG_MODE)];
+
         filter.read(nbt);
         rsControl.read(nbt);
 
@@ -85,6 +104,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     public CompoundTag write(CompoundTag nbt) {
 
         nbt.putString(TAG_TYPE, FILTER);
+        nbt.putByte(TAG_MODE, (byte) mode.ordinal());
 
         filter.write(nbt);
         rsControl.write(nbt);
@@ -101,7 +121,17 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     @Override
     public ResourceLocation getTexture() {
 
-        return rsControl.getState() ? FILTER_ATTACHMENT_ACTIVE_LOC : FILTER_ATTACHMENT_LOC;
+        switch (mode) {
+            case TO_EXTERNAL_ONLY -> {
+                return rsControl.getState() ? FILTER_ATTACHMENT_TO_EXTERNAL_ACTIVE_LOC : FILTER_ATTACHMENT_TO_EXTERNAL_LOC;
+            }
+            case TO_GRID_ONLY -> {
+                return rsControl.getState() ? FILTER_ATTACHMENT_TO_GRID_ACTIVE_LOC : FILTER_ATTACHMENT_TO_GRID_LOC;
+            }
+            default -> {
+                return rsControl.getState() ? FILTER_ATTACHMENT_ACTIVE_LOC : FILTER_ATTACHMENT_LOC;
+            }
+        }
     }
 
     @Override
@@ -163,6 +193,8 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     @Override
     public FriendlyByteBuf getConfigPacket(FriendlyByteBuf buffer) {
 
+        buffer.writeByte(mode.ordinal());
+
         buffer.writeBoolean(filter.getAllowList());
         buffer.writeBoolean(filter.getCheckNBT());
 
@@ -172,13 +204,21 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     @Override
     public void handleConfigPacket(FriendlyByteBuf buffer) {
 
+        FilterMode prevMode = mode;
+        mode = FilterMode.VALUES[buffer.readByte()];
+
         filter.setAllowList(buffer.readBoolean());
         filter.setCheckNBT(buffer.readBoolean());
+
+        if (mode != prevMode) {
+            onControlUpdate();
+        }
     }
 
     @Override
     public FriendlyByteBuf getControlPacket(FriendlyByteBuf buffer) {
 
+        buffer.writeByte(mode.ordinal());
         rsControl.writeToBuffer(buffer);
 
         return buffer;
@@ -187,6 +227,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     @Override
     public void handleControlPacket(FriendlyByteBuf buffer) {
 
+        mode = FilterMode.VALUES[buffer.readByte()];
         rsControl.readFromBuffer(buffer);
     }
     // endregion
@@ -234,8 +275,8 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
 
-            if (mode == 1) {
-                return wrappedHandler.isFluidValid(tank, stack);
+            if (mode == FilterMode.TO_EXTERNAL_ONLY) {
+                return false;
             }
             return validator.test(stack) && wrappedHandler.isFluidValid(tank, stack);
         }
@@ -243,7 +284,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public int fill(FluidStack resource, FluidAction action) {
 
-            if (mode == 1) {
+            if (mode == FilterMode.TO_EXTERNAL_ONLY) {
                 return 0;
             }
             return validator.test(resource) ? wrappedHandler.fill(resource, action) : 0;
@@ -253,7 +294,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
 
-            if (mode == 2) {
+            if (mode == FilterMode.TO_GRID_ONLY) {
                 return FluidStack.EMPTY;
             }
             return validator.test(resource) ? wrappedHandler.drain(resource, action) : FluidStack.EMPTY;
@@ -263,7 +304,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
 
-            if (mode == 2) {
+            if (mode == FilterMode.TO_GRID_ONLY) {
                 return FluidStack.EMPTY;
             }
             return validator.test(wrappedHandler.drain(maxDrain, SIMULATE)) ? wrappedHandler.drain(maxDrain, action) : FluidStack.EMPTY;
@@ -307,8 +348,8 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
 
-            if (mode == 2) {
-                return wrappedHandler.isFluidValid(tank, stack);
+            if (mode == FilterMode.TO_GRID_ONLY) {
+                return false;
             }
             return validator.test(stack) && wrappedHandler.isFluidValid(tank, stack);
         }
@@ -316,7 +357,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public int fill(FluidStack resource, FluidAction action) {
 
-            if (mode == 2) {
+            if (mode == FilterMode.TO_GRID_ONLY) {
                 return 0;
             }
             return validator.test(resource) ? wrappedHandler.fill(resource, action) : 0;
@@ -326,7 +367,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
 
-            if (mode == 1) {
+            if (mode == FilterMode.TO_EXTERNAL_ONLY) {
                 return FluidStack.EMPTY;
             }
             return validator.test(resource) ? wrappedHandler.drain(resource, action) : FluidStack.EMPTY;
@@ -336,7 +377,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
 
-            if (mode == 1) {
+            if (mode == FilterMode.TO_EXTERNAL_ONLY) {
                 return FluidStack.EMPTY;
             }
             return validator.test(wrappedHandler.drain(maxDrain, SIMULATE)) ? wrappedHandler.drain(maxDrain, action) : FluidStack.EMPTY;

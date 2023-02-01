@@ -39,11 +39,11 @@ public class TDynClientSetupEvents {
         event.addSprite(FILTER_ATTACHMENT_ACTIVE_LOC);
         event.addSprite(FILTER_ATTACHMENT_LOC);
 
-        event.addSprite(INPUT_FILTER_ATTACHMENT_ACTIVE_LOC);
-        event.addSprite(INPUT_FILTER_ATTACHMENT_LOC);
+        event.addSprite(FILTER_ATTACHMENT_TO_EXTERNAL_ACTIVE_LOC);
+        event.addSprite(FILTER_ATTACHMENT_TO_EXTERNAL_LOC);
 
-        event.addSprite(OUTPUT_FILTER_ATTACHMENT_ACTIVE_LOC);
-        event.addSprite(OUTPUT_FILTER_ATTACHMENT_LOC);
+        event.addSprite(FILTER_ATTACHMENT_TO_GRID_ACTIVE_LOC);
+        event.addSprite(FILTER_ATTACHMENT_TO_GRID_LOC);
 
         event.addSprite(SERVO_ATTACHMENT_ACTIVE_LOC);
         event.addSprite(SERVO_ATTACHMENT_LOC);

@@ -6,6 +6,7 @@ import cofh.core.client.gui.element.ElementFluid;
 import cofh.core.client.gui.element.SimpleTooltip;
 import cofh.core.client.gui.element.panel.RSControlPanel;
 import cofh.thermal.dynamics.attachment.FluidFilterAttachment;
+import cofh.thermal.dynamics.attachment.FluidFilterAttachment.FilterMode;
 import cofh.thermal.dynamics.inventory.container.attachment.FluidFilterAttachmentContainer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -16,6 +17,7 @@ import net.minecraft.world.inventory.Slot;
 import static cofh.core.util.helpers.GuiHelper.createSlot;
 import static cofh.core.util.helpers.GuiHelper.generatePanelInfo;
 import static cofh.lib.util.Constants.PATH_GUI;
+import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 
 public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilterAttachmentContainer> {
@@ -26,6 +28,10 @@ public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilter
     public static final String TEX_ALLOW_LIST = PATH_GUI + "filters/filter_allow_list.png";
     public static final String TEX_IGNORE_NBT = PATH_GUI + "filters/filter_ignore_nbt.png";
     public static final String TEX_USE_NBT = PATH_GUI + "filters/filter_use_nbt.png";
+
+    public static final String TEX_BIDIRECTIONAL = ID_THERMAL + ":textures/gui/container/filter_attachment_mode_bidirectional.png";
+    public static final String TEX_INPUT = ID_THERMAL + ":textures/gui/container/filter_attachment_mode_inbound.png";
+    public static final String TEX_OUTPUT = ID_THERMAL + ":textures/gui/container/filter_attachment_mode_outbound.png";
 
     protected final FluidFilterAttachment attachment;
 
@@ -58,7 +64,7 @@ public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilter
     // region ELEMENTS
     protected void addButtons() {
 
-        addElement(new ElementButton(this, 132, 22) {
+        addElement(new ElementButton(this, 121, 22) {
 
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
@@ -73,7 +79,7 @@ public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilter
                 .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.cofh.filter.allowlist.0")))
                 .setVisible(() -> !menu.getAllowList()));
 
-        addElement(new ElementButton(this, 132, 22) {
+        addElement(new ElementButton(this, 121, 22) {
 
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
@@ -88,7 +94,7 @@ public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilter
                 .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.cofh.filter.allowlist.1")))
                 .setVisible(() -> menu.getAllowList()));
 
-        addElement(new ElementButton(this, 132, 44) {
+        addElement(new ElementButton(this, 121, 44) {
 
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
@@ -103,7 +109,7 @@ public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilter
                 .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.cofh.filter.checkNBT.0")))
                 .setVisible(() -> !menu.getCheckNBT()));
 
-        addElement(new ElementButton(this, 132, 44) {
+        addElement(new ElementButton(this, 121, 44) {
 
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
@@ -117,6 +123,51 @@ public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilter
                 .setTexture(TEX_USE_NBT, 40, 20)
                 .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.cofh.filter.checkNBT.1")))
                 .setVisible(() -> menu.getCheckNBT()));
+
+        addElement(new ElementButton(this, 143, 33) {
+
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+
+                attachment.setFilterMode(FilterMode.TO_EXTERNAL_ONLY);
+                playClickSound(0.8F);
+                return true;
+            }
+        }
+                .setSize(20, 20)
+                .setTexture(TEX_BIDIRECTIONAL, 40, 20)
+                .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.thermal.filter_attachment.mode.0")))
+                .setVisible(() -> attachment.getFilterMode() == FilterMode.BIDIRECTIONAL));
+
+        addElement(new ElementButton(this, 143, 33) {
+
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+
+                attachment.setFilterMode(FilterMode.TO_GRID_ONLY);
+                playClickSound(0.7F);
+                return true;
+            }
+        }
+                .setSize(20, 20)
+                .setTexture(TEX_INPUT, 40, 20)
+                .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.thermal.filter_attachment.mode.1")))
+                .setVisible(() -> attachment.getFilterMode() == FilterMode.TO_EXTERNAL_ONLY));
+
+        addElement(new ElementButton(this, 143, 33) {
+
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+
+                attachment.setFilterMode(FilterMode.BIDIRECTIONAL);
+                playClickSound(0.6F);
+                return true;
+            }
+        }
+                .setSize(20, 20)
+                .setTexture(TEX_OUTPUT, 40, 20)
+                .setTooltipFactory(new SimpleTooltip(new TranslatableComponent("info.thermal.filter_attachment.mode.2")))
+                .setVisible(() -> attachment.getFilterMode() == FilterMode.TO_GRID_ONLY));
     }
     // endregion
 }

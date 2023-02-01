@@ -148,7 +148,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
                         if (!player.getAbilities().instabuild && Utils.isServerWorld(worldIn)) {
                             player.setItemInHand(handIn, consumeItem(heldStack, 1));
                         }
-                    } else {
+                    } else if (Utils.isServerWorld(worldIn)) {
                         duct.openDuctGui(player);
                     }
                     return InteractionResult.SUCCESS;
@@ -157,7 +157,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
                         if (!player.getAbilities().instabuild && Utils.isServerWorld(worldIn)) {
                             player.setItemInHand(handIn, consumeItem(heldStack, 1));
                         }
-                    } else {
+                    } else if (Utils.isServerWorld(worldIn)) {
                         duct.openAttachmentGui(DIRECTIONS[advHit.subHit - 7], player);
                     }
                     return InteractionResult.SUCCESS;
