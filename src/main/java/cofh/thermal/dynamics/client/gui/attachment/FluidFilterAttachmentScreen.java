@@ -128,7 +128,11 @@ public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilter
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                attachment.setFilterMode(FilterMode.TO_EXTERNAL_ONLY);
+                if (mouseButton == 0) {
+                    attachment.setFilterMode(FilterMode.TO_EXTERNAL_ONLY);
+                } else {
+                    attachment.setFilterMode(FilterMode.TO_GRID_ONLY);
+                }
                 playClickSound(0.8F);
                 return true;
             }
@@ -143,7 +147,11 @@ public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilter
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                attachment.setFilterMode(FilterMode.TO_GRID_ONLY);
+                if (mouseButton == 0) {
+                    attachment.setFilterMode(FilterMode.TO_GRID_ONLY);
+                } else {
+                    attachment.setFilterMode(FilterMode.BIDIRECTIONAL);
+                }
                 playClickSound(0.7F);
                 return true;
             }
@@ -158,7 +166,11 @@ public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilter
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-                attachment.setFilterMode(FilterMode.BIDIRECTIONAL);
+                if (mouseButton == 0) {
+                    attachment.setFilterMode(FilterMode.BIDIRECTIONAL);
+                } else {
+                    attachment.setFilterMode(FilterMode.TO_EXTERNAL_ONLY);
+                }
                 playClickSound(0.6F);
                 return true;
             }
