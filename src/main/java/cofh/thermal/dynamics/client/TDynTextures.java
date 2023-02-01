@@ -16,11 +16,11 @@ public class TDynTextures {
     public static ResourceLocation FILTER_ATTACHMENT_ACTIVE_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/filter_attachment_active");
     public static ResourceLocation FILTER_ATTACHMENT_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/filter_attachment");
 
-    public static ResourceLocation INPUT_FILTER_ATTACHMENT_ACTIVE_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/input_filter_attachment_active");
-    public static ResourceLocation INPUT_FILTER_ATTACHMENT_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/input_filter_attachment");
+    public static ResourceLocation FILTER_ATTACHMENT_TO_GRID_ACTIVE_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/filter_attachment_to_grid_active");
+    public static ResourceLocation FILTER_ATTACHMENT_TO_GRID_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/filter_attachment_to_grid");
 
-    public static ResourceLocation OUTPUT_FILTER_ATTACHMENT_ACTIVE_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/output_filter_attachment_active");
-    public static ResourceLocation OUTPUT_FILTER_ATTACHMENT_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/output_filter_attachment");
+    public static ResourceLocation FILTER_ATTACHMENT_TO_EXTERNAL_ACTIVE_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/filter_attachment_to_external_active");
+    public static ResourceLocation FILTER_ATTACHMENT_TO_EXTERNAL_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/filter_attachment_to_external");
 
     public static ResourceLocation SERVO_ATTACHMENT_ACTIVE_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/servo_attachment_active");
     public static ResourceLocation SERVO_ATTACHMENT_LOC = new ResourceLocation(ID_THERMAL + ":block/ducts/servo_attachment");
