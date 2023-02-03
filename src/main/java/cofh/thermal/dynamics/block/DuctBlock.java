@@ -1,5 +1,6 @@
 package cofh.thermal.dynamics.block;
 
+import cofh.core.network.packet.client.ModelUpdatePacket;
 import cofh.lib.api.block.IDismantleable;
 import cofh.lib.util.Utils;
 import cofh.lib.util.raytracer.IndexedVoxelShape;
@@ -14,6 +15,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -44,7 +47,6 @@ import java.util.function.Supplier;
 
 import static cofh.core.util.helpers.ItemHelper.consumeItem;
 import static cofh.lib.util.Constants.DIRECTIONS;
-import static cofh.thermal.dynamics.client.model.data.DuctModelData.DUCT_MODEL_DATA;
 
 public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBlock, IDismantleable {
 
@@ -168,17 +170,23 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 
-        if (world.isClientSide()) {
+        ModelUpdatePacket.sendToClient(level, pos);
+    }
+
+    @Override
+    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+
+        if (worldIn.isClientSide()) {
             return;
         }
-        BlockEntity tile = world.getBlockEntity(pos);
+        BlockEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof IDuct<?, ?> host) {
             host.neighborChanged(blockIn, fromPos);
-            IGridContainer gridContainer = IGridContainer.getCapability(world);
-            if (gridContainer != null) {
-                gridContainer.onDuctNeighborChanged(host);
+            IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
+            if (gridContainer != null && gridContainer.onDuctNeighborChanged(host)) {
+                worldIn.scheduleTick(pos, this, 1);
             }
         }
     }
@@ -218,8 +226,8 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
 
         BlockEntity tile = worldIn.getBlockEntity(pos);
-        if (tile instanceof DuctBlockEntity<?, ?>) {
-            var ductModelData = tile.getModelData().get(DUCT_MODEL_DATA);
+        if (tile instanceof DuctBlockEntity<?, ?> duct) {
+            var ductModelData = duct.getDuctModelData();
             if (ductModelData != null) {
                 return getConnectionShape(ductModelData.getConnectionState());
             }

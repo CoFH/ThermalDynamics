@@ -31,6 +31,7 @@ public class EnergyGridNode extends GridNode<EnergyGrid> implements ITickableGri
             }
         }
         distArray = connections.toArray(new Direction[0]);
+        cached = true;
     }
 
     @Override

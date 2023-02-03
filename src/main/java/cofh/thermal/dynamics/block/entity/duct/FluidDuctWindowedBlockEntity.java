@@ -39,10 +39,8 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
     @Override
     public ModelData getModelData() {
 
-        if (modelUpdate) {
-            modelData.setFill(renderFluid.isEmpty() ? BLANK_TEXTURE : RenderHelper.getFluidTexture(renderFluid).getName());
-            modelData.setFillColor(FluidHelper.color(renderFluid));
-        }
+        modelData.setFill(renderFluid.isEmpty() ? BLANK_TEXTURE : RenderHelper.getFluidTexture(renderFluid).getName());
+        modelData.setFillColor(FluidHelper.color(renderFluid));
         return super.getModelData();
     }
 
@@ -83,10 +81,10 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
     @Override
     public FriendlyByteBuf getStatePacket(FriendlyByteBuf buffer) {
 
-        super.getStatePacket(buffer);
-
         renderFluid = getGrid().getRenderFluid();
         buffer.writeFluidStack(renderFluid);
+
+        super.getStatePacket(buffer);
 
         return buffer;
     }
@@ -94,11 +92,9 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
     @Override
     public void handleStatePacket(FriendlyByteBuf buffer) {
 
-        super.handleStatePacket(buffer);
-
         renderFluid = buffer.readFluidStack();
 
-        requestModelDataUpdate();
+        super.handleStatePacket(buffer);
     }
     // endregion
 }

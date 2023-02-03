@@ -25,7 +25,7 @@ public interface IGridContainer {
 
     void onDuctRemoved(IDuct<?, ?> duct);
 
-    void onDuctNeighborChanged(IDuct<?, ?> duct);
+    boolean onDuctNeighborChanged(IDuct<?, ?> duct);
 
     /**
      * Connect the grid host side.

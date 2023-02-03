@@ -99,6 +99,10 @@ dependencies {
     implementation fg.deobf("com.teamcofh:cofh_core:${mc_version}-${cofh_core_version}")
     implementation fg.deobf("com.teamcofh:thermal_core:${mc_version}-${thermal_core_version}")
 
+//    implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
+//    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
+//    implementation fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }

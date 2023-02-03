@@ -32,6 +32,7 @@ public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridN
             }
         }
         distArray = connections.toArray(new Direction[0]);
+        cached = true;
     }
 
     @Override
