@@ -1,6 +1,5 @@
 package cofh.thermal.dynamics.handler;
 
-import cofh.core.network.packet.client.ModelUpdatePacket;
 import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IDuct.ConnectionType;
@@ -227,12 +226,12 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     }
 
     @Override
-    public void onDuctNeighborChanged(IDuct<?, ?> duct) {
+    public boolean onDuctNeighborChanged(IDuct<?, ?> duct) {
 
-        gridNeighborChanged(duct);
+        return gridNeighborChanged(duct);
     }
 
-    public <G extends Grid<G, N>, N extends GridNode<G>> void gridNeighborChanged(IDuct<G, N> duct) {
+    public <G extends Grid<G, N>, N extends GridNode<G>> boolean gridNeighborChanged(IDuct<G, N> duct) {
 
         G grid = duct.getGrid();
         N node = duct.getNode();
@@ -243,13 +242,14 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
                 simplifyNode(node);
             }
             node.clearConnections();
-            ModelUpdatePacket.sendToClient(duct.getHostWorld(), duct.getHostPos());
+            return true;
         } else {
             if (canExternallyConnect) {
                 grid.getNodeOrSplitEdgeAndInsertNode(duct.getHostPos());
-                ModelUpdatePacket.sendToClient(duct.getHostWorld(), duct.getHostPos());
+                return true;
             }
         }
+        return false;
     }
 
     @Override

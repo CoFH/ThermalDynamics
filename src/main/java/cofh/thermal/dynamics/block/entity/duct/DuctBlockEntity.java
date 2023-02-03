@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -47,7 +46,6 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     protected G grid = null;
     protected ConnectionType[] connections = {ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED, ALLOWED};
     protected IAttachment[] attachments = {EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE, EmptyAttachment.INSTANCE};
-    protected boolean modelUpdate;
 
     protected int redstonePower;
 
@@ -206,6 +204,12 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
         }
     }
 
+    // This is called only in getShape()
+    public DuctModelData getDuctModelData() {
+
+        return modelData;
+    }
+
     protected void callNeighborStateChange() {
 
         if (level == null) {
@@ -216,26 +220,15 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
 
     protected abstract boolean canConnectToBlock(Direction dir);
 
-    public void requestModelDataUpdate() {
-
-        if (this.level != null && level.isClientSide) {
-            modelUpdate = true;
-            ModelDataManager.requestModelDataRefresh(this);
-        }
-    }
-
     @Nonnull
     @Override
     public IModelData getModelData() {
 
-        if (modelUpdate) {
-            for (Direction dir : DIRECTIONS) {
-                IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
-                modelData.setInternalConnection(dir, adjacent != null && canConnectTo(adjacent, dir) && adjacent.canConnectTo(this, dir.getOpposite()));
-                modelData.setExternalConnection(dir, canConnectToBlock(dir) || connections[dir.ordinal()] == FORCED);
-                modelData.setAttachment(dir, attachments[dir.ordinal()].getTexture());
-            }
-            modelUpdate = false;
+        for (Direction dir : DIRECTIONS) {
+            IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+            modelData.setInternalConnection(dir, adjacent != null && canConnectTo(adjacent, dir) && adjacent.canConnectTo(this, dir.getOpposite()));
+            modelData.setExternalConnection(dir, canConnectToBlock(dir) || connections[dir.ordinal()] == FORCED);
+            modelData.setAttachment(dir, attachments[dir.ordinal()].getTexture());
         }
         return modelData;
     }

@@ -1,6 +1,5 @@
 package cofh.thermal.dynamics.grid.fluid;
 
-import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fluids.FluidStack;
@@ -8,7 +7,6 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 
-import static cofh.lib.util.Constants.MAX_CAPACITY;
 import static cofh.lib.util.constants.NBTTags.TAG_CAPACITY;
 import static cofh.lib.util.constants.NBTTags.TAG_TRACK_OUT;
 
@@ -36,7 +34,7 @@ public final class GridFluidStorage implements IFluidHandler, INBTSerializable<C
 
     public GridFluidStorage setBaseCapacity(int baseCapacity) {
 
-        this.baseCapacity = MathHelper.clamp(baseCapacity, 0, MAX_CAPACITY);
+        this.baseCapacity = Math.max(0, baseCapacity);
         //        if (!this.fluid.isEmpty()) {
         //            this.fluid.setAmount(MathHelper.clamp(this.fluid.getAmount(), 0, baseCapacity));
         //        }
