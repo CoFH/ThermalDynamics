@@ -39,6 +39,21 @@ public class DuctModelData implements IModelData {
         }
     }
 
+    public void setNeedsRefresh() {
+
+        state = -1;
+    }
+
+    public void clearState() {
+
+        state = 0;
+    }
+
+    public boolean needsRefresh() {
+
+        return state == -1;
+    }
+
     public void setInternalConnection(Direction dir, boolean present) {
 
         setStateBit(dir.ordinal(), present);

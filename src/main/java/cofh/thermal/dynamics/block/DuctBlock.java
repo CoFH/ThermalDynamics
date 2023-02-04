@@ -5,6 +5,7 @@ import cofh.lib.api.block.IDismantleable;
 import cofh.lib.util.Utils;
 import cofh.lib.util.raytracer.IndexedVoxelShape;
 import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
+import cofh.lib.util.raytracer.RayTracer;
 import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -117,53 +119,60 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
-        if (hit instanceof VoxelShapeBlockHitResult advHit && worldIn.getBlockEntity(pos) instanceof DuctBlockEntity<?, ?> duct) {
-            ItemStack heldStack = player.getItemInHand(handIn);
-            if (Utils.isWrench(heldStack)) {
-                if (Utils.isClientWorld(worldIn)) {
-                    return InteractionResult.SUCCESS;
-                }
-                if (advHit.subHit == 0) {
-                    duct.attemptConnect(advHit.getDirection());
-                } else if (advHit.subHit < 7) {
-                    duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 1], player);
-                } else if (advHit.subHit < 13) {
-                    duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 7], player);
-                }
-                return InteractionResult.CONSUME;
-            } else if (heldStack.isEmpty()) {
-                if (Utils.isClientWorld(worldIn)) {
-                    return InteractionResult.SUCCESS;
-                }
-                if (advHit.subHit >= 7) {
-                    if (duct.openAttachmentGui(DIRECTIONS[advHit.subHit - 7], player)) {
+        if (worldIn.getBlockEntity(pos) instanceof DuctBlockEntity<?, ?> duct) {
+            duct.calcDuctModelDataServer();
+            HitResult rawHit = RayTracer.retrace(player, ClipContext.Fluid.NONE);
+            if (rawHit instanceof VoxelShapeBlockHitResult advHit) {
+                ItemStack heldStack = player.getItemInHand(handIn);
+                if (Utils.isWrench(heldStack)) {
+                    if (Utils.isClientWorld(worldIn)) {
                         return InteractionResult.SUCCESS;
                     }
-                } else {
-                    if (duct.openDuctGui(player)) {
+                    if (advHit.subHit == 0) {
+                        duct.attemptConnect(advHit.getDirection());
+                    } else if (advHit.subHit < 7) {
+                        duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 1], player);
+                    } else if (advHit.subHit < 13) {
+                        duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 7], player);
+                    }
+                    return InteractionResult.CONSUME;
+                } else if (heldStack.isEmpty()) {
+                    if (Utils.isClientWorld(worldIn)) {
                         return InteractionResult.SUCCESS;
                     }
-                }
-                return InteractionResult.CONSUME;
-            } else if (heldStack.getItem() instanceof AttachmentItem attachmentItem) {
-                if (advHit.subHit == 0) {
-                    if (duct.attemptAttachmentInstall(advHit.getDirection(), attachmentItem.getAttachmentType(heldStack))) {
-                        if (!player.getAbilities().instabuild && Utils.isServerWorld(worldIn)) {
-                            player.setItemInHand(handIn, consumeItem(heldStack, 1));
+                    if (advHit.subHit >= 7) {
+                        if (duct.openAttachmentGui(DIRECTIONS[advHit.subHit - 7], player)) {
+                            return InteractionResult.SUCCESS;
                         }
-                    } else if (Utils.isServerWorld(worldIn)) {
-                        duct.openDuctGui(player);
-                    }
-                    return InteractionResult.SUCCESS;
-                } else if (advHit.subHit >= 7) {
-                    if (duct.attemptAttachmentInstall(DIRECTIONS[advHit.subHit - 7], attachmentItem.getAttachmentType(heldStack))) {
-                        if (!player.getAbilities().instabuild && Utils.isServerWorld(worldIn)) {
-                            player.setItemInHand(handIn, consumeItem(heldStack, 1));
+                    } else {
+                        if (duct.openDuctGui(player)) {
+                            return InteractionResult.SUCCESS;
                         }
-                    } else if (Utils.isServerWorld(worldIn)) {
-                        duct.openAttachmentGui(DIRECTIONS[advHit.subHit - 7], player);
                     }
-                    return InteractionResult.SUCCESS;
+                    return InteractionResult.CONSUME;
+                } else if (heldStack.getItem() instanceof AttachmentItem attachmentItem) {
+                    if (Utils.isClientWorld(worldIn)) {
+                        return InteractionResult.SUCCESS;
+                    }
+                    if (advHit.subHit == 0) {
+                        if (duct.attemptAttachmentInstall(advHit.getDirection(), attachmentItem.getAttachmentType(heldStack))) {
+                            if (!player.getAbilities().instabuild) {
+                                player.setItemInHand(handIn, consumeItem(heldStack, 1));
+                            }
+                        } else {
+                            duct.openDuctGui(player);
+                        }
+                        return InteractionResult.SUCCESS;
+                    } else if (advHit.subHit >= 7) {
+                        if (duct.attemptAttachmentInstall(DIRECTIONS[advHit.subHit - 7], attachmentItem.getAttachmentType(heldStack))) {
+                            if (!player.getAbilities().instabuild) {
+                                player.setItemInHand(handIn, consumeItem(heldStack, 1));
+                            }
+                        } else {
+                            duct.openAttachmentGui(DIRECTIONS[advHit.subHit - 7], player);
+                        }
+                        return InteractionResult.SUCCESS;
+                    }
                 }
             }
         }
@@ -240,12 +249,9 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 
         BlockEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof DuctBlockEntity<?, ?> duct) {
-            var ductModelData = duct.getDuctModelData();
-            if (ductModelData != null) {
-                return getConnectionShape(ductModelData.getConnectionState());
-            }
+            return getConnectionShape(duct.getDuctModelData().getConnectionState());
         }
-        return super.getShape(state, worldIn, pos, context);
+        return BASE_SHAPE;
     }
 
     @Override

@@ -463,7 +463,6 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         return grids.get(id);
     }
 
-    @Nullable
     @Override
     public <G extends Grid<G, ?>> G getGrid(IGridType<G> type, BlockPos pos) {
 
