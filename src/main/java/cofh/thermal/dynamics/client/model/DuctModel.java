@@ -91,11 +91,6 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
             EnumMap<Direction, List<BakedQuad>> baked = bake(front, context, spriteFunc, modelState, modelLoc);
             merge(quads, baked);
         }
-        BlockElement frontFill = getPart("center/fill", "frontface");
-        if (frontFill != null) {
-            EnumMap<Direction, List<BakedQuad>> baked = bake(frontFill, context, spriteFunc, modelState, modelLoc);
-            merge(quads, baked);
-        }
         BlockElement back = getPart("center/duct", "backface");
         if (back != null) {
             EnumMap<Direction, List<BakedQuad>> baked = bakeBack(back, context, spriteFunc, modelState, modelLoc);

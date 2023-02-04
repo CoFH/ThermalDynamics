@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
+import static cofh.thermal.core.ThermalCore.LOG;
 import static cofh.thermal.dynamics.api.helper.GridHelper.*;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
@@ -414,8 +415,12 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         if (phase != TickEvent.Phase.END) {
             return;
         }
-        for (Grid<?, ?> value : loadedGrids.values()) {
-            value.tick();
+        try {
+            for (Grid<?, ?> value : loadedGrids.values()) {
+                value.tick();
+            }
+        } catch (Exception e) {
+            LOG.error("Thermal Dynamics encountered an error during grid ticking:", e);
         }
         if (DEBUG && tickCounter % 10 == 0 && !loadedGrids.isEmpty()) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
@@ -583,7 +588,7 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         return adjacentGrids;
     }
 
-    public <G extends Grid<G, ?>> G createAndAddGrid(UUID uuid, IGridType<G> gridType, boolean load) {
+    public synchronized <G extends Grid<G, ?>> G createAndAddGrid(UUID uuid, IGridType<G> gridType, boolean load) {
 
         G grid = gridType.createGrid(uuid, world);
         grids.put(uuid, grid);

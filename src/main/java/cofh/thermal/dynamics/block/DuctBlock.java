@@ -8,6 +8,7 @@ import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
 import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
+import cofh.thermal.dynamics.api.grid.IGridHostLuminous;
 import cofh.thermal.dynamics.block.entity.duct.DuctBlockEntity;
 import cofh.thermal.dynamics.item.AttachmentItem;
 import com.google.common.collect.ImmutableSet;
@@ -220,6 +221,18 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
             }
             super.onRemove(state, worldIn, pos, newState, isMoving);
         }
+    }
+
+    @Override
+    public int getLightEmission(BlockState state, BlockGetter world, BlockPos pos) {
+
+        if (state.getLightEmission() > 0) {
+            return state.getLightEmission();
+        }
+        if (world.getBlockEntity(pos) instanceof IGridHostLuminous tile) {
+            return tile.getLightValue();
+        }
+        return state.getLightEmission();
     }
 
     @Override

@@ -2,6 +2,7 @@ package cofh.thermal.dynamics.attachment;
 
 import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.IFilter;
+import cofh.lib.api.IConveyableData;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.inventory.container.attachment.FluidFilterAttachmentContainer;
 import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
@@ -35,7 +36,7 @@ import static cofh.thermal.dynamics.init.TDynIDs.FILTER;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_FILTER_ATTACHMENT;
 import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE;
 
-public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, MenuProvider {
+public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, IConveyableData, MenuProvider {
 
     public enum FilterMode {
         BIDIRECTIONAL, TO_EXTERNAL_ONLY, TO_GRID_ONLY;
@@ -236,6 +237,22 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     public RedstoneControlLogic redstoneControl() {
 
         return rsControl;
+    }
+    // endregion
+
+    // region IConveyableData
+    @Override
+    public void readConveyableData(Player player, CompoundTag tag) {
+
+        rsControl.readSettings(tag);
+        filter.read(tag);
+    }
+
+    @Override
+    public void writeConveyableData(Player player, CompoundTag tag) {
+
+        rsControl.writeSettings(tag);
+        filter.write(tag);
     }
     // endregion
 
