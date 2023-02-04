@@ -4,6 +4,7 @@ import cofh.core.network.packet.client.TileStatePacket;
 import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.api.block.entity.IPacketHandlerTile;
+import cofh.thermal.dynamics.api.grid.IGridHostLuminous;
 import cofh.thermal.dynamics.api.grid.IGridHostUpdateable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -20,9 +21,11 @@ import static cofh.lib.util.constants.NBTTags.TAG_RENDER_FLUID;
 import static cofh.thermal.dynamics.init.TDynBlockEntities.FLUID_DUCT_WINDOWED_BLOCK_ENTITY;
 import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
 
-public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implements IGridHostUpdateable, IPacketHandlerTile {
+public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implements IGridHostUpdateable, IGridHostLuminous, IPacketHandlerTile {
 
     FluidStack renderFluid = FluidStack.EMPTY;
+
+    protected int prevLight;
 
     public FluidDuctWindowedBlockEntity(BlockPos pos, BlockState state) {
 
@@ -33,6 +36,12 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
     public void update() {
 
         TileStatePacket.sendToClient(this);
+    }
+
+    @Override
+    public int getLightValue() {
+
+        return FluidHelper.luminosity(renderFluid);
     }
 
     @Nonnull
@@ -83,6 +92,7 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
 
         renderFluid = getGrid().getRenderFluid();
         buffer.writeFluidStack(renderFluid);
+        buffer.writeInt(prevLight);
 
         super.getStatePacket(buffer);
 
@@ -93,7 +103,11 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
     public void handleStatePacket(FriendlyByteBuf buffer) {
 
         renderFluid = buffer.readFluidStack();
+        prevLight = buffer.readInt();
 
+        if (prevLight != getLightValue()) {
+            level.getChunkSource().getLightEngine().checkBlock(worldPosition);
+        }
         super.handleStatePacket(buffer);
     }
     // endregion

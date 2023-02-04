@@ -1,5 +1,6 @@
 package cofh.thermal.dynamics.attachment;
 
+import cofh.lib.api.IConveyableData;
 import cofh.lib.util.helpers.MathHelper;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.inventory.container.attachment.EnergyLimiterAttachmentContainer;
@@ -31,7 +32,7 @@ import static cofh.thermal.dynamics.client.TDynTextures.ENERGY_LIMITER_ATTACHMEN
 import static cofh.thermal.dynamics.init.TDynIDs.ENERGY_LIMITER;
 import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_LIMITER_ATTACHMENT;
 
-public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllableAttachment, MenuProvider {
+public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllableAttachment, IConveyableData, MenuProvider {
 
     public static final IAttachmentFactory<IAttachment> FACTORY = (nbt, duct, side) -> new EnergyLimiterAttachment(duct, side).read(nbt);
 
@@ -195,6 +196,20 @@ public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllab
     public RedstoneControlLogic redstoneControl() {
 
         return rsControl;
+    }
+    // endregion
+
+    // region IConveyableData
+    @Override
+    public void readConveyableData(Player player, CompoundTag tag) {
+
+        rsControl.readSettings(tag);
+    }
+
+    @Override
+    public void writeConveyableData(Player player, CompoundTag tag) {
+
+        rsControl.writeSettings(tag);
     }
     // endregion
 

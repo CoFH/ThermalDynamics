@@ -104,7 +104,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
 
                 if (!internal && !external) {
                     List<BakedQuad> fillQuads = rebakeFill(centerFillCache, centerFill, modelData.getFill(), modelData.getFillColor(), dir);
-                    quads.addAll(filterBlank(centerModel.get(dir), !fillQuads.isEmpty()));
+                    quads.addAll(filterBlank(centerModel.get(dir), false));
                     quads.addAll(filterBlank(fillQuads, false));
                 } else {
                     List<BakedQuad> fillQuads = rebakeFill(fillCache, fill, modelData.getFill(), modelData.getFillColor(), dir);
