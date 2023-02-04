@@ -53,6 +53,7 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     public DuctBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 
         super(type, pos, state);
+        modelData.setNeedsRefresh();
     }
 
     public boolean attemptConnect(Direction side) {
@@ -205,9 +206,32 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
         }
     }
 
+    public void calcDuctModelDataServer() {
+
+        if (level == null || Utils.isClientWorld(level) || grid == null) {
+            return;
+        }
+        modelData.clearState();
+        for (var dir : Direction.values()) {
+            if (getGrid().isConnectedTo(worldPosition, worldPosition.relative(dir))) {
+                modelData.setInternalConnection(dir, true);
+            }
+        }
+        if (getNode() == null) {
+            return;
+        }
+        for (var dir : getNode().getConnections()) {
+            modelData.setExternalConnection(dir, connections[dir.ordinal()] != DISABLED);
+        }
+    }
+
     // This is called only in getShape()
+    @Nonnull
     public DuctModelData getDuctModelData() {
 
+        if (modelData.needsRefresh()) {
+            calcDuctModelDataServer();
+        }
         return modelData;
     }
 
@@ -225,8 +249,9 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     @Override
     public ModelData getModelData() {
 
+        modelData.clearState();
         for (Direction dir : DIRECTIONS) {
-            IDuct<?, ?> adjacent = GridHelper.getGridHost(getLevel(), getBlockPos().relative(dir));
+            IDuct<?, ?> adjacent = GridHelper.getGridHost(level, getBlockPos().relative(dir));
             modelData.setInternalConnection(dir, adjacent != null && canConnectTo(adjacent, dir) && adjacent.canConnectTo(this, dir.getOpposite()));
             modelData.setExternalConnection(dir, canConnectToBlock(dir) || connections[dir.ordinal()] == FORCED);
             modelData.setAttachment(dir, attachments[dir.ordinal()].getTexture());
@@ -261,6 +286,8 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     // STATE
     @Override
     public FriendlyByteBuf getStatePacket(FriendlyByteBuf buffer) {
+
+        modelData.setNeedsRefresh();
 
         for (ConnectionType connection : connections) {
             buffer.writeByte(connection.ordinal());
@@ -304,6 +331,7 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     @Override
     public CompoundTag getUpdateTag() {
 
+        modelData.setNeedsRefresh();
         return saveWithoutMetadata();
     }
 
@@ -408,11 +436,13 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
             }
             TileRedstonePacket.sendToClient(this);
         }
+        modelData.setNeedsRefresh();
     }
 
     @Override
     public void onAttachmentUpdate() {
 
+        modelData.setNeedsRefresh();
         setChanged();
         callNeighborStateChange();
         ModelUpdatePacket.sendToClient(getLevel(), getBlockPos());
