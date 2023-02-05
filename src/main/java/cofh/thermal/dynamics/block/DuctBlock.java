@@ -196,7 +196,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
             host.neighborChanged(blockIn, fromPos);
             IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
             if (gridContainer != null && gridContainer.onDuctNeighborChanged(host)) {
-                worldIn.scheduleTick(pos, this, 1);
+                worldIn.scheduleTick(pos, this, 2);
             }
         }
     }

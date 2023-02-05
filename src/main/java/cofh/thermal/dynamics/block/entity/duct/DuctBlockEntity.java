@@ -148,7 +148,8 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
                 Utils.dropDismantleStackIntoWorld(attachmentItem, level, worldPosition);
             }
             attachments[side.ordinal()] = EmptyAttachment.INSTANCE;
-            connections[side.ordinal()] = ALLOWED;
+            IDuct<?, ?> adjacent = GridHelper.getGridHost(level, getBlockPos().relative(side));
+            connections[side.ordinal()] = adjacent == null ? ALLOWED : DISABLED;
             setChanged();
             callNeighborStateChange();
 
@@ -207,13 +208,16 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
 
     public void calcDuctModelDataServer() {
 
-        if (level == null || Utils.isClientWorld(level) || grid == null) {
+        if (level == null || Utils.isClientWorld(level) || getGrid() == null) {
             return;
         }
         modelData.clearState();
         for (var dir : Direction.values()) {
             if (getGrid().isConnectedTo(worldPosition, worldPosition.relative(dir))) {
                 modelData.setInternalConnection(dir, true);
+            }
+            if (connections[dir.ordinal()] == FORCED) {
+                modelData.setExternalConnection(dir, true);
             }
         }
         if (getNode() == null) {
@@ -408,7 +412,7 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
             assert gridContainer != null;
             grid = gridContainer.getGrid(getGridType(), getBlockPos());
         }
-        assert grid != null;
+        // assert grid != null;
         return grid;
     }
 
