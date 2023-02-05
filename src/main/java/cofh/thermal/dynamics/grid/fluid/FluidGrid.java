@@ -36,7 +36,7 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
     protected FluidStack prevRenderFluid = FluidStack.EMPTY;
     protected TimeTracker timeTracker = new TimeTracker();
     protected boolean wasFilled;
-    protected int sendDelay;
+    protected boolean needsUpdate;
 
     protected FluidGridNode[] distArray = new FluidGridNode[0];
     protected int distIndex = 0;
@@ -112,18 +112,12 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
         return false;
     }
 
-    private void setRenderData(FluidStack renderFluid, int sendDelay) {
-
-        this.renderFluid = renderFluid;
-        this.sendDelay = sendDelay;
-    }
-
     private void renderUpdate() {
 
         prevRenderFluid = renderFluid;
         renderFluid = new FluidStack(getFluid(), BUCKET_VOLUME);
 
-        if (!FluidHelper.fluidsEqual(prevRenderFluid, renderFluid) || wasFilled && timeTracker.hasDelayPassed(world, sendDelay)) {
+        if (!FluidHelper.fluidsEqual(prevRenderFluid, renderFluid) || wasFilled && timeTracker.hasDelayPassed(world, 40) || needsUpdate) {
             if (!wasFilled && renderFluid.isEmpty()) {
                 timeTracker.markTime(world);
                 wasFilled = true;
@@ -131,7 +125,7 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
             }
             updateHosts();
             wasFilled = false;
-            sendDelay = 40;
+            needsUpdate = false;
         }
     }
 
@@ -150,8 +144,7 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
         storage.setCapacity(this.getCapacity() + from.getCapacity());
         storage.setFluid(new FluidStack(storage.getFluid(), this.getFluidAmount() + from.getFluidAmount()));
 
-        setRenderData(new FluidStack(storage.getFluid(), BUCKET_VOLUME), 2);
-        from.setRenderData(new FluidStack(storage.getFluid(), BUCKET_VOLUME), 2);
+        needsUpdate = true;
 
         refreshCapabilities();
         from.refreshCapabilities();
@@ -167,7 +160,7 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
             grid.setBaseCapacity(NODE_CAPACITY * gridNodes);
             grid.setCapacity(this.getCapacity());
             if (!this.renderFluid.isEmpty()) {
-                grid.setRenderData(this.renderFluid.copy(), 2);
+                grid.needsUpdate = true;
             }
             grid.refreshCapabilities();
         }
