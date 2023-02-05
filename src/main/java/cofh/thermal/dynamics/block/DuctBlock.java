@@ -196,7 +196,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
             host.neighborChanged(blockIn, fromPos);
             IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
             if (gridContainer != null && gridContainer.onDuctNeighborChanged(host)) {
-                worldIn.scheduleTick(pos, this, 1);
+                worldIn.scheduleTick(pos, this, 2);
             }
         }
     }
@@ -249,12 +249,9 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 
         BlockEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof DuctBlockEntity<?, ?> duct) {
-            var ductModelData = duct.getDuctModelData();
-            if (ductModelData != null) {
-                return getConnectionShape(ductModelData.getConnectionState());
-            }
+            return getConnectionShape(duct.getDuctModelData().getConnectionState());
         }
-        return super.getShape(state, worldIn, pos, context);
+        return BASE_SHAPE;
     }
 
     @Override

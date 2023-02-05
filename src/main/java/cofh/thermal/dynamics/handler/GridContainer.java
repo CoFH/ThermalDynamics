@@ -464,10 +464,14 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         return grids.get(id);
     }
 
+    @Nullable
     @Override
     public <G extends Grid<G, ?>> G getGrid(IGridType<G> type, BlockPos pos) {
 
         Grid<?, ?> grid = gridPosLookup.get(pos);
+        if (grid == null) {
+            return null;
+        }
         if (grid.getGridType() != type) {
             throw new IllegalStateException("Grid at position " + pos + " is not of type " + type + ". Got: " + grid.getGridType());
         }

@@ -23,7 +23,7 @@ import static cofh.thermal.dynamics.init.TDynGrids.ENERGY_GRID;
  */
 public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRedstoneFluxStorage {
 
-    protected final long NODE_CAPACITY = 400;
+    protected static final long NODE_CAPACITY = 400;
 
     protected final GridEnergyStorage storage = new GridEnergyStorage(NODE_CAPACITY);
     protected LazyOptional<?> energyCap = LazyOptional.empty();
@@ -115,7 +115,9 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
             totalNodes += grid.getNodes().size();
             grid.setBaseCapacity(NODE_CAPACITY * gridNodes);
             grid.setCapacity(this.getCapacity());
+            grid.refreshCapabilities();
         }
+        this.refreshCapabilities();
         if (getEnergy() <= 0) {
             return;
         }
@@ -125,7 +127,6 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
         for (EnergyGrid grid : others) {
             int gridNodes = grid.getNodes().size();
             grid.setEnergy(energyPerNode * gridNodes);
-            grid.refreshCapabilities();
         }
         // First grid gets the extra. Why? Because there's always a first grid.
         others.get(0).setEnergy(others.get(0).getEnergy() + remEnergy);
