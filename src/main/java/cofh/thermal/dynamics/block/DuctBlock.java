@@ -292,7 +292,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
             duct.dismantleAttachments(player, returnDrops);
         }
         ItemStack dropBlock = this.getCloneItemStack(state, target, world, pos, player);
-        world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+        world.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL_IMMEDIATE);
         if (!returnDrops || player == null || !player.addItem(dropBlock)) {
             Utils.dropDismantleStackIntoWorld(dropBlock, world, pos);
         }
