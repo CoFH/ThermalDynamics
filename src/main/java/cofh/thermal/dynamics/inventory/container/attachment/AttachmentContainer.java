@@ -29,18 +29,6 @@ public abstract class AttachmentContainer extends ContainerCoFH {
         }
     }
 
-    //    @Override
-    //    public void broadcastChanges() {
-    //
-    //        super.broadcastChanges();
-    //
-    //        if (baseAttachment instanceof IPacketHandlerAttachment handlerAttachment) {
-    //            if (player instanceof ServerPlayer serverPlayer && (!(player instanceof FakePlayer))) {
-    //                AttachmentGuiPacket.sendToClient(handlerAttachment, serverPlayer);
-    //            }
-    //        }
-    //    }
-
     @Override
     public boolean stillValid(Player player) {
 

@@ -11,6 +11,7 @@ public interface IPacketHandlerAttachment extends IAttachment {
         duct().onAttachmentUpdate();
     }
 
+    // TODO: Remove config packet; can be handled w/ Container packets.
     // CONFIG
     default boolean hasConfigPacket() {
 
