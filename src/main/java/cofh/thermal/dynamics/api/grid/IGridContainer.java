@@ -19,8 +19,7 @@ public interface IGridContainer {
     @Nullable
     Grid<?, ?> getGrid(UUID id);
 
-    @Nullable
-    <G extends Grid<G, ?>> G getGrid(IGridType<G> gridType, BlockPos pos);
+    @Nullable <G extends Grid<G, ?>> G getGrid(IGridType<G> gridType, BlockPos pos);
 
     void onDuctPlaced(IDuct<?, ?> duct, @Nullable Direction connectionPreference);
 
