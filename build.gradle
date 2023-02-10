@@ -163,6 +163,11 @@ shadowJar {
     }
     configurations = [project.configurations.shadowIn]
     relocate 'net.covers1624.quack', 'cofh.requack'
+
+    doFirst {
+        exclude 'cofh/thermal/dynamics/data/**'
+        exclude '.cache/**'
+    }
 }
 
 task srcJar(type: Jar) {
