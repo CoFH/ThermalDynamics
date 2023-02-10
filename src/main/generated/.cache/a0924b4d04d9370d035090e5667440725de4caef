@@ -1,5 +1,0 @@
-// 1.19.2	2023-01-27T23:55:54.0565284	Thermal Dynamics: Loot Tables
-109aff3cb9f870b6e39a17ff21c1bba8c5e6154c data/thermal/loot_tables/blocks/energy_duct.json
-fdd57d71144902a938c298a27f753d9bf1930590 data/thermal/loot_tables/blocks/fluid_duct.json
-5178299c150376bf9ded212353feb7fc95ce7acc data/thermal/loot_tables/blocks/fluid_duct_windowed.json
-2bae318a8a2a21c99eef2f04f9191e062ea58826 data/thermal/loot_tables/blocks/item_buffer.json
