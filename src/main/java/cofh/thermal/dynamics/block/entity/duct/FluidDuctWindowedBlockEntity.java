@@ -25,8 +25,6 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
 
     FluidStack renderFluid = FluidStack.EMPTY;
 
-    protected int prevLight;
-
     public FluidDuctWindowedBlockEntity(BlockPos pos, BlockState state) {
 
         super(FLUID_DUCT_WINDOWED_BLOCK_ENTITY.get(), pos, state);
@@ -92,7 +90,6 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
 
         renderFluid = getGrid().getRenderFluid();
         buffer.writeFluidStack(renderFluid);
-        buffer.writeInt(prevLight);
 
         super.getStatePacket(buffer);
 
@@ -102,8 +99,8 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
     @Override
     public void handleStatePacket(FriendlyByteBuf buffer) {
 
+        int prevLight = getLightValue();
         renderFluid = buffer.readFluidStack();
-        prevLight = buffer.readInt();
 
         if (prevLight != getLightValue()) {
             level.getChunkSource().getLightEngine().checkBlock(worldPosition);

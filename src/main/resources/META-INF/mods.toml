@@ -39,7 +39,7 @@ ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.thermal_dynamics]]
-modId = "thermal"
+modId = "thermal_foundation"
 mandatory = true
 versionRange = "[9.2,9.3]"
 ordering = "AFTER"
