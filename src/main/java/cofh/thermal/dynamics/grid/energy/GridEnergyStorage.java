@@ -63,9 +63,9 @@ public final class GridEnergyStorage implements IRedstoneFluxStorage, INBTSerial
         averageOut = 0;
     }
 
-    public long getBaseCapacity() {
+    public long getCapacity() {
 
-        return baseCapacity;
+        return capacity;
     }
 
     public long getEnergy() {

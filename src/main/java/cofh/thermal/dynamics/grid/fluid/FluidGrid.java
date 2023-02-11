@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static cofh.lib.util.Constants.BUCKET_VOLUME;
+import static cofh.lib.util.Constants.TANK_MEDIUM;
 import static cofh.thermal.dynamics.init.TDynGrids.FLUID_GRID;
 
 /**
@@ -133,14 +134,14 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
     public void onModified() {
 
         distArray = new FluidGridNode[0];
-        setBaseCapacity(getNodes().size() * NODE_CAPACITY);
+        storage.setBaseCapacity(Math.max(TANK_MEDIUM, getNodes().size() * NODE_CAPACITY));
         super.onModified();
     }
 
     @Override
     public void onMerge(FluidGrid from) {
 
-        storage.setBaseCapacity(NODE_CAPACITY * getNodes().size());
+        storage.setBaseCapacity(Math.max(TANK_MEDIUM, getNodes().size() * NODE_CAPACITY));
         storage.setCapacity(this.getCapacity() + from.getCapacity());
         storage.setFluid(new FluidStack(storage.getFluid(), this.getFluidAmount() + from.getFluidAmount()));
 
@@ -157,7 +158,7 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
         for (FluidGrid grid : others) {
             int gridNodes = grid.getNodes().size();
             totalNodes += grid.getNodes().size();
-            grid.setBaseCapacity(NODE_CAPACITY * gridNodes);
+            grid.setBaseCapacity(Math.max(TANK_MEDIUM, NODE_CAPACITY * gridNodes));
             grid.setCapacity(this.getCapacity());
             if (!this.renderFluid.isEmpty()) {
                 grid.needsUpdate = true;
@@ -227,7 +228,7 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
     }
 
     //@formatter:off
-    public int getCapacity() { return storage.getBaseCapacity(); }
+    public int getCapacity() { return storage.getCapacity(); }
     public FluidStack getFluid() { return storage.getFluid(); }
     public FluidStack getRenderFluid() { return renderFluid; }
     public int getFluidAmount() { return storage.getFluid().getAmount(); }
