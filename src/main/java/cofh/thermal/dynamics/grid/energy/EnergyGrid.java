@@ -23,6 +23,7 @@ import static cofh.thermal.dynamics.init.TDynGrids.ENERGY_GRID;
  */
 public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRedstoneFluxStorage {
 
+    protected static final long MIN_CAPACITY = 10000;
     protected static final long NODE_CAPACITY = 400;
 
     protected final GridEnergyStorage storage = new GridEnergyStorage(NODE_CAPACITY);
@@ -91,14 +92,14 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
     public void onModified() {
 
         distArray = new EnergyGridNode[0];
-        setBaseCapacity(getNodes().size() * NODE_CAPACITY);
+        storage.setBaseCapacity(Math.max(MIN_CAPACITY, getNodes().size() * NODE_CAPACITY));
         super.onModified();
     }
 
     @Override
     public void onMerge(EnergyGrid from) {
 
-        storage.setBaseCapacity(NODE_CAPACITY * getNodes().size());
+        storage.setBaseCapacity(Math.max(MIN_CAPACITY, getNodes().size() * NODE_CAPACITY));
         storage.setCapacity(this.getCapacity() + from.getCapacity());
         storage.setEnergy(storage.getEnergy() + from.getEnergy());
 
@@ -113,7 +114,7 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
         for (EnergyGrid grid : others) {
             int gridNodes = grid.getNodes().size();
             totalNodes += grid.getNodes().size();
-            grid.setBaseCapacity(NODE_CAPACITY * gridNodes);
+            grid.setBaseCapacity(Math.max(MIN_CAPACITY, gridNodes * NODE_CAPACITY));
             grid.setCapacity(this.getCapacity());
             grid.refreshCapabilities();
         }
@@ -180,7 +181,7 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
     }
 
     //@formatter:off
-    public long getCapacity() { return storage.getBaseCapacity(); }
+    public long getCapacity() { return storage.getCapacity(); }
     public long getEnergy() { return storage.getEnergy(); }
     public void setBaseCapacity(long capacity) { storage.setBaseCapacity(capacity); }
     public void setCapacity(long capacity) { storage.setCapacity(capacity); }

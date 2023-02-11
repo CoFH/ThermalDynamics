@@ -68,9 +68,9 @@ public final class GridFluidStorage implements IFluidHandler, INBTSerializable<C
         averageOut = 0;
     }
 
-    public int getBaseCapacity() {
+    public int getCapacity() {
 
-        return baseCapacity;
+        return capacity;
     }
 
     public FluidStack getFluid() {
