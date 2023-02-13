@@ -181,6 +181,9 @@ public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllab
 
         rsControl.writeToBuffer(buffer);
 
+        buffer.writeInt(amountInput);
+        buffer.writeInt(amountOutput);
+
         return buffer;
     }
 
@@ -188,6 +191,9 @@ public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllab
     public void handleControlPacket(FriendlyByteBuf buffer) {
 
         rsControl.readFromBuffer(buffer);
+
+        amountInput = MathHelper.clamp(buffer.readInt(), 0, getMaxTransfer());
+        amountOutput = MathHelper.clamp(buffer.readInt(), 0, getMaxTransfer());
     }
     // endregion
 
@@ -204,6 +210,8 @@ public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllab
     public void readConveyableData(Player player, CompoundTag tag) {
 
         rsControl.readSettings(tag);
+
+        onControlUpdate();
     }
 
     @Override

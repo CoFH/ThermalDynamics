@@ -7,6 +7,7 @@ import cofh.lib.util.raytracer.IndexedVoxelShape;
 import cofh.lib.util.raytracer.MultiIndexedVoxelShape;
 import cofh.lib.util.raytracer.RayTracer;
 import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
+import cofh.thermal.core.item.RedprintItem;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHostLuminous;
@@ -136,6 +137,15 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
                         duct.attemptDisconnect(DIRECTIONS[advHit.subHit - 7], player);
                     }
                     return InteractionResult.CONSUME;
+                } else if (heldStack.getItem() instanceof RedprintItem) {
+                    if (Utils.isClientWorld(worldIn)) {
+                        return InteractionResult.SUCCESS;
+                    }
+                    if (advHit.subHit >= 7) {
+                        if (duct.attachmentRedprintInteraction(heldStack, DIRECTIONS[advHit.subHit - 7], player)) {
+                            return InteractionResult.SUCCESS;
+                        }
+                    }
                 } else if (heldStack.isEmpty()) {
                     if (Utils.isClientWorld(worldIn)) {
                         return InteractionResult.SUCCESS;
@@ -155,7 +165,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
                         return InteractionResult.SUCCESS;
                     }
                     if (advHit.subHit == 0) {
-                        if (duct.attemptAttachmentInstall(advHit.getDirection(), attachmentItem.getAttachmentType(heldStack))) {
+                        if (duct.attemptAttachmentInstall(advHit.getDirection(), player, attachmentItem.getAttachmentType(heldStack))) {
                             if (!player.getAbilities().instabuild) {
                                 player.setItemInHand(handIn, consumeItem(heldStack, 1));
                             }
@@ -164,7 +174,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
                         }
                         return InteractionResult.SUCCESS;
                     } else if (advHit.subHit >= 7) {
-                        if (duct.attemptAttachmentInstall(DIRECTIONS[advHit.subHit - 7], attachmentItem.getAttachmentType(heldStack))) {
+                        if (duct.attemptAttachmentInstall(DIRECTIONS[advHit.subHit - 7], player, attachmentItem.getAttachmentType(heldStack))) {
                             if (!player.getAbilities().instabuild) {
                                 player.setItemInHand(handIn, consumeItem(heldStack, 1));
                             }

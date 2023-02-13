@@ -222,6 +222,9 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
         buffer.writeByte(mode.ordinal());
         rsControl.writeToBuffer(buffer);
 
+        buffer.writeBoolean(filter.getAllowList());
+        buffer.writeBoolean(filter.getCheckNBT());
+
         return buffer;
     }
 
@@ -230,6 +233,9 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
 
         mode = FilterMode.VALUES[buffer.readByte()];
         rsControl.readFromBuffer(buffer);
+
+        filter.setAllowList(buffer.readBoolean());
+        filter.setCheckNBT(buffer.readBoolean());
     }
     // endregion
 
@@ -245,13 +251,17 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     @Override
     public void readConveyableData(Player player, CompoundTag tag) {
 
+        mode = FilterMode.VALUES[tag.getByte("FilterAttachmentMode")];
         rsControl.readSettings(tag);
         filter.read(tag);
+
+        onControlUpdate();
     }
 
     @Override
     public void writeConveyableData(Player player, CompoundTag tag) {
 
+        tag.putByte("FilterAttachmentMode", (byte) mode.ordinal());
         rsControl.writeSettings(tag);
         filter.write(tag);
     }

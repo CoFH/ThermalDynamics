@@ -213,6 +213,9 @@ public class FluidTurboServoAttachment implements IFilterableAttachment, IRedsto
 
         rsControl.writeToBuffer(buffer);
 
+        buffer.writeBoolean(filter.getAllowList());
+        buffer.writeBoolean(filter.getCheckNBT());
+
         return buffer;
     }
 
@@ -220,6 +223,9 @@ public class FluidTurboServoAttachment implements IFilterableAttachment, IRedsto
     public void handleControlPacket(FriendlyByteBuf buffer) {
 
         rsControl.readFromBuffer(buffer);
+
+        filter.setAllowList(buffer.readBoolean());
+        filter.setCheckNBT(buffer.readBoolean());
     }
     // endregion
 
@@ -237,6 +243,8 @@ public class FluidTurboServoAttachment implements IFilterableAttachment, IRedsto
 
         rsControl.readSettings(tag);
         filter.read(tag);
+
+        onControlUpdate();
     }
 
     @Override

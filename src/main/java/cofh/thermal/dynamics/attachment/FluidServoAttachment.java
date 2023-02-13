@@ -200,6 +200,9 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
 
         rsControl.writeToBuffer(buffer);
 
+        buffer.writeBoolean(filter.getAllowList());
+        buffer.writeBoolean(filter.getCheckNBT());
+
         return buffer;
     }
 
@@ -207,6 +210,9 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     public void handleControlPacket(FriendlyByteBuf buffer) {
 
         rsControl.readFromBuffer(buffer);
+
+        filter.setAllowList(buffer.readBoolean());
+        filter.setCheckNBT(buffer.readBoolean());
     }
     // endregion
 
@@ -224,6 +230,8 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
 
         rsControl.readSettings(tag);
         filter.read(tag);
+
+        onControlUpdate();
     }
 
     @Override
