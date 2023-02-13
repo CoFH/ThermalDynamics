@@ -3,9 +3,11 @@ package cofh.thermal.dynamics.block.entity.duct;
 import cofh.core.network.packet.client.ModelUpdatePacket;
 import cofh.core.network.packet.client.TileRedstonePacket;
 import cofh.core.network.packet.client.TileStatePacket;
+import cofh.lib.api.IConveyableData;
 import cofh.lib.api.block.entity.IPacketHandlerTile;
 import cofh.lib.api.block.entity.ITileLocation;
 import cofh.lib.util.Utils;
+import cofh.thermal.core.item.RedprintItem;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.helper.GridHelper;
@@ -18,6 +20,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -122,7 +127,7 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
         return true;
     }
 
-    public boolean attemptAttachmentInstall(Direction side, String type) {
+    public boolean attemptAttachmentInstall(Direction side, Player player, String type) {
 
         if (attachments[side.ordinal()] != EmptyAttachment.INSTANCE) {
             return false;
@@ -133,6 +138,11 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
         }
         attachments[side.ordinal()] = attachment;
         connections[side.ordinal()] = FORCED;
+
+        ItemStack offhand = player.getItemInHand(InteractionHand.OFF_HAND);
+        if (offhand.hasTag() && offhand.getItem() instanceof RedprintItem) {
+            attachmentRedprintInteraction(offhand, side, player);
+        }
         setChanged();
         callNeighborStateChange();
 
@@ -156,6 +166,25 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
 
             // TODO: Send FULL Update Packet
             TileStatePacket.sendToClient(this);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean attachmentRedprintInteraction(ItemStack stack, Direction side, Player player) {
+
+        if (side != null && attachments[side.ordinal()] instanceof IConveyableData conveyableData) {
+            if (stack.getTag() == null) {
+                conveyableData.writeConveyableData(player, stack.getOrCreateTag());
+                if (stack.getTag().isEmpty()) {
+                    stack.setTag(null);
+                    return false;
+                }
+                player.level.playSound(null, player.blockPosition(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.5F, 0.7F);
+                return true;
+            }
+            conveyableData.readConveyableData(player, stack.getTag());
+            player.level.playSound(null, player.blockPosition(), SoundEvents.UI_BUTTON_CLICK, SoundSource.PLAYERS, 0.5F, 0.8F);
             return true;
         }
         return false;
