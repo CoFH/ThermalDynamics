@@ -7,6 +7,7 @@ import cofh.lib.api.IConveyableData;
 import cofh.lib.api.block.entity.IPacketHandlerTile;
 import cofh.lib.api.block.entity.ITileLocation;
 import cofh.lib.util.Utils;
+import cofh.lib.util.helpers.BlockHelper;
 import cofh.thermal.core.item.RedprintItem;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
@@ -457,13 +458,16 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     @Override
     public void neighborChanged(Block blockIn, BlockPos fromPos) {
 
+        Direction dir = BlockHelper.getSide(fromPos.subtract(worldPosition));
+        if (dir != null) {
+            attachments[dir.ordinal()].invalidate();
+        }
         if (level != null) {
             redstonePower = level.getBestNeighborSignal(worldPosition);
             for (IAttachment attachment : attachments) {
                 if (attachment instanceof IRedstoneControllableAttachment redstoneControllableAttachment) {
                     redstoneControllableAttachment.redstoneControl().setPower(redstonePower);
                 }
-                attachment.invalidate();
             }
             TileRedstonePacket.sendToClient(this);
         }
