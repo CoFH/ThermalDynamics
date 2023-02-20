@@ -29,6 +29,8 @@ public interface IAttachment extends INBTSerializable<CompoundTag> {
 
     Direction side();
 
+    void invalidate();
+
     IAttachment read(CompoundTag nbt);
 
     // Attachments MUST write their type to the NBT. Reading is optional.
