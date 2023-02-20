@@ -466,6 +466,7 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
                 if (attachment instanceof IRedstoneControllableAttachment redstoneControllableAttachment) {
                     redstoneControllableAttachment.redstoneControl().setPower(redstonePower);
                 }
+                attachment.invalidate();
             }
             TileRedstonePacket.sendToClient(this);
         }

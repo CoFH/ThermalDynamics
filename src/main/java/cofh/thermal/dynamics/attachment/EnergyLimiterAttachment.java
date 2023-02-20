@@ -46,6 +46,7 @@ public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllab
     public int amountOutput = MAX_TRANSFER / 2;
 
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
+
     protected LazyOptional<IEnergyStorage> gridCap = LazyOptional.empty();
     protected LazyOptional<IEnergyStorage> externalCap = LazyOptional.empty();
 
@@ -70,6 +71,13 @@ public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllab
     public Direction side() {
 
         return side;
+    }
+
+    @Override
+    public void invalidate() {
+
+        gridCap.invalidate();
+        externalCap.invalidate();
     }
 
     @Override

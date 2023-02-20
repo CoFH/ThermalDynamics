@@ -87,6 +87,13 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     }
 
     @Override
+    public void invalidate() {
+
+        gridCap.invalidate();
+        externalCap.invalidate();
+    }
+
+    @Override
     public IAttachment read(CompoundTag nbt) {
 
         if (nbt.isEmpty()) {
