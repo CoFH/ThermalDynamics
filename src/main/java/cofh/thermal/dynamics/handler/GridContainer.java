@@ -543,8 +543,8 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
     private void addGridLookup(Grid<?, ?> grid, BlockPos node) {
 
-        Grid<?, ?> removed = gridPosLookup.put(node, grid);
-        assert removed == null;
+        Grid<?, ?> added = gridPosLookup.put(node, grid);
+        assert added == null;
     }
 
     private void replaceGridLookupEdge(Grid<?, ?> newGrid, Grid<?, ?> oldGrid, Iterable<BlockPos> edge) {
