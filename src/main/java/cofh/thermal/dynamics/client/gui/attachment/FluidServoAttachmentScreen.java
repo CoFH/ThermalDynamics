@@ -61,7 +61,7 @@ public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAt
             final int j = i;
             addElement(new ElementFluid(this, slot.x, slot.y).setFluid(() -> menu.getFilterStacks().get(j)).setSize(16, 16));
         }
-        addElement(new ElementTexture(this, 141, 16)
+        addElement(new ElementTexture(this, 141, 25)
                 .setSize(20, 20)
                 .setTexture(TEX_EXTRACT, 20, 20));
 
@@ -73,7 +73,7 @@ public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAt
 
         String output = format(attachment.getTransfer());
 
-        fontRenderer().draw(matrixStack, output, getCenteredOffset(output, 151), 42, 0x404040);
+        fontRenderer().draw(matrixStack, output, getCenteredOffset(output, 151), 51, 0x404040);
 
         super.renderLabels(matrixStack, mouseX, mouseY);
     }
