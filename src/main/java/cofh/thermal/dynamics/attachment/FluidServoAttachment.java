@@ -28,6 +28,8 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static cofh.lib.util.Constants.BUCKET_VOLUME;
+import static cofh.lib.util.constants.NBTTags.TAG_AMOUNT;
 import static cofh.lib.util.constants.NBTTags.TAG_TYPE;
 import static cofh.thermal.core.ThermalCore.ITEMS;
 import static cofh.thermal.dynamics.client.TDynTextures.SERVO_ATTACHMENT_ACTIVE_LOC;
@@ -42,9 +44,12 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     public static final Component DISPLAY_NAME = new TranslatableComponent("attachment.thermal.servo");
 
     public static final int TRANSFER = 50;
+    public static final int MAX_TRANSFER = BUCKET_VOLUME;
 
     protected final IDuct<?, ?> duct;
     protected final Direction side;
+
+    public int amountTransfer = TRANSFER;
 
     protected BaseFluidFilter filter = new BaseFluidFilter(15);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
@@ -89,6 +94,8 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
         if (nbt.isEmpty()) {
             return this;
         }
+        amountTransfer = nbt.getInt(TAG_AMOUNT);
+
         filter.read(nbt);
         rsControl.read(nbt);
 
@@ -99,6 +106,7 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     public CompoundTag write(CompoundTag nbt) {
 
         nbt.putString(TAG_TYPE, SERVO);
+        nbt.putInt(TAG_AMOUNT, amountTransfer);
 
         filter.write(nbt);
         rsControl.write(nbt);
@@ -115,7 +123,13 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
         if (!internalGridCap.isPresent()) {
             internalGridCap = duct.getGrid().getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
         }
-        externalCap.ifPresent(e -> internalGridCap.ifPresent(i -> i.fill(e.drain(i.fill(e.drain(getTransfer(), SIMULATE), SIMULATE), EXECUTE), EXECUTE)));
+        externalCap.ifPresent(e -> internalGridCap.ifPresent(i -> {
+            amountTransfer += TRANSFER;
+            amountTransfer = Math.min(amountTransfer, MAX_TRANSFER);
+            int toFill = i.fill(e.drain(amountTransfer, SIMULATE), SIMULATE);
+            i.fill(e.drain(toFill, EXECUTE), EXECUTE);
+            amountTransfer -= toFill;
+        }));
     }
 
     @Override
