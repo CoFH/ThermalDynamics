@@ -3,7 +3,7 @@ package cofh.thermal.dynamics.inventory.container.interblock;
 import cofh.core.inventory.container.ContainerCoFH;
 import cofh.core.network.packet.client.ContainerGuiPacket;
 import cofh.core.network.packet.server.ContainerConfigPacket;
-import cofh.core.util.filter.BaseFluidFilter;
+import cofh.core.util.filter.FluidFilter;
 import cofh.core.util.filter.IFilterOptions;
 import cofh.lib.inventory.container.slot.SlotFalseCopy;
 import cofh.lib.inventory.wrapper.InvWrapperFluids;
@@ -24,7 +24,7 @@ public class FluidServoInterblockContainer extends ContainerCoFH implements IFil
 
     public final FluidServoInterblock attachment;
 
-    protected BaseFluidFilter filter;
+    protected FluidFilter filter;
     protected InvWrapperFluids filterInventory;
 
     public FluidServoInterblockContainer(int id, Level world, BlockPos pos, Direction side, Inventory inventory) {
@@ -33,7 +33,7 @@ public class FluidServoInterblockContainer extends ContainerCoFH implements IFil
         super(null, id, inventory, inventory.player);
 
         this.attachment = null; // TODO Grab from map
-        this.filter = (BaseFluidFilter) attachment.getFilter();
+        this.filter = (FluidFilter) attachment.getFilter();
 
         allowSwap = false;
 

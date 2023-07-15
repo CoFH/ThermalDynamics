@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.attachment;
 
-import cofh.core.util.filter.BaseFluidFilter;
+import cofh.core.util.filter.FluidFilter;
 import cofh.core.util.filter.IFilter;
 import cofh.lib.api.IConveyableData;
 import cofh.thermal.dynamics.api.grid.IDuct;
@@ -50,7 +50,7 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
 
     public int amountTransfer = TRANSFER;
 
-    protected BaseFluidFilter filter = new BaseFluidFilter(15);
+    protected FluidFilter filter = new FluidFilter(15);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
 
     protected LazyOptional<IFluidHandler> internalGridCap = LazyOptional.empty();

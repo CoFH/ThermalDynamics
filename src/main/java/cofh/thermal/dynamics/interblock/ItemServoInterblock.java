@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.interblock;
 
-import cofh.core.util.filter.BaseItemFilter;
+import cofh.core.util.filter.ItemFilter;
 import cofh.core.util.filter.IFilter;
 import cofh.thermal.dynamics.inventory.container.interblock.FluidServoInterblockContainer;
 import net.minecraft.core.BlockPos;
@@ -19,7 +19,7 @@ public class ItemServoInterblock implements MenuProvider {
     protected final BlockPos pos;
     protected final Direction side;
 
-    protected BaseItemFilter filter = new BaseItemFilter(5);
+    protected ItemFilter filter = new ItemFilter(5);
 
     public static final Component DISPLAY_NAME = Component.translatable("attachment.thermal.shim_servo");
 

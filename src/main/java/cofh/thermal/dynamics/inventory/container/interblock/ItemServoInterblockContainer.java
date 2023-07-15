@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.inventory.container.interblock;
 
 import cofh.core.inventory.container.ContainerCoFH;
 import cofh.core.network.packet.server.ContainerConfigPacket;
-import cofh.core.util.filter.BaseItemFilter;
+import cofh.core.util.filter.ItemFilter;
 import cofh.core.util.filter.IFilterOptions;
 import cofh.lib.inventory.container.slot.SlotFalseCopy;
 import cofh.lib.inventory.wrapper.InvWrapperGeneric;
@@ -19,7 +19,7 @@ public class ItemServoInterblockContainer extends ContainerCoFH implements IFilt
 
     public final ItemServoInterblock attachment;
 
-    protected BaseItemFilter filter;
+    protected ItemFilter filter;
     protected InvWrapperGeneric filterInventory;
 
     public ItemServoInterblockContainer(int id, Level world, BlockPos pos, Direction side, Inventory inventory) {
@@ -28,7 +28,7 @@ public class ItemServoInterblockContainer extends ContainerCoFH implements IFilt
         super(null, id, inventory, inventory.player);
 
         this.attachment = null; // TODO Grab from map
-        this.filter = (BaseItemFilter) attachment.getFilter();
+        this.filter = (ItemFilter) attachment.getFilter();
 
         allowSwap = false;
 

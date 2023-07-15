@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.inventory.container.attachment;
 
 import cofh.core.network.packet.client.ContainerGuiPacket;
-import cofh.core.util.filter.BaseFluidFilter;
+import cofh.core.util.filter.FluidFilter;
 import cofh.core.util.filter.IFilterOptions;
 import cofh.lib.inventory.container.slot.SlotFalseCopy;
 import cofh.lib.inventory.wrapper.InvWrapperFluids;
@@ -26,7 +26,7 @@ public class FluidTurboServoAttachmentContainer extends AttachmentContainer impl
 
     public final FluidTurboServoAttachment attachment;
 
-    protected BaseFluidFilter filter;
+    protected FluidFilter filter;
     protected InvWrapperFluids filterInventory;
 
     public FluidTurboServoAttachmentContainer(int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
@@ -35,7 +35,7 @@ public class FluidTurboServoAttachmentContainer extends AttachmentContainer impl
 
         if (hostTile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof FluidTurboServoAttachment expectedAttachment) {
             this.attachment = expectedAttachment;
-            this.filter = (BaseFluidFilter) attachment.getFilter();
+            this.filter = (FluidFilter) attachment.getFilter();
         } else {
             this.attachment = null;
         }
