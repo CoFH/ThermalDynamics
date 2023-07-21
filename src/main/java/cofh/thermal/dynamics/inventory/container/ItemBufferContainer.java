@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.inventory.container;
 
-import cofh.core.inventory.container.TileContainer;
+import cofh.core.inventory.container.TileCoFHContainer;
 import cofh.lib.inventory.container.slot.SlotCoFH;
 import cofh.lib.inventory.wrapper.InvWrapperCoFH;
 import cofh.thermal.dynamics.block.entity.ItemBufferBlockEntity;
@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 
 import static cofh.thermal.dynamics.init.TDynContainers.ITEM_BUFFER_CONTAINER;
 
-public class ItemBufferContainer extends TileContainer {
+public class ItemBufferContainer extends TileCoFHContainer {
 
     public final ItemBufferBlockEntity tile;
 
