@@ -5,6 +5,8 @@ import cofh.core.network.packet.server.TileConfigPacket;
 import cofh.lib.inventory.IOItemInv;
 import cofh.lib.inventory.ItemStorageCoFH;
 import cofh.lib.inventory.StackValidatedItemStorage;
+import cofh.lib.util.Utils;
+import cofh.thermal.core.config.ThermalCoreConfig;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -117,6 +119,16 @@ public class ItemBufferBlockEntity extends SecurableBlockEntity implements MenuP
     public boolean getCheckNBT() {
 
         return checkNBT;
+    }
+
+    @Override
+    public void onReplaced(BlockState state, Level worldIn, BlockPos pos, BlockState newState) {
+
+        if (!ThermalCoreConfig.keepItems.get()) {
+            for (int i = 0; i < invSize() - 9; ++i) {
+                Utils.dropItemStackIntoWorldWithRandomness(inventory.getStackInSlot(i), worldIn, pos);
+            }
+        }
     }
 
     // region NETWORK

@@ -3,11 +3,14 @@ package cofh.thermal.dynamics.inventory.container;
 import cofh.core.inventory.container.TileCoFHContainer;
 import cofh.lib.inventory.container.slot.SlotCoFH;
 import cofh.lib.inventory.wrapper.InvWrapperCoFH;
+import cofh.lib.util.helpers.MathHelper;
 import cofh.thermal.dynamics.block.entity.ItemBufferBlockEntity;
 import cofh.thermal.dynamics.inventory.container.slot.SlotFalseBuffer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import static cofh.thermal.dynamics.init.TDynContainers.ITEM_BUFFER_CONTAINER;
@@ -15,6 +18,9 @@ import static cofh.thermal.dynamics.init.TDynContainers.ITEM_BUFFER_CONTAINER;
 public class ItemBufferContainer extends TileCoFHContainer {
 
     public final ItemBufferBlockEntity tile;
+
+    public int wheelSlot = -1;
+    public int wheelDir = 0;
 
     public ItemBufferContainer(int windowId, Level world, BlockPos pos, Inventory inventory, Player player) {
 
@@ -48,4 +54,25 @@ public class ItemBufferContainer extends TileCoFHContainer {
         return 96;
     }
 
+    // region NETWORK
+    public FriendlyByteBuf getConfigPacket(FriendlyByteBuf buffer) {
+
+        buffer.writeVarInt(wheelSlot);
+        buffer.writeVarInt(wheelDir);
+
+        return buffer;
+    }
+
+    public void handleConfigPacket(FriendlyByteBuf buffer) {
+
+        wheelSlot = buffer.readVarInt();
+        wheelDir = buffer.readVarInt();
+
+        if (slots.get(wheelSlot).isActive() && slots.get(wheelSlot).hasItem()) {
+            ItemStack stackInSlot = slots.get(wheelSlot).getItem();
+            stackInSlot.setCount(MathHelper.clamp(stackInSlot.getCount() + wheelDir, 1, stackInSlot.getMaxStackSize()));
+            slots.get(wheelSlot).set(stackInSlot);
+        }
+    }
+    // endregion
 }

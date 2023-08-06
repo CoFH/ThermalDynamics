@@ -3,10 +3,13 @@ package cofh.thermal.dynamics.client.gui;
 import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.SimpleTooltip;
+import cofh.core.network.packet.server.ContainerConfigPacket;
 import cofh.thermal.dynamics.inventory.container.ItemBufferContainer;
+import cofh.thermal.dynamics.inventory.container.slot.SlotFalseBuffer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 
 import static cofh.core.util.helpers.GuiHelper.generatePanelInfo;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
@@ -38,6 +41,19 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
         super.init();
 
         addButtons();
+    }
+
+    @Override
+    protected boolean mouseWheel(double mouseX, double mouseY, double movement) {
+
+        for (Slot slot : this.menu.slots) {
+            if (slot instanceof SlotFalseBuffer && mouseX >= slot.x && mouseY >= slot.y && mouseX < slot.x + 16 && mouseY < slot.y + 16) {
+                menu.wheelSlot = slot.index;
+                menu.wheelDir = movement > 0 ? 1 : -1;
+                ContainerConfigPacket.sendToServer(menu);
+            }
+        }
+        return false;
     }
 
     // region ELEMENTS
