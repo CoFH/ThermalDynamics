@@ -542,7 +542,7 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
 
-        if (side == null || level == null || getGrid() == null || level.isClientSide || connections[side.ordinal()] == DISABLED) {
+        if (side == null || level == null || level.isClientSide || connections[side.ordinal()] == DISABLED || getGrid() == null) {
             return LazyOptional.empty();
         }
         return attachments[side.ordinal()].wrapGridCapability(cap, getGrid().getCapability(cap));
