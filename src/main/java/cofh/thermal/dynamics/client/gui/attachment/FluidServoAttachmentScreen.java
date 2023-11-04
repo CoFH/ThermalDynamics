@@ -8,7 +8,7 @@ import cofh.core.client.gui.element.SimpleTooltip;
 import cofh.core.client.gui.element.panel.RSControlPanel;
 import cofh.thermal.dynamics.attachment.FluidServoAttachment;
 import cofh.thermal.dynamics.inventory.container.attachment.FluidServoAttachmentContainer;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -69,13 +69,13 @@ public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAt
     }
 
     @Override
-    protected void renderLabels(PoseStack matrixStack, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
 
         String output = format(attachment.getTransfer());
 
-        fontRenderer().draw(matrixStack, output, getCenteredOffset(output, 151), 51, 0x404040);
+        pGuiGraphics.drawString(font, output, getCenteredOffset(output, 151), 51, 0x404040, false);
 
-        super.renderLabels(matrixStack, mouseX, mouseY);
+        super.renderLabels(pGuiGraphics, mouseX, mouseY);
     }
 
     // region ELEMENTS

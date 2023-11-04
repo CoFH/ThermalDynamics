@@ -6,11 +6,12 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.renderer.block.model.*;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.*;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -44,7 +45,7 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext context, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
+    public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
 
         boolean isInventory = context.isComponentVisible("inv", false);
         // Map<Face, List(FrontFace, BackFace)>
@@ -61,24 +62,6 @@ public class DuctModel implements IUnbakedGeometry<DuctModel> {
         DuctBakedModel model = new DuctBakedModel(context, spriteGetter.apply(context.getMaterial("particle")), center, centerFill, ductSides, ductFill, connections, isInventory);
         bakedModels.add(model);
         return model;
-    }
-
-    @Override
-    public Collection<Material> getMaterials(IGeometryBakingContext context, Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
-
-        List<Material> materials = new LinkedList<>();
-        for (Map<String, BlockElement> namedPart : parts.values()) {
-            for (BlockElement part : namedPart.values()) {
-                for (BlockElementFace face : part.faces.values()) {
-                    Material mat = context.getMaterial(face.texture);
-                    if (MissingTextureAtlasSprite.getLocation().equals(mat.texture())) {
-                        missingTextureErrors.add(Pair.of(face.texture, context.getModelName()));
-                    }
-                    materials.add(mat);
-                }
-            }
-        }
-        return materials;
     }
 
     // region HELPERS

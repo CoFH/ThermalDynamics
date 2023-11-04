@@ -185,7 +185,7 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
                 return true;
             }
             conveyableData.readConveyableData(player, stack.getTag());
-            player.level.playSound(null, player.blockPosition(), SoundEvents.UI_BUTTON_CLICK, SoundSource.PLAYERS, 0.5F, 0.8F);
+            player.level.playSound(null, player.blockPosition(), SoundEvents.UI_BUTTON_CLICK.get(), SoundSource.PLAYERS, 0.5F, 0.8F);
             return true;
         }
         return false;

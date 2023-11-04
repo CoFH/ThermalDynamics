@@ -9,9 +9,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
@@ -202,17 +202,17 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
             return false; // We cannot externally connect to other grids.
         }
         if (dir != null) {
-            return tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir).isPresent();
+            return tile.getCapability(ForgeCapabilities.FLUID_HANDLER, dir).isPresent();
         }
         return false;
-        // return tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).isPresent();
+        // return tile.getCapability(ForgeCapabilities.FLUID_HANDLER).isPresent();
     }
 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
 
-        if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.FLUID_HANDLER) {
             if (!fluidCap.isPresent()) {
                 fluidCap = LazyOptional.of(() -> storage);
             }

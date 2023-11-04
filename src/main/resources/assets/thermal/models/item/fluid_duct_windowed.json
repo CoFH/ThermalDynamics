@@ -3,7 +3,7 @@
   "textures": {
     "duct": "thermal:block/ducts/fluid_duct_windowed",
     "duct_end": "thermal:block/ducts/fluid_duct_windowed",
-    "fill": "thermal:blank"
+    "fill": "thermal:block/blank"
   },
   "visibility": {
     "inv": true

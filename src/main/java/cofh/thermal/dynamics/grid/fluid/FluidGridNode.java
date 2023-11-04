@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.DISABLED;
@@ -79,8 +79,8 @@ public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridN
         if (tile == null) {
             return;
         }
-        attachment.wrapExternalCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY,
-                        tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir.getOpposite()))
+        attachment.wrapExternalCapability(ForgeCapabilities.FLUID_HANDLER,
+                        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, dir.getOpposite()))
                 .ifPresent(e -> grid.drain(e.fill(grid.getFluid(), EXECUTE), EXECUTE));
     }
 

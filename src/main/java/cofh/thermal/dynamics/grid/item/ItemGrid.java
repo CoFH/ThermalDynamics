@@ -46,10 +46,10 @@
 //            return false; // We cannot externally connect to other grids.
 //        }
 //        if (dir != null) {
-//            return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir).isPresent();
+//            return tile.getCapability(ForgeCapabilities.ITEM_HANDLER, dir).isPresent();
 //        }
 //        return false;
-//        // return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent();
+//        // return tile.getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent();
 //    }
 //
 //    @Override

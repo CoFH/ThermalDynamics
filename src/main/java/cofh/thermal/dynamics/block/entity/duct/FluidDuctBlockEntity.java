@@ -11,8 +11,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import static cofh.thermal.dynamics.init.TDynBlockEntities.FLUID_DUCT_BLOCK_ENTITY;
 import static cofh.thermal.dynamics.init.TDynGrids.FLUID_GRID;
@@ -39,7 +39,7 @@ public class FluidDuctBlockEntity extends DuctBlockEntity<FluidGrid, FluidGridNo
         if (tile == null || GridHelper.getGridHost(tile) != null) {
             return false;
         }
-        return tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir.getOpposite()).isPresent();
+        return tile.getCapability(ForgeCapabilities.FLUID_HANDLER, dir.getOpposite()).isPresent();
     }
 
     // region IGridHost

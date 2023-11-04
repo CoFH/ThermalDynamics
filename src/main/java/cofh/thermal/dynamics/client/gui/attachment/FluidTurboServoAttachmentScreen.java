@@ -7,7 +7,7 @@ import cofh.core.util.helpers.GuiHelper;
 import cofh.thermal.dynamics.attachment.FluidTurboServoAttachment;
 import cofh.thermal.dynamics.inventory.container.attachment.FluidTurboServoAttachmentContainer;
 import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -67,13 +67,13 @@ public class FluidTurboServoAttachmentScreen extends ContainerScreenCoFH<FluidTu
     }
 
     @Override
-    protected void renderLabels(PoseStack matrixStack, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
 
         String output = format(attachment.amountTransfer);
 
-        fontRenderer().draw(matrixStack, output, getCenteredOffset(output, 151), 42, 0x404040);
+        pGuiGraphics.drawString(font, output, getCenteredOffset(output, 151), 42, 0x404040, false);
 
-        super.renderLabels(matrixStack, mouseX, mouseY);
+        super.renderLabels(pGuiGraphics, mouseX, mouseY);
     }
 
     // region ELEMENTS

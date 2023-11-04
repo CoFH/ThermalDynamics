@@ -9,7 +9,7 @@ import cofh.core.util.helpers.GuiHelper;
 import cofh.thermal.dynamics.attachment.EnergyLimiterAttachment;
 import cofh.thermal.dynamics.inventory.container.attachment.EnergyLimiterAttachmentContainer;
 import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -59,15 +59,15 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
     }
 
     @Override
-    protected void renderLabels(PoseStack matrixStack, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
 
         String input = format(attachment.amountInput);
         String output = format(attachment.amountOutput);
 
-        fontRenderer().draw(matrixStack, input, getCenteredOffset(input, 50), 42, 0x404040);
-        fontRenderer().draw(matrixStack, output, getCenteredOffset(output, 126), 42, 0x404040);
+        pGuiGraphics.drawString(font, input, getCenteredOffset(input, 50), 42, 0x404040, false);
+        pGuiGraphics.drawString(font, output, getCenteredOffset(output, 126), 42, 0x404040, false);
 
-        super.renderLabels(matrixStack, mouseX, mouseY);
+        super.renderLabels(pGuiGraphics, mouseX, mouseY);
     }
 
     // region ELEMENTS

@@ -18,8 +18,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static cofh.lib.util.constants.NBTTags.TAG_RENDER_FLUID;
+import static cofh.thermal.core.client.ThermalTextures.BLANK_TEXTURE;
 import static cofh.thermal.dynamics.init.TDynBlockEntities.FLUID_DUCT_WINDOWED_BLOCK_ENTITY;
-import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
 
 public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implements IGridHostUpdateable, IGridHostLuminous, IPacketHandlerTile {
 
@@ -46,7 +46,7 @@ public class FluidDuctWindowedBlockEntity extends FluidDuctBlockEntity implement
     @Override
     public ModelData getModelData() {
 
-        modelData.setFill(renderFluid.isEmpty() ? BLANK_TEXTURE : RenderHelper.getFluidTexture(renderFluid).getName());
+        modelData.setFill(renderFluid.isEmpty() ? BLANK_TEXTURE : RenderHelper.getFluidTexture(renderFluid).contents().name());
         modelData.setFillColor(FluidHelper.color(renderFluid));
         return super.getModelData();
     }

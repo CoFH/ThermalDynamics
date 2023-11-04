@@ -28,8 +28,8 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
+import static cofh.thermal.core.client.ThermalTextures.BLANK_TEXTURE;
 import static cofh.thermal.dynamics.client.model.data.DuctModelData.DUCT_MODEL_DATA;
-import static cofh.thermal.dynamics.util.TDynConstants.BLANK_TEXTURE;
 
 public class DuctBakedModel implements IDynamicBakedModel {
 
@@ -128,7 +128,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
 
         List<BakedQuad> newQuads = new ArrayList<>(quads.size());
         for (BakedQuad quad : quads) {
-            if (cullBack && quad instanceof BackfaceBakedQuad || quad.getSprite().getName().equals(BLANK_TEXTURE)) {
+            if (cullBack && quad instanceof BackfaceBakedQuad || quad.getSprite().contents().name().equals(BLANK_TEXTURE)) {
                 // do nothing
             } else {
                 newQuads.add(quad);
@@ -209,7 +209,7 @@ public class DuctBakedModel implements IDynamicBakedModel {
                 return quads;
             }
         }
-        // Whatever intellij, I know what im doing.
+        // Whatever intelliJ, I know what im doing.
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (cache) {
             retextured = cache.get(texture); // Another thread could have computed whilst we were locked.

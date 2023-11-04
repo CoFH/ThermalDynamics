@@ -16,9 +16,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -120,7 +120,7 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
             return;
         }
         if (!internalGridCap.isPresent()) {
-            internalGridCap = duct.getGrid().getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
+            internalGridCap = duct.getGrid().getCapability(ForgeCapabilities.FLUID_HANDLER);
         }
         externalCap.ifPresent(e -> internalGridCap.ifPresent(i -> {
             amountTransfer += TRANSFER;
@@ -153,13 +153,13 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
-        return new FluidServoAttachmentContainer(i, player.getLevel(), pos(), side, inventory, player);
+        return new FluidServoAttachmentContainer(i, player.level, pos(), side, inventory, player);
     }
 
     @Override
     public <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridLazOpt) {
 
-        if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.FLUID_HANDLER) {
             if (gridCap.isPresent()) {
                 return gridCap.cast();
             }
@@ -176,7 +176,7 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     @Override
     public <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> extLazOpt) {
 
-        if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.FLUID_HANDLER) {
             if (externalCap.isPresent()) {
                 return externalCap.cast();
             }
