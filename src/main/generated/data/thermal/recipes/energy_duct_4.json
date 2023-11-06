@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "building",
   "key": {
     "G": {
       "tag": "forge:glass"
@@ -19,5 +20,6 @@
   "result": {
     "count": 4,
     "item": "thermal:energy_duct"
-  }
+  },
+  "show_notification": true
 }
