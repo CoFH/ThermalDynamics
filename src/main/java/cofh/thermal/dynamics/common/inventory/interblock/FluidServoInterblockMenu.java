@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.common.inventory.interblock;
 
-import cofh.core.common.inventory.ContainerCoFH;
+import cofh.core.common.inventory.ContainerMenuCoFH;
 import cofh.core.common.network.packet.client.ContainerGuiPacket;
 import cofh.core.common.network.packet.server.ContainerConfigPacket;
 import cofh.core.util.filter.BaseFluidFilter;
@@ -20,14 +20,14 @@ import net.minecraftforge.fluids.FluidStack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FluidServoInterblockContainer extends ContainerCoFH implements IFilterOptions {
+public class FluidServoInterblockMenu extends ContainerMenuCoFH implements IFilterOptions {
 
     public final FluidServoInterblock attachment;
 
     protected BaseFluidFilter filter;
     protected InvWrapperFluids filterInventory;
 
-    public FluidServoInterblockContainer(int id, Level world, BlockPos pos, Direction side, Inventory inventory) {
+    public FluidServoInterblockMenu(int id, Level world, BlockPos pos, Direction side, Inventory inventory) {
 
         // TODO Container type
         super(null, id, inventory, inventory.player);

@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.interblock;
 
 import cofh.core.util.filter.BaseItemFilter;
 import cofh.core.util.filter.IFilter;
-import cofh.thermal.dynamics.common.inventory.interblock.FluidServoInterblockContainer;
+import cofh.thermal.dynamics.common.inventory.interblock.FluidServoInterblockMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -64,7 +64,7 @@ public class ItemServoInterblock implements MenuProvider {
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
-        return new FluidServoInterblockContainer(i, player.level, pos, side, inventory);
+        return new FluidServoInterblockMenu(i, player.level, pos, side, inventory);
     }
 
 }

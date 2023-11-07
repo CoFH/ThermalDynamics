@@ -7,7 +7,7 @@ import cofh.core.client.gui.element.SimpleTooltip;
 import cofh.core.client.gui.element.panel.RSControlPanel;
 import cofh.thermal.dynamics.attachment.FluidFilterAttachment;
 import cofh.thermal.dynamics.attachment.FluidFilterAttachment.FilterMode;
-import cofh.thermal.dynamics.common.inventory.attachment.FluidFilterAttachmentContainer;
+import cofh.thermal.dynamics.common.inventory.attachment.FluidFilterAttachmentMenu;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,7 +19,7 @@ import static cofh.lib.util.Constants.PATH_GUI;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 
-public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilterAttachmentContainer> {
+public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilterAttachmentMenu> {
 
     public static final ResourceLocation TEXTURE = new ResourceLocation(PATH_GUI + "generic.png");
 
@@ -34,7 +34,7 @@ public class FluidFilterAttachmentScreen extends ContainerScreenCoFH<FluidFilter
 
     protected final FluidFilterAttachment attachment;
 
-    public FluidFilterAttachmentScreen(FluidFilterAttachmentContainer container, Inventory inv, Component titleIn) {
+    public FluidFilterAttachmentScreen(FluidFilterAttachmentMenu container, Inventory inv, Component titleIn) {
 
         super(container, inv, titleIn);
 

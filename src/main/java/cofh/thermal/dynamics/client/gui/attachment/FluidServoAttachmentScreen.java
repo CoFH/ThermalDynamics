@@ -7,7 +7,7 @@ import cofh.core.client.gui.element.ElementTexture;
 import cofh.core.client.gui.element.SimpleTooltip;
 import cofh.core.client.gui.element.panel.RSControlPanel;
 import cofh.thermal.dynamics.attachment.FluidServoAttachment;
-import cofh.thermal.dynamics.common.inventory.attachment.FluidServoAttachmentContainer;
+import cofh.thermal.dynamics.common.inventory.attachment.FluidServoAttachmentMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +22,7 @@ import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 import static cofh.lib.util.helpers.StringHelper.format;
 
-public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAttachmentContainer> {
+public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAttachmentMenu> {
 
     public static final ResourceLocation TEXTURE = new ResourceLocation(PATH_GUI + "generic.png");
 
@@ -38,7 +38,7 @@ public class FluidServoAttachmentScreen extends ContainerScreenCoFH<FluidServoAt
 
     protected final FluidServoAttachment attachment;
 
-    public FluidServoAttachmentScreen(FluidServoAttachmentContainer container, Inventory inv, Component titleIn) {
+    public FluidServoAttachmentScreen(FluidServoAttachmentMenu container, Inventory inv, Component titleIn) {
 
         super(container, inv, titleIn);
 

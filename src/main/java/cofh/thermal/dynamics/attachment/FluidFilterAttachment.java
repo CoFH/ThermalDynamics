@@ -4,7 +4,7 @@ import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.IFilter;
 import cofh.lib.api.IConveyableData;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.common.inventory.attachment.FluidFilterAttachmentContainer;
+import cofh.thermal.dynamics.common.inventory.attachment.FluidFilterAttachmentMenu;
 import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -151,7 +151,7 @@ public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneCo
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
-        return new FluidFilterAttachmentContainer(i, player.level, pos(), side, inventory, player);
+        return new FluidFilterAttachmentMenu(i, player.level, pos(), side, inventory, player);
     }
 
     @Override

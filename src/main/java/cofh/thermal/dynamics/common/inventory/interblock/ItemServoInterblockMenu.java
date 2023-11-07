@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.common.inventory.interblock;
 
-import cofh.core.common.inventory.ContainerCoFH;
+import cofh.core.common.inventory.ContainerMenuCoFH;
 import cofh.core.common.network.packet.server.ContainerConfigPacket;
 import cofh.core.util.filter.BaseItemFilter;
 import cofh.core.util.filter.IFilterOptions;
@@ -15,14 +15,14 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public class ItemServoInterblockContainer extends ContainerCoFH implements IFilterOptions {
+public class ItemServoInterblockMenu extends ContainerMenuCoFH implements IFilterOptions {
 
     public final ItemServoInterblock attachment;
 
     protected BaseItemFilter filter;
     protected InvWrapperGeneric filterInventory;
 
-    public ItemServoInterblockContainer(int id, Level world, BlockPos pos, Direction side, Inventory inventory) {
+    public ItemServoInterblockMenu(int id, Level world, BlockPos pos, Direction side, Inventory inventory) {
 
         // TODO Container type
         super(null, id, inventory, inventory.player);

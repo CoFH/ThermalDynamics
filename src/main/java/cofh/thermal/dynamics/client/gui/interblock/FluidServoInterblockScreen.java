@@ -4,7 +4,7 @@ import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.ElementFluid;
 import cofh.core.client.gui.element.SimpleTooltip;
-import cofh.thermal.dynamics.common.inventory.interblock.FluidServoInterblockContainer;
+import cofh.thermal.dynamics.common.inventory.interblock.FluidServoInterblockMenu;
 import cofh.thermal.dynamics.interblock.FluidServoInterblock;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +16,7 @@ import static cofh.core.util.helpers.GuiHelper.generatePanelInfo;
 import static cofh.lib.util.Constants.PATH_GUI;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 
-public class FluidServoInterblockScreen extends ContainerScreenCoFH<FluidServoInterblockContainer> {
+public class FluidServoInterblockScreen extends ContainerScreenCoFH<FluidServoInterblockMenu> {
 
     public static final ResourceLocation TEXTURE = new ResourceLocation(PATH_GUI + "generic.png");
 
@@ -27,7 +27,7 @@ public class FluidServoInterblockScreen extends ContainerScreenCoFH<FluidServoIn
 
     protected final FluidServoInterblock attachment;
 
-    public FluidServoInterblockScreen(FluidServoInterblockContainer container, Inventory inv, Component titleIn) {
+    public FluidServoInterblockScreen(FluidServoInterblockMenu container, Inventory inv, Component titleIn) {
 
         super(container, inv, titleIn);
 

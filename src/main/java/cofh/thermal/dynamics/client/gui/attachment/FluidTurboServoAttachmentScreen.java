@@ -5,7 +5,7 @@ import cofh.core.client.gui.element.*;
 import cofh.core.client.gui.element.panel.RSControlPanel;
 import cofh.core.util.helpers.GuiHelper;
 import cofh.thermal.dynamics.attachment.FluidTurboServoAttachment;
-import cofh.thermal.dynamics.common.inventory.attachment.FluidTurboServoAttachmentContainer;
+import cofh.thermal.dynamics.common.inventory.attachment.FluidTurboServoAttachmentMenu;
 import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -20,7 +20,7 @@ import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 import static cofh.lib.util.helpers.StringHelper.format;
 
-public class FluidTurboServoAttachmentScreen extends ContainerScreenCoFH<FluidTurboServoAttachmentContainer> {
+public class FluidTurboServoAttachmentScreen extends ContainerScreenCoFH<FluidTurboServoAttachmentMenu> {
 
     public static final ResourceLocation TEXTURE = new ResourceLocation(PATH_GUI + "generic.png");
 
@@ -36,7 +36,7 @@ public class FluidTurboServoAttachmentScreen extends ContainerScreenCoFH<FluidTu
 
     protected final FluidTurboServoAttachment attachment;
 
-    public FluidTurboServoAttachmentScreen(FluidTurboServoAttachmentContainer container, Inventory inv, Component titleIn) {
+    public FluidTurboServoAttachmentScreen(FluidTurboServoAttachmentMenu container, Inventory inv, Component titleIn) {
 
         super(container, inv, titleIn);
 

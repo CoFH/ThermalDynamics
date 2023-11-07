@@ -12,11 +12,11 @@ import net.minecraft.world.level.Level;
 
 import static cofh.thermal.dynamics.init.registries.TDynContainers.ENERGY_LIMITER_ATTACHMENT_CONTAINER;
 
-public class EnergyLimiterAttachmentContainer extends AttachmentContainer {
+public class EnergyLimiterAttachmentMenu extends AttachmentMenu {
 
     public final EnergyLimiterAttachment attachment;
 
-    public EnergyLimiterAttachmentContainer(int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
+    public EnergyLimiterAttachmentMenu(int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
 
         super(ENERGY_LIMITER_ATTACHMENT_CONTAINER.get(), id, world, pos, side, inventory, player);
 

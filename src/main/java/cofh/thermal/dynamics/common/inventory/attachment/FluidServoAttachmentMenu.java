@@ -7,7 +7,7 @@ import cofh.lib.common.inventory.SlotFalseCopy;
 import cofh.lib.common.inventory.wrapper.InvWrapperFluids;
 import cofh.lib.util.helpers.MathHelper;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.attachment.FluidTurboServoAttachment;
+import cofh.thermal.dynamics.attachment.FluidServoAttachment;
 import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,20 +20,20 @@ import net.minecraftforge.fluids.FluidStack;
 import java.util.ArrayList;
 import java.util.List;
 
-import static cofh.thermal.dynamics.init.registries.TDynContainers.FLUID_TURBO_SERVO_ATTACHMENT_CONTAINER;
+import static cofh.thermal.dynamics.init.registries.TDynContainers.FLUID_SERVO_ATTACHMENT_CONTAINER;
 
-public class FluidTurboServoAttachmentContainer extends AttachmentContainer implements IFilterOptions {
+public class FluidServoAttachmentMenu extends AttachmentMenu implements IFilterOptions {
 
-    public final FluidTurboServoAttachment attachment;
+    public final FluidServoAttachment attachment;
 
     protected BaseFluidFilter filter;
     protected InvWrapperFluids filterInventory;
 
-    public FluidTurboServoAttachmentContainer(int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
+    public FluidServoAttachmentMenu(int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
 
-        super(FLUID_TURBO_SERVO_ATTACHMENT_CONTAINER.get(), id, world, pos, side, inventory, player);
+        super(FLUID_SERVO_ATTACHMENT_CONTAINER.get(), id, world, pos, side, inventory, player);
 
-        if (hostTile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof FluidTurboServoAttachment expectedAttachment) {
+        if (hostTile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof FluidServoAttachment expectedAttachment) {
             this.attachment = expectedAttachment;
             this.filter = (BaseFluidFilter) attachment.getFilter();
         } else {
@@ -103,8 +103,6 @@ public class FluidTurboServoAttachmentContainer extends AttachmentContainer impl
         for (int i = 0; i < size; ++i) {
             buffer.writeFluidStack(getFilterStacks().get(i));
         }
-        buffer.writeInt(attachment.amountTransfer);
-
         return buffer;
     }
 
@@ -117,8 +115,6 @@ public class FluidTurboServoAttachmentContainer extends AttachmentContainer impl
             fluidStacks.add(buffer.readFluidStack());
         }
         filterInventory.readFromSource(fluidStacks);
-
-        attachment.amountTransfer = buffer.readInt();
     }
     // endregion
 

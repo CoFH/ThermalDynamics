@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.common.inventory;
 
-import cofh.core.common.inventory.TileCoFHContainer;
+import cofh.core.common.inventory.BlockEntityCoFHMenu;
 import cofh.lib.common.inventory.SlotCoFH;
 import cofh.lib.common.inventory.wrapper.InvWrapperCoFH;
 import cofh.lib.util.helpers.MathHelper;
@@ -15,14 +15,14 @@ import net.minecraft.world.level.Level;
 
 import static cofh.thermal.dynamics.init.registries.TDynContainers.ITEM_BUFFER_CONTAINER;
 
-public class ItemBufferContainer extends TileCoFHContainer {
+public class ItemBufferMenu extends BlockEntityCoFHMenu {
 
     public final ItemBufferBlockEntity tile;
 
     public int wheelSlot = -1;
     public int wheelDir = 0;
 
-    public ItemBufferContainer(int windowId, Level world, BlockPos pos, Inventory inventory, Player player) {
+    public ItemBufferMenu(int windowId, Level world, BlockPos pos, Inventory inventory, Player player) {
 
         super(ITEM_BUFFER_CONTAINER.get(), windowId, world, pos, inventory, player);
         this.tile = (ItemBufferBlockEntity) world.getBlockEntity(pos);

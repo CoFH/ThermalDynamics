@@ -1,7 +1,8 @@
 {
-    "pack": {
-        "description": "CoFH - Thermal Dynamics Resources",
-        "pack_format": 9,
-        "_comment": ""
-    }
+  "pack": {
+    "description": {
+      "translate": "pack.thermal_dynamics.description"
+    },
+    "pack_format": 15
+  }
 }

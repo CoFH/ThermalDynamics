@@ -3,7 +3,7 @@ package cofh.thermal.dynamics.attachment;
 import cofh.lib.api.IConveyableData;
 import cofh.lib.util.helpers.MathHelper;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.common.inventory.attachment.EnergyLimiterAttachmentContainer;
+import cofh.thermal.dynamics.common.inventory.attachment.EnergyLimiterAttachmentMenu;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -129,7 +129,7 @@ public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllab
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
-        return new EnergyLimiterAttachmentContainer(i, player.level, pos(), side, inventory, player);
+        return new EnergyLimiterAttachmentMenu(i, player.level, pos(), side, inventory, player);
     }
 
     @Override

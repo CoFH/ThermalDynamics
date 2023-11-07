@@ -22,14 +22,14 @@ import java.util.List;
 
 import static cofh.thermal.dynamics.init.registries.TDynContainers.FLUID_FILTER_ATTACHMENT_CONTAINER;
 
-public class FluidFilterAttachmentContainer extends AttachmentContainer implements IFilterOptions {
+public class FluidFilterAttachmentMenu extends AttachmentMenu implements IFilterOptions {
 
     public final FluidFilterAttachment attachment;
 
     protected BaseFluidFilter filter;
     protected InvWrapperFluids filterInventory;
 
-    public FluidFilterAttachmentContainer(int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
+    public FluidFilterAttachmentMenu(int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
 
         super(FLUID_FILTER_ATTACHMENT_CONTAINER.get(), id, world, pos, side, inventory, player);
 

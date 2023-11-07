@@ -7,7 +7,7 @@ import cofh.core.client.gui.element.ElementTexture;
 import cofh.core.client.gui.element.panel.RSControlPanel;
 import cofh.core.util.helpers.GuiHelper;
 import cofh.thermal.dynamics.attachment.EnergyLimiterAttachment;
-import cofh.thermal.dynamics.common.inventory.attachment.EnergyLimiterAttachmentContainer;
+import cofh.thermal.dynamics.common.inventory.attachment.EnergyLimiterAttachmentMenu;
 import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -20,7 +20,7 @@ import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 import static cofh.lib.util.helpers.StringHelper.format;
 
-public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLimiterAttachmentContainer> {
+public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLimiterAttachmentMenu> {
 
     public static final String TEX_PATH = ID_THERMAL + ":textures/gui/container/energy_limiter_attachment.png";
     public static final ResourceLocation TEXTURE = new ResourceLocation(TEX_PATH);
@@ -33,7 +33,7 @@ public class EnergyLimiterAttachmentScreen extends ContainerScreenCoFH<EnergyLim
 
     protected final EnergyLimiterAttachment attachment;
 
-    public EnergyLimiterAttachmentScreen(EnergyLimiterAttachmentContainer container, Inventory inv, Component titleIn) {
+    public EnergyLimiterAttachmentScreen(EnergyLimiterAttachmentMenu container, Inventory inv, Component titleIn) {
 
         super(container, inv, titleIn);
         texture = TEXTURE;

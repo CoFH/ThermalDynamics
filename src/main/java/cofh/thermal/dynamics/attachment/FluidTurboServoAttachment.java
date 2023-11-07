@@ -5,7 +5,7 @@ import cofh.core.util.filter.IFilter;
 import cofh.lib.api.IConveyableData;
 import cofh.lib.util.helpers.MathHelper;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.common.inventory.attachment.FluidTurboServoAttachmentContainer;
+import cofh.thermal.dynamics.common.inventory.attachment.FluidTurboServoAttachmentMenu;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -148,7 +148,7 @@ public class FluidTurboServoAttachment implements IFilterableAttachment, IRedsto
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
-        return new FluidTurboServoAttachmentContainer(i, player.level, pos(), side, inventory, player);
+        return new FluidTurboServoAttachmentMenu(i, player.level, pos(), side, inventory, player);
     }
 
     @Override

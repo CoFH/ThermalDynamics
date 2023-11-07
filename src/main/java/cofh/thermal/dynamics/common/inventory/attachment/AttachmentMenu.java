@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.common.inventory.attachment;
 
-import cofh.core.common.inventory.ContainerCoFH;
+import cofh.core.common.inventory.ContainerMenuCoFH;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.attachment.IAttachment;
 import net.minecraft.core.BlockPos;
@@ -12,12 +12,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AttachmentContainer extends ContainerCoFH {
+public abstract class AttachmentMenu extends ContainerMenuCoFH {
 
     public final BlockEntity hostTile;
     public final IAttachment baseAttachment;
 
-    public AttachmentContainer(@Nullable MenuType<?> type, int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
+    public AttachmentMenu(@Nullable MenuType<?> type, int id, Level world, BlockPos pos, Direction side, Inventory inventory, Player player) {
 
         super(type, id, inventory, player);
         hostTile = world.getBlockEntity(pos);

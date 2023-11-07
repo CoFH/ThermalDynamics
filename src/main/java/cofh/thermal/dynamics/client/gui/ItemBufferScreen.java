@@ -4,7 +4,7 @@ import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.SimpleTooltip;
 import cofh.core.common.network.packet.server.ContainerConfigPacket;
-import cofh.thermal.dynamics.common.inventory.ItemBufferContainer;
+import cofh.thermal.dynamics.common.inventory.ItemBufferMenu;
 import cofh.thermal.dynamics.common.inventory.slot.SlotFalseBuffer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +16,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 
-public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
+public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferMenu> {
 
     public static final String TEX_PATH = ID_THERMAL + ":textures/gui/container/item_buffer.png";
     public static final ResourceLocation TEXTURE = new ResourceLocation(TEX_PATH);
@@ -27,7 +27,7 @@ public class ItemBufferScreen extends ContainerScreenCoFH<ItemBufferContainer> {
     public static final String TEX_IGNORE_NBT = ID_COFH_CORE + ":textures/gui/filters/filter_ignore_nbt.png";
     public static final String TEX_USE_NBT = ID_COFH_CORE + ":textures/gui/filters/filter_use_nbt.png";
 
-    public ItemBufferScreen(ItemBufferContainer container, Inventory inv, Component titleIn) {
+    public ItemBufferScreen(ItemBufferMenu container, Inventory inv, Component titleIn) {
 
         super(container, inv, titleIn);
         texture = TEXTURE;

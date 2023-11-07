@@ -7,7 +7,7 @@ import cofh.lib.common.inventory.ItemStorageCoFH;
 import cofh.lib.common.inventory.StackValidatedItemStorage;
 import cofh.lib.util.Utils;
 import cofh.thermal.core.common.config.ThermalCoreConfig;
-import cofh.thermal.dynamics.common.inventory.ItemBufferContainer;
+import cofh.thermal.dynamics.common.inventory.ItemBufferMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -92,7 +92,7 @@ public class ItemBufferBlockEntity extends SecurableBlockEntity implements MenuP
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
-        return new ItemBufferContainer(i, level, worldPosition, inventory, player);
+        return new ItemBufferMenu(i, level, worldPosition, inventory, player);
     }
 
     public void setLatchMode(boolean latchMode) {
