@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import static cofh.lib.util.Constants.BUCKET_VOLUME;
 import static cofh.lib.util.Constants.TANK_MEDIUM;
-import static cofh.thermal.dynamics.init.TDynGrids.FLUID_GRID;
+import static cofh.thermal.dynamics.init.registries.TDynGrids.FLUID_GRID;
 
 /**
  * @author King Lemming

@@ -7,7 +7,7 @@ import cofh.core.client.gui.element.SimpleTooltip;
 import cofh.core.client.gui.element.panel.RSControlPanel;
 import cofh.thermal.dynamics.attachment.FluidFilterAttachment;
 import cofh.thermal.dynamics.attachment.FluidFilterAttachment.FilterMode;
-import cofh.thermal.dynamics.inventory.container.attachment.FluidFilterAttachmentContainer;
+import cofh.thermal.dynamics.common.inventory.attachment.FluidFilterAttachmentContainer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;

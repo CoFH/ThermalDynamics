@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.interblock;
 
 import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.IFilter;
-import cofh.thermal.dynamics.inventory.container.interblock.FluidServoInterblockContainer;
+import cofh.thermal.dynamics.common.inventory.interblock.FluidServoInterblockContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;

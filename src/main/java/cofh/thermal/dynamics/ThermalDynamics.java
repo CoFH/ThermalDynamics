@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics;
 
-import cofh.lib.network.PacketHandler;
+import cofh.lib.common.network.PacketHandler;
 import cofh.lib.util.DeferredRegisterCoFH;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridType;
@@ -10,12 +10,12 @@ import cofh.thermal.dynamics.client.gui.attachment.EnergyLimiterAttachmentScreen
 import cofh.thermal.dynamics.client.gui.attachment.FluidFilterAttachmentScreen;
 import cofh.thermal.dynamics.client.gui.attachment.FluidServoAttachmentScreen;
 import cofh.thermal.dynamics.client.gui.attachment.FluidTurboServoAttachmentScreen;
+import cofh.thermal.dynamics.common.network.packet.client.AttachmentControlPacket;
+import cofh.thermal.dynamics.common.network.packet.client.GridDebugPacket;
+import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
+import cofh.thermal.dynamics.common.network.packet.server.AttachmentRedstoneControlPacket;
 import cofh.thermal.dynamics.handler.GridEvents;
-import cofh.thermal.dynamics.init.*;
-import cofh.thermal.dynamics.network.packet.client.AttachmentControlPacket;
-import cofh.thermal.dynamics.network.packet.client.GridDebugPacket;
-import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
-import cofh.thermal.dynamics.network.packet.server.AttachmentRedstoneControlPacket;
+import cofh.thermal.dynamics.init.registries.*;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -33,16 +33,16 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.Supplier;
 
-import static cofh.core.network.packet.PacketIDs.*;
+import static cofh.core.common.network.packet.PacketIDs.*;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.core.ThermalCore.BLOCKS;
-import static cofh.thermal.dynamics.init.TDynContainers.*;
-import static cofh.thermal.dynamics.init.TDynIDs.*;
+import static cofh.thermal.dynamics.init.registries.TDynContainers.*;
+import static cofh.thermal.dynamics.init.registries.TDynIDs.*;
 import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;
-import static cofh.thermal.lib.common.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
-import static cofh.thermal.lib.common.ThermalFlags.setFlag;
-import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_COLLECTOR;
-import static cofh.thermal.lib.common.ThermalIDs.ID_DEVICE_NULLIFIER;
+import static cofh.thermal.lib.init.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
+import static cofh.thermal.lib.init.ThermalFlags.setFlag;
+import static cofh.thermal.lib.init.ThermalIDs.ID_DEVICE_COLLECTOR;
+import static cofh.thermal.lib.init.ThermalIDs.ID_DEVICE_NULLIFIER;
 
 @Mod (ID_THERMAL_DYNAMICS)
 public class ThermalDynamics {

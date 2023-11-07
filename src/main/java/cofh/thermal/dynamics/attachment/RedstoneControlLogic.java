@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.attachment;
 
 import cofh.lib.api.control.IRedstoneControllable;
 import cofh.lib.util.Utils;
-import cofh.thermal.dynamics.network.packet.server.AttachmentRedstoneControlPacket;
+import cofh.thermal.dynamics.common.network.packet.server.AttachmentRedstoneControlPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 

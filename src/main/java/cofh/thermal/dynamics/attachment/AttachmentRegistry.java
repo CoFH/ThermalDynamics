@@ -7,8 +7,8 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.util.Map;
 
-import static cofh.thermal.dynamics.init.TDynGrids.FLUID_GRID;
-import static cofh.thermal.dynamics.init.TDynIDs.*;
+import static cofh.thermal.dynamics.init.registries.TDynGrids.FLUID_GRID;
+import static cofh.thermal.dynamics.init.registries.TDynIDs.*;
 
 public class AttachmentRegistry {
 

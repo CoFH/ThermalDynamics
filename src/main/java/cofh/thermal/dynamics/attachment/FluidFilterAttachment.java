@@ -4,8 +4,8 @@ import cofh.core.util.filter.BaseFluidFilter;
 import cofh.core.util.filter.IFilter;
 import cofh.lib.api.IConveyableData;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.inventory.container.attachment.FluidFilterAttachmentContainer;
-import cofh.thermal.dynamics.network.packet.server.AttachmentConfigPacket;
+import cofh.thermal.dynamics.common.inventory.attachment.FluidFilterAttachmentContainer;
+import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -32,8 +32,8 @@ import static cofh.lib.util.constants.NBTTags.TAG_MODE;
 import static cofh.lib.util.constants.NBTTags.TAG_TYPE;
 import static cofh.thermal.core.ThermalCore.ITEMS;
 import static cofh.thermal.dynamics.client.TDynTextures.*;
-import static cofh.thermal.dynamics.init.TDynIDs.FILTER;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_FILTER_ATTACHMENT;
+import static cofh.thermal.dynamics.init.registries.TDynIDs.FILTER;
+import static cofh.thermal.dynamics.init.registries.TDynIDs.ID_FILTER_ATTACHMENT;
 import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE;
 
 public class FluidFilterAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, IConveyableData, MenuProvider {

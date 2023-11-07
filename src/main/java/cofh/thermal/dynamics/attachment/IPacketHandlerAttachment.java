@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.attachment;
 
-import cofh.thermal.dynamics.network.packet.client.AttachmentControlPacket;
+import cofh.thermal.dynamics.common.network.packet.client.AttachmentControlPacket;
 import net.minecraft.network.FriendlyByteBuf;
 
 public interface IPacketHandlerAttachment extends IAttachment {

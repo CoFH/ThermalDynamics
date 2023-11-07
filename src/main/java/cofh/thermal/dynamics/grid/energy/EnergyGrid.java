@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.grid.energy;
 
-import cofh.lib.energy.IRedstoneFluxStorage;
+import cofh.lib.common.energy.IRedstoneFluxStorage;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.grid.Grid;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-import static cofh.thermal.dynamics.init.TDynGrids.ENERGY_GRID;
+import static cofh.thermal.dynamics.init.registries.TDynGrids.ENERGY_GRID;
 
 /**
  * @author covers1624

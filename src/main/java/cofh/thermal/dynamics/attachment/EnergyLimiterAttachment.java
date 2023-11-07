@@ -3,7 +3,7 @@ package cofh.thermal.dynamics.attachment;
 import cofh.lib.api.IConveyableData;
 import cofh.lib.util.helpers.MathHelper;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.inventory.container.attachment.EnergyLimiterAttachmentContainer;
+import cofh.thermal.dynamics.common.inventory.attachment.EnergyLimiterAttachmentContainer;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -28,8 +28,8 @@ import static cofh.lib.util.constants.NBTTags.*;
 import static cofh.thermal.core.ThermalCore.ITEMS;
 import static cofh.thermal.dynamics.client.TDynTextures.ENERGY_LIMITER_ATTACHMENT_ACTIVE_LOC;
 import static cofh.thermal.dynamics.client.TDynTextures.ENERGY_LIMITER_ATTACHMENT_LOC;
-import static cofh.thermal.dynamics.init.TDynIDs.ENERGY_LIMITER;
-import static cofh.thermal.dynamics.init.TDynIDs.ID_ENERGY_LIMITER_ATTACHMENT;
+import static cofh.thermal.dynamics.init.registries.TDynIDs.ENERGY_LIMITER;
+import static cofh.thermal.dynamics.init.registries.TDynIDs.ID_ENERGY_LIMITER_ATTACHMENT;
 
 public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllableAttachment, IConveyableData, MenuProvider {
 
