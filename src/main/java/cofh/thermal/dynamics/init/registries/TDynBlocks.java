@@ -12,10 +12,10 @@ import java.util.function.IntSupplier;
 
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.core.ThermalCore.BLOCKS;
+import static cofh.thermal.core.init.registries.ThermalCreativeTabs.devicesTab;
 import static cofh.thermal.core.util.RegistrationHelper.registerBlock;
 import static cofh.thermal.dynamics.init.registries.TDynBlockEntities.*;
 import static cofh.thermal.dynamics.init.registries.TDynIDs.*;
-import static cofh.thermal.lib.init.ThermalCreativeTabs.devicesTab;
 import static net.minecraft.world.level.block.state.BlockBehaviour.Properties.of;
 
 public class TDynBlocks {

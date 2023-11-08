@@ -39,10 +39,10 @@ import static cofh.thermal.core.ThermalCore.BLOCKS;
 import static cofh.thermal.dynamics.init.registries.TDynContainers.*;
 import static cofh.thermal.dynamics.init.registries.TDynIDs.*;
 import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;
-import static cofh.thermal.lib.init.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
-import static cofh.thermal.lib.init.ThermalFlags.setFlag;
-import static cofh.thermal.lib.init.ThermalIDs.ID_DEVICE_COLLECTOR;
-import static cofh.thermal.lib.init.ThermalIDs.ID_DEVICE_NULLIFIER;
+import static cofh.thermal.lib.util.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
+import static cofh.thermal.lib.util.ThermalFlags.setFlag;
+import static cofh.thermal.lib.util.ThermalIDs.ID_DEVICE_COLLECTOR;
+import static cofh.thermal.lib.util.ThermalIDs.ID_DEVICE_NULLIFIER;
 
 @Mod (ID_THERMAL_DYNAMICS)
 public class ThermalDynamics {

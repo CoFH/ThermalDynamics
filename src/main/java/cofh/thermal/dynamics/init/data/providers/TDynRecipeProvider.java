@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.init.data.providers;
 
 import cofh.lib.init.data.RecipeProviderCoFH;
 import cofh.lib.init.tags.ItemTagsCoFH;
-import cofh.thermal.lib.init.ThermalFlags;
+import cofh.thermal.lib.util.ThermalFlags;
 import cofh.thermal.lib.util.references.ThermalTags;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
