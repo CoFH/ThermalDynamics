@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.SoundType;
 
 import java.util.function.IntSupplier;
 
+import static cofh.lib.util.Utils.itemProperties;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.core.ThermalCore.BLOCKS;
 import static cofh.thermal.core.init.registries.ThermalCreativeTabs.devicesTab;
@@ -34,13 +35,13 @@ public class TDynBlocks {
 
         devicesTab(registerBlock(ID_ENERGY_DUCT,
                 () -> new DuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), ENERGY_DUCT_BLOCK_ENTITY),
-                () -> new DuctBlockItem(BLOCKS.get(ID_ENERGY_DUCT), new Item.Properties()).setModId(ID_THERMAL_DYNAMICS)));
+                () -> new DuctBlockItem(BLOCKS.get(ID_ENERGY_DUCT), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
         devicesTab(registerBlock(ID_FLUID_DUCT,
                 () -> new DuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), FLUID_DUCT_BLOCK_ENTITY),
-                () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT), new Item.Properties()).setModId(ID_THERMAL_DYNAMICS)));
+                () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
         devicesTab(registerBlock(ID_FLUID_DUCT_WINDOWED,
                 () -> new DuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), FLUID_DUCT_WINDOWED_BLOCK_ENTITY),
-                () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT_WINDOWED), new Item.Properties()).setModId(ID_THERMAL_DYNAMICS)));
+                () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT_WINDOWED), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
 
 
         IntSupplier storageAugs = () -> ThermalCoreConfig.storageAugments;
