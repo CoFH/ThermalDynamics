@@ -20,7 +20,7 @@ Contains various logistic options for technical gameplay!
 [[dependencies.thermal_dynamics]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[${mc_version},)"
+versionRange = "1.20.1"
 ordering = "AFTER"
 side = "BOTH"
 

@@ -5,7 +5,6 @@ import cofh.thermal.core.common.config.ThermalCoreConfig;
 import cofh.thermal.dynamics.common.block.DuctBlock;
 import cofh.thermal.dynamics.common.block.entity.ItemBufferBlockEntity;
 import cofh.thermal.dynamics.common.item.DuctBlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 
 import java.util.function.IntSupplier;
