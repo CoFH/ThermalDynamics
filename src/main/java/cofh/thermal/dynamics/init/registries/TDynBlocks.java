@@ -32,13 +32,13 @@ public class TDynBlocks {
     // region HELPERS
     private static void registerTileBlocks() {
 
-        devicesTab(registerBlock(ID_ENERGY_DUCT,
+        devicesTab(50, registerBlock(ID_ENERGY_DUCT,
                 () -> new DuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), ENERGY_DUCT_BLOCK_ENTITY),
                 () -> new DuctBlockItem(BLOCKS.get(ID_ENERGY_DUCT), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
-        devicesTab(registerBlock(ID_FLUID_DUCT,
+        devicesTab(50, registerBlock(ID_FLUID_DUCT,
                 () -> new DuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), FLUID_DUCT_BLOCK_ENTITY),
                 () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
-        devicesTab(registerBlock(ID_FLUID_DUCT_WINDOWED,
+        devicesTab(50, registerBlock(ID_FLUID_DUCT_WINDOWED,
                 () -> new DuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), FLUID_DUCT_WINDOWED_BLOCK_ENTITY),
                 () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT_WINDOWED), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
 
