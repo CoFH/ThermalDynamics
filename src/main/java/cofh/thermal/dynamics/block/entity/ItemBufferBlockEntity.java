@@ -205,6 +205,9 @@ public class ItemBufferBlockEntity extends SecurableBlockEntity implements MenuP
         latchMode = nbt.getBoolean(TAG_MODE);
         checkNBT = nbt.getBoolean(TAG_FILTER_OPT_NBT);
 
+        inputLock = nbt.getBoolean("InputLock");
+        outputLock = nbt.getBoolean("OutputLock");
+
         updateHandlers();
     }
 
@@ -217,6 +220,9 @@ public class ItemBufferBlockEntity extends SecurableBlockEntity implements MenuP
 
         nbt.putBoolean(TAG_MODE, latchMode);
         nbt.putBoolean(TAG_FILTER_OPT_NBT, checkNBT);
+
+        nbt.putBoolean("InputLock", inputLock);
+        nbt.putBoolean("OutputLock", outputLock);
     }
     // endregion
 
