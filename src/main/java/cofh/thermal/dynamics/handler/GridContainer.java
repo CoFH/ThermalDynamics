@@ -235,6 +235,9 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
     public <G extends Grid<G, N>, N extends GridNode<G>> boolean gridNeighborChanged(IDuct<G, N> duct) {
 
         G grid = duct.getGrid();
+        if (grid == null) {
+            return false;
+        }
         N node = duct.getNode();
 
         boolean canExternallyConnect = grid.canConnectExternally(duct.getHostPos());

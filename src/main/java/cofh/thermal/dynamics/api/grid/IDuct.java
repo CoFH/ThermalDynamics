@@ -49,7 +49,7 @@ public interface IDuct<G extends Grid<G, N>, N extends GridNode<G>> {
     /**
      * Set the {@link Grid}.
      *
-     * @param grid The gird to set.
+     * @param grid The grid to set.
      */
     void setGrid(G grid);
 
@@ -63,7 +63,7 @@ public interface IDuct<G extends Grid<G, N>, N extends GridNode<G>> {
     @Nullable
     default N getNode() {
 
-        return getGrid().getNodes().get(getHostPos());
+        return getGrid() == null ? null : getGrid().getNodes().get(getHostPos());
     }
 
     default void neighborChanged(Block blockIn, BlockPos fromPos) {
