@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.common.inventory.attachment;
 
 import cofh.core.common.network.packet.client.ContainerGuiPacket;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.attachment.EnergyLimiterAttachment;
+import cofh.thermal.dynamics.common.attachment.EnergyLimiterAttachment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;

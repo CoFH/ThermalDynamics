@@ -2,8 +2,8 @@ package cofh.thermal.dynamics.common.block.entity.duct;
 
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
-import cofh.thermal.dynamics.grid.energy.EnergyGrid;
-import cofh.thermal.dynamics.grid.energy.EnergyGridNode;
+import cofh.thermal.dynamics.common.grid.energy.EnergyGrid;
+import cofh.thermal.dynamics.common.grid.energy.EnergyGridNode;
 import cofh.thermal.lib.util.ThermalEnergyHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

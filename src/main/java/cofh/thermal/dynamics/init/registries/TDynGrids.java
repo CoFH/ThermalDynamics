@@ -1,8 +1,8 @@
 package cofh.thermal.dynamics.init.registries;
 
 import cofh.thermal.dynamics.api.grid.IGridType;
-import cofh.thermal.dynamics.grid.energy.EnergyGrid;
-import cofh.thermal.dynamics.grid.fluid.FluidGrid;
+import cofh.thermal.dynamics.common.grid.energy.EnergyGrid;
+import cofh.thermal.dynamics.common.grid.fluid.FluidGrid;
 import net.minecraftforge.registries.RegistryObject;
 
 import static cofh.thermal.dynamics.ThermalDynamics.GRIDS;

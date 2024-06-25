@@ -10,11 +10,11 @@ import cofh.thermal.dynamics.client.gui.attachment.EnergyLimiterAttachmentScreen
 import cofh.thermal.dynamics.client.gui.attachment.FluidFilterAttachmentScreen;
 import cofh.thermal.dynamics.client.gui.attachment.FluidServoAttachmentScreen;
 import cofh.thermal.dynamics.client.gui.attachment.FluidTurboServoAttachmentScreen;
+import cofh.thermal.dynamics.common.event.GridEvents;
 import cofh.thermal.dynamics.common.network.packet.client.AttachmentControlPacket;
 import cofh.thermal.dynamics.common.network.packet.client.GridDebugPacket;
 import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
 import cofh.thermal.dynamics.common.network.packet.server.AttachmentRedstoneControlPacket;
-import cofh.thermal.dynamics.handler.GridEvents;
 import cofh.thermal.dynamics.init.registries.*;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;

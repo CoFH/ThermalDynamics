@@ -6,7 +6,7 @@ import cofh.core.client.gui.element.ElementFluid;
 import cofh.core.client.gui.element.ElementTexture;
 import cofh.core.client.gui.element.SimpleTooltip;
 import cofh.core.client.gui.element.panel.RSControlPanel;
-import cofh.thermal.dynamics.attachment.FluidServoAttachment;
+import cofh.thermal.dynamics.common.attachment.FluidServoAttachment;
 import cofh.thermal.dynamics.common.inventory.attachment.FluidServoAttachmentMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;

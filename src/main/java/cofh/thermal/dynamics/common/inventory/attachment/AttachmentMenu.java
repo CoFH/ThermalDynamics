@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.common.inventory.attachment;
 
 import cofh.core.common.inventory.ContainerMenuCoFH;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.attachment.IAttachment;
+import cofh.thermal.dynamics.common.attachment.IAttachment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Inventory;

@@ -4,7 +4,7 @@ import cofh.lib.common.network.packet.IPacketServer;
 import cofh.lib.common.network.packet.PacketBase;
 import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.attachment.IPacketHandlerAttachment;
+import cofh.thermal.dynamics.common.attachment.IPacketHandlerAttachment;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

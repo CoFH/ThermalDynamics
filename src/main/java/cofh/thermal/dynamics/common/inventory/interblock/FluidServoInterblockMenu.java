@@ -8,7 +8,7 @@ import cofh.core.util.filter.IFilterOptions;
 import cofh.lib.common.inventory.SlotFalseCopy;
 import cofh.lib.common.inventory.wrapper.InvWrapperFluids;
 import cofh.lib.util.helpers.MathHelper;
-import cofh.thermal.dynamics.interblock.FluidServoInterblock;
+import cofh.thermal.dynamics.common.interblock.FluidServoInterblock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;

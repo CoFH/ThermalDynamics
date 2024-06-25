@@ -88,13 +88,6 @@ public class ItemBufferBlockEntity extends SecurableBlockEntity implements MenuP
         updateHandlers();
     }
 
-    @Nullable
-    @Override
-    public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-
-        return new ItemBufferMenu(i, level, worldPosition, inventory, player);
-    }
-
     public void setLatchMode(boolean latchMode) {
 
         boolean curLatch = this.latchMode;
@@ -226,11 +219,18 @@ public class ItemBufferBlockEntity extends SecurableBlockEntity implements MenuP
     }
     // endregion
 
-    // region INamedContainerProvider
+    // region MenuProvider
     @Override
     public Component getDisplayName() {
 
         return Component.translatable(this.getBlockState().getBlock().getDescriptionId());
+    }
+
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
+
+        return new ItemBufferMenu(i, level, worldPosition, inventory, player);
     }
     // endregion
 

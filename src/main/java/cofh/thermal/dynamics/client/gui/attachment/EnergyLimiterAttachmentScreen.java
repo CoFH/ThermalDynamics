@@ -6,7 +6,7 @@ import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.ElementTexture;
 import cofh.core.client.gui.element.panel.RSControlPanel;
 import cofh.core.util.helpers.GuiHelper;
-import cofh.thermal.dynamics.attachment.EnergyLimiterAttachment;
+import cofh.thermal.dynamics.common.attachment.EnergyLimiterAttachment;
 import cofh.thermal.dynamics.common.inventory.attachment.EnergyLimiterAttachmentMenu;
 import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
 import net.minecraft.client.gui.GuiGraphics;

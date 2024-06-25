@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.ThermalDynamics;
-import cofh.thermal.dynamics.grid.Grid;
+import cofh.thermal.dynamics.common.grid.Grid;
 import net.minecraft.world.level.Level;
 
 import java.util.UUID;

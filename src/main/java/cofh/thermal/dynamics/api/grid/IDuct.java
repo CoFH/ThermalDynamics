@@ -1,9 +1,9 @@
 package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.TDynApi;
-import cofh.thermal.dynamics.attachment.IAttachment;
-import cofh.thermal.dynamics.grid.Grid;
-import cofh.thermal.dynamics.grid.GridNode;
+import cofh.thermal.dynamics.common.attachment.IAttachment;
+import cofh.thermal.dynamics.common.grid.Grid;
+import cofh.thermal.dynamics.common.grid.GridNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;

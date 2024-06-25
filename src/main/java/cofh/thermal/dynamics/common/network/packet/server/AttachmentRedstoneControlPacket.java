@@ -5,7 +5,7 @@ import cofh.lib.common.network.packet.IPacketServer;
 import cofh.lib.common.network.packet.PacketBase;
 import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.attachment.IRedstoneControllableAttachment;
+import cofh.thermal.dynamics.common.attachment.IRedstoneControllableAttachment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;

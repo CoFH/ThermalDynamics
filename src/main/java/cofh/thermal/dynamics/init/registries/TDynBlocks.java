@@ -47,7 +47,7 @@ public class TDynBlocks {
 
         // registerAugmentableBlock(ID_ENERGY_DISTRIBUTOR, () -> new TileBlockActive6Way(of().sound(SoundType.LANTERN).strength(2.0F).harvestTool(ToolType.PICKAXE).noOcclusion(), EnergyDistributorTile::new), storageAugs, ENERGY_STORAGE_VALIDATOR, ID_THERMAL_DYNAMICS);
 
-        devicesTab(registerBlock(ID_ITEM_BUFFER, () -> new EntityBlock6Way(of().sound(SoundType.NETHERITE_BLOCK).strength(2.0F), ItemBufferBlockEntity.class, ITEM_BUFFER_BLOCK_ENTITY), ID_THERMAL_DYNAMICS));
+        devicesTab(150, registerBlock(ID_ITEM_BUFFER, () -> new EntityBlock6Way(of().sound(SoundType.NETHERITE_BLOCK).strength(2.0F), ItemBufferBlockEntity.class, ITEM_BUFFER_BLOCK_ENTITY), ID_THERMAL_DYNAMICS));
     }
     // endregion
 }

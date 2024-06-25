@@ -1,7 +1,7 @@
 package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.TDynApi;
-import cofh.thermal.dynamics.grid.Grid;
+import cofh.thermal.dynamics.common.grid.Grid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;

@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics.api.grid;
 
-import cofh.thermal.dynamics.grid.GridNode;
+import cofh.thermal.dynamics.common.grid.GridNode;
 
 /**
  * Represents a {@link GridNode} capable of receiving world ticks.

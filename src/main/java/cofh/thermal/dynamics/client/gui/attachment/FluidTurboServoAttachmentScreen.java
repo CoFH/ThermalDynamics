@@ -4,7 +4,7 @@ import cofh.core.client.gui.ContainerScreenCoFH;
 import cofh.core.client.gui.element.*;
 import cofh.core.client.gui.element.panel.RSControlPanel;
 import cofh.core.util.helpers.GuiHelper;
-import cofh.thermal.dynamics.attachment.FluidTurboServoAttachment;
+import cofh.thermal.dynamics.common.attachment.FluidTurboServoAttachment;
 import cofh.thermal.dynamics.common.inventory.attachment.FluidTurboServoAttachmentMenu;
 import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
 import net.minecraft.client.gui.GuiGraphics;

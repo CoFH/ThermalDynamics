@@ -7,7 +7,7 @@ import cofh.lib.common.inventory.SlotFalseCopy;
 import cofh.lib.common.inventory.wrapper.InvWrapperFluids;
 import cofh.lib.util.helpers.MathHelper;
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.attachment.FluidFilterAttachment;
+import cofh.thermal.dynamics.common.attachment.FluidFilterAttachment;
 import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
