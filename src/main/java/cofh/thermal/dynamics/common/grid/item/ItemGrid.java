@@ -8,7 +8,7 @@
 //import net.minecraft.core.Direction;
 //import net.minecraft.world.level.Level;
 //import net.minecraft.world.level.block.entity.BlockEntity;
-//import net.minecraftforge.items.CapabilityItemHandler;
+//import net.neoforged.neoforge.items.CapabilityItemHandler;
 //
 //import javax.annotation.Nullable;
 //import java.util.List;

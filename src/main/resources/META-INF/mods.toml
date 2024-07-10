@@ -27,7 +27,7 @@ side = "BOTH"
 [[dependencies.thermal_dynamics]]
 modId = "forge"
 mandatory = true
-versionRange = "[${forge_version},)"
+versionRange = "[${neo_version},)"
 ordering = "AFTER"
 side = "BOTH"
 

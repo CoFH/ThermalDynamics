@@ -10,7 +10,7 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.Capability;
+import net.neoforged.neoforge.common.capabilities.Capability;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;

@@ -11,8 +11,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import static cofh.thermal.dynamics.init.registries.TDynBlockEntities.FLUID_DUCT_BLOCK_ENTITY;
 import static cofh.thermal.dynamics.init.registries.TDynGrids.FLUID_GRID;

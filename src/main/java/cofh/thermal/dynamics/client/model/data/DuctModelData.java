@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.client.model.data;
 
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.data.ModelProperty;
+import net.neoforged.neoforge.client.model.data.ModelProperty;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;

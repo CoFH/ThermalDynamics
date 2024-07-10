@@ -5,7 +5,7 @@ import cofh.thermal.dynamics.common.block.entity.duct.EnergyDuctBlockEntity;
 import cofh.thermal.dynamics.common.block.entity.duct.FluidDuctBlockEntity;
 import cofh.thermal.dynamics.common.block.entity.duct.FluidDuctWindowedBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.RegistryObject;
 
 import static cofh.thermal.core.ThermalCore.BLOCKS;
 import static cofh.thermal.core.ThermalCore.BLOCK_ENTITIES;

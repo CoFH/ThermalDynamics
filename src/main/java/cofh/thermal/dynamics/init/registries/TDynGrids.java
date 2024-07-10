@@ -3,7 +3,7 @@ package cofh.thermal.dynamics.init.registries;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.common.grid.energy.EnergyGrid;
 import cofh.thermal.dynamics.common.grid.fluid.FluidGrid;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.RegistryObject;
 
 import static cofh.thermal.dynamics.ThermalDynamics.GRIDS;
 import static cofh.thermal.dynamics.init.registries.TDynIDs.ID_ENERGY_GRID;

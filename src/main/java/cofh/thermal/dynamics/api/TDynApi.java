@@ -2,10 +2,10 @@ package cofh.thermal.dynamics.api;
 
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.capabilities.Capability;
+import net.neoforged.neoforge.common.capabilities.CapabilityManager;
+import net.neoforged.neoforge.common.capabilities.CapabilityToken;
+import net.neoforged.neoforge.common.capabilities.RegisterCapabilitiesEvent;
 
 public class TDynApi {
 

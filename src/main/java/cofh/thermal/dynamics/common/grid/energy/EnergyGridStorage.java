@@ -2,7 +2,7 @@ package cofh.thermal.dynamics.common.grid.energy;
 
 import cofh.lib.common.energy.IRedstoneFluxStorage;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.util.INBTSerializable;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 
 import static cofh.lib.util.constants.NBTTags.*;
 

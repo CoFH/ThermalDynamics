@@ -5,10 +5,10 @@ import cofh.thermal.dynamics.common.grid.GridContainer;
 import cofh.thermal.dynamics.common.grid.GridContainerCapProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.common.MinecraftForge;
+import net.neoforged.neoforge.event.AttachCapabilitiesEvent;
+import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
 
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 

@@ -8,8 +8,8 @@ import cofh.thermal.dynamics.common.inventory.attachment.FluidServoAttachmentMen
 import cofh.thermal.dynamics.common.inventory.attachment.FluidTurboServoAttachmentMenu;
 import net.minecraft.core.Direction;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.extensions.IForgeMenuType;
+import net.neoforged.neoforge.registries.RegistryObject;
 
 import static cofh.thermal.core.ThermalCore.CONTAINERS;
 import static cofh.thermal.dynamics.init.registries.TDynIDs.*;

@@ -9,7 +9,7 @@
 //import net.minecraft.world.entity.player.Player;
 //import net.minecraft.world.inventory.AbstractContainerMenu;
 //import net.minecraft.world.level.block.state.BlockState;
-//import net.minecraftforge.energy.IEnergyStorage;
+//import net.neoforged.neoforge.energy.IEnergyStorage;
 //
 //import javax.annotation.Nullable;
 //import java.util.ArrayList;
