@@ -3,14 +3,14 @@ package cofh.thermal.dynamics.common.grid.fluid;
 import cofh.core.util.helpers.FluidHelper;
 import cofh.lib.util.TimeTracker;
 import cofh.thermal.dynamics.api.helper.GridHelper;
+import cofh.thermal.dynamics.common.block.entity.duct.DuctBlockEntity;
 import cofh.thermal.dynamics.common.grid.Grid;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.ForgeCapabilities;
-import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
@@ -31,7 +31,6 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
     protected static final int NODE_CAPACITY = 100;
 
     protected final FluidGridStorage storage = new FluidGridStorage(NODE_CAPACITY);
-    protected LazyOptional<?> fluidCap = LazyOptional.empty();
 
     protected FluidStack renderFluid = FluidStack.EMPTY;
     protected FluidStack prevRenderFluid = FluidStack.EMPTY;
@@ -202,29 +201,30 @@ public class FluidGrid extends Grid<FluidGrid, FluidGridNode> implements IFluidH
             return false; // We cannot externally connect to other grids.
         }
         if (dir != null) {
-            return tile.getCapability(ForgeCapabilities.FLUID_HANDLER, dir).isPresent();
+            return FluidHelper.hasFluidHandlerCap(tile, dir);
         }
         return false;
-        // return tile.getCapability(ForgeCapabilities.FLUID_HANDLER).isPresent();
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+    @Nullable
+    @SuppressWarnings ("unchecked")
+    public <T, C> T getCapability(BlockCapability<T, C> capability) {
 
-        if (cap == ForgeCapabilities.FLUID_HANDLER) {
-            if (!fluidCap.isPresent()) {
-                fluidCap = LazyOptional.of(() -> storage);
-            }
-            return fluidCap.cast();
+        if (capability == Capabilities.FluidHandler.BLOCK) {
+            return (T) storage;
         }
-        return LazyOptional.empty();
+        return null;
     }
 
     @Override
     public void refreshCapabilities() {
 
-        fluidCap.invalidate();
+        for (var node : getNodes().keySet()) {
+            if (getLevel().getBlockEntity(node) instanceof DuctBlockEntity<?, ?> duct) {
+                duct.invalidateAttachments();
+            }
+            getLevel().invalidateCapabilities(node);
+        }
     }
 
     //@formatter:off

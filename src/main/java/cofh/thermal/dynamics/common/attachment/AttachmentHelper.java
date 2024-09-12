@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
-import net.neoforged.neoforge.network.NetworkHooks;
 
 public class AttachmentHelper {
 
@@ -14,7 +13,7 @@ public class AttachmentHelper {
 
     public static void openAttachmentScreen(ServerPlayer player, MenuProvider containerSupplier, BlockPos pos, Direction side) {
 
-        NetworkHooks.openScreen(player, containerSupplier, buf -> {
+        player.openMenu(containerSupplier, buf -> {
             buf.writeBlockPos(pos);
             buf.writeEnum(side);
         });

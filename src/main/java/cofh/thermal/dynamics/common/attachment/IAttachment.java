@@ -7,11 +7,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.capabilities.Capability;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.common.util.LazyOptional;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.Nullable;
 
 public interface IAttachment extends INBTSerializable<CompoundTag> {
 
@@ -29,7 +27,9 @@ public interface IAttachment extends INBTSerializable<CompoundTag> {
 
     Direction side();
 
-    void invalidate();
+    default void invalidate() {
+
+    }
 
     IAttachment read(CompoundTag nbt);
 
@@ -65,25 +65,27 @@ public interface IAttachment extends INBTSerializable<CompoundTag> {
     /**
      * This allows for the grid's capability to be "wrapped" by an attachment.
      *
-     * @param cap        The capability being queried (e.g., ENERGY).
-     * @param gridLazOpt The returned LazyOptional from the grid (or a LazyOptional.empty())
+     * @param capability The capability being queried (e.g., ENERGY).
+     * @param gridCap    The returned cap from the grid (or null)
      * @return The wrapped capability.
      */
-    default <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridLazOpt) {
+    @Nullable
+    default <T, C> T wrapGridCapability(BlockCapability<T, C> capability, T gridCap) {
 
-        return gridLazOpt;
+        return gridCap;
     }
 
     /**
      * This allows for a tile's capability to be "wrapped" by an attachment.
      *
-     * @param cap       The capability being queried (e.g., ENERGY).
-     * @param extLazOpt The returned LazyOptional from the tile (or a LazyOptional.empty())
+     * @param capability The capability being queried (e.g., ENERGY).
+     * @param extCap     The returned cap from the tile (or null)
      * @return The wrapped capability.
      */
-    default <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> extLazOpt) {
+    @Nullable
+    default <T, C> T wrapExternalCapability(BlockCapability<T, C> capability, T extCap) {
 
-        return extLazOpt;
+        return extCap;
     }
 
 }

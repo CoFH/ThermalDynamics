@@ -1,17 +1,16 @@
 package cofh.thermal.dynamics.common.grid.energy;
 
+import cofh.core.util.helpers.EnergyHelper;
 import cofh.lib.common.energy.IRedstoneFluxStorage;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.common.grid.Grid;
-import cofh.thermal.lib.util.ThermalEnergyHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.Capabilities;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +26,6 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
     protected static final long NODE_CAPACITY = 400;
 
     protected final EnergyGridStorage storage = new EnergyGridStorage(NODE_CAPACITY);
-    protected LazyOptional<?> energyCap = LazyOptional.empty();
 
     protected EnergyGridNode[] distArray = new EnergyGridNode[0];
     protected int distIndex = 0;
@@ -134,7 +132,7 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public @org.jetbrains.annotations.UnknownNullability CompoundTag serializeNBT() {
 
         CompoundTag tag = super.serializeNBT();
         storage.write(tag);
@@ -155,29 +153,27 @@ public class EnergyGrid extends Grid<EnergyGrid, EnergyGridNode> implements IRed
             return false; // We cannot externally connect to other grids.
         }
         if (dir != null) {
-            return tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), dir).isPresent();
+            return EnergyHelper.hasEnergyHandlerCap(tile, dir);
         }
         return false;
-        // return tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem()).isPresent();
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public <T, C> T getCapability(BlockCapability<T, C> capability) {
 
-        if (cap == ThermalEnergyHelper.getBaseEnergySystem()) {
-            if (!energyCap.isPresent()) {
-                energyCap = LazyOptional.of(() -> storage);
-            }
-            return energyCap.cast();
+        if (capability == Capabilities.EnergyStorage.BLOCK) {
+            return (T) storage;
         }
-        return LazyOptional.empty();
+        return null;
     }
 
     @Override
     public void refreshCapabilities() {
 
-        energyCap.invalidate();
+        for (var node : getNodes().keySet()) {
+            getLevel().invalidateCapabilities(node);
+        }
     }
 
     //@formatter:off

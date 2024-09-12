@@ -32,10 +32,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.util.LazyOptional;
-import net.neoforged.neoforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -185,7 +183,7 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
                 return true;
             }
             conveyableData.readConveyableData(player, stack.getTag());
-            player.level.playSound(null, player.blockPosition(), SoundEvents.UI_BUTTON_CLICK.get(), SoundSource.PLAYERS, 0.5F, 0.8F);
+            player.level.playSound(null, player.blockPosition(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.5F, 0.8F);
             return true;
         }
         return false;
@@ -194,7 +192,7 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     public boolean openDuctGui(Player player) {
 
         if (this instanceof MenuProvider provider) {
-            NetworkHooks.openScreen((ServerPlayer) player, provider, pos());
+            player.openMenu(provider, pos());
             return true;
         }
         return false;
@@ -234,6 +232,13 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
                 }
                 attachments[dir.ordinal()] = EmptyAttachment.INSTANCE;
             }
+        }
+    }
+
+    public void invalidateAttachments() {
+
+        for (IAttachment attachment : attachments) {
+            attachment.invalidate();
         }
     }
 
@@ -541,14 +546,13 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     }
     // endregion
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+    @Nullable
+    public <T, C> T getCapability(BlockCapability<T, C> capability, Direction side) {
 
         if (side == null || level == null || level.isClientSide || connections[side.ordinal()] == DISABLED || getGrid() == null) {
-            return LazyOptional.empty();
+            return null;
         }
-        return attachments[side.ordinal()].wrapGridCapability(cap, getGrid().getCapability(cap));
+        return attachments[side.ordinal()].wrapGridCapability(capability, getGrid().getCapability(capability));
     }
 
 }

@@ -5,7 +5,7 @@ import cofh.thermal.dynamics.common.grid.GridContainer;
 import cofh.thermal.dynamics.common.grid.GridContainerCapProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AttachCapabilitiesEvent;
 import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
@@ -16,10 +16,10 @@ public class GridEvents {
 
     public static void register() {
 
-        MinecraftForge.EVENT_BUS.addGenericListener(Level.class, GridEvents::attachCapabilities);
-        MinecraftForge.EVENT_BUS.addListener(GridEvents::onWorldTick);
-        MinecraftForge.EVENT_BUS.addListener(GridEvents::onChunkLoad);
-        MinecraftForge.EVENT_BUS.addListener(GridEvents::onChunkUnload);
+        NeoForge.EVENT_BUS.addGenericListener(Level.class, GridEvents::attachCapabilities);
+        NeoForge.EVENT_BUS.addListener(GridEvents::onWorldTick);
+        NeoForge.EVENT_BUS.addListener(GridEvents::onChunkLoad);
+        NeoForge.EVENT_BUS.addListener(GridEvents::onChunkUnload);
     }
 
     private static void attachCapabilities(AttachCapabilitiesEvent<Level> event) {

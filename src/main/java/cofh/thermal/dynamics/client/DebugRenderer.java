@@ -13,9 +13,9 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.common.MinecraftForge;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -62,7 +62,7 @@ public class DebugRenderer {
 
     public static void register() {
 
-        MinecraftForge.EVENT_BUS.addListener(DebugRenderer::renderWorldLast);
+        NeoForge.EVENT_BUS.addListener(DebugRenderer::renderWorldLast);
     }
 
     private static void renderWorldLast(RenderLevelStageEvent event) {

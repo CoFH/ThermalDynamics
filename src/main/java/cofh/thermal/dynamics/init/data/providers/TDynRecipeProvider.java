@@ -5,14 +5,12 @@ import cofh.lib.init.tags.ItemTagsCoFH;
 import cofh.thermal.lib.util.ThermalFlags;
 import cofh.thermal.lib.util.references.ThermalTags;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.Tags;
-
-import java.util.function.Consumer;
 
 import static cofh.lib.util.constants.ModIds.ID_THERMAL;
 import static cofh.thermal.core.ThermalCore.ITEMS;
@@ -29,12 +27,12 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
     }
 
     @Override
-    protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
+    protected void buildRecipes(RecipeOutput consumer) {
 
         generateTileRecipes(consumer);
     }
 
-    private void generateTileRecipes(Consumer<FinishedRecipe> consumer) {
+    private void generateTileRecipes(RecipeOutput consumer) {
 
         var reg = ITEMS;
 

@@ -10,18 +10,14 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.capabilities.Capability;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 
 /**
  * Represents an object capable of hosting a {@link Grid}.
- * <p>
  * These are usually {@link BlockEntity} instances.
- * <p>
- * This interface may be implemented directly on the {@link BlockEntity},
- * or exposed via a {@link Capability}.
+ * This interface may be implemented directly on the {@link BlockEntity}.
  *
  * @author covers1624
  * @see TDynApi#GRID_HOST_CAPABILITY

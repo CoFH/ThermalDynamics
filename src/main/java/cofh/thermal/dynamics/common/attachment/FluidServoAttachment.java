@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.common.capabilities.Capability;
 import net.neoforged.neoforge.common.capabilities.ForgeCapabilities;
 import net.neoforged.neoforge.common.util.LazyOptional;
@@ -78,13 +79,6 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     public Direction side() {
 
         return side;
-    }
-
-    @Override
-    public void invalidate() {
-
-        gridCap.invalidate();
-        externalCap.invalidate();
     }
 
     @Override
@@ -154,6 +148,20 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 
         return new FluidServoAttachmentMenu(i, player.level, pos(), side, inventory, player);
+    }
+
+    @Nullable
+    @Override
+    public <T, C> T wrapGridCapability(BlockCapability<T, C> capability, T gridCap) {
+
+        return gridCap;
+    }
+
+    @Nullable
+    @Override
+    public <T, C> T wrapExternalCapability(BlockCapability<T, C> capability, T extCap) {
+
+        return extCap;
     }
 
     @Override

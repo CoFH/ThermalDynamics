@@ -17,14 +17,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.neoforged.neoforge.common.capabilities.Capability;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.LongFunction;
 
@@ -637,9 +635,10 @@ public abstract class Grid<G extends Grid<G, N>, N extends GridNode<G>> implemen
         return canConnectOnSide(tile, dir);
     }
 
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+    @Nullable
+    public <T, C> T getCapability(BlockCapability<T, C> capability) {
 
-        return LazyOptional.empty();
+        return null;
     }
 
     public final void debugWriteToPacket(FriendlyByteBuf buffer) {

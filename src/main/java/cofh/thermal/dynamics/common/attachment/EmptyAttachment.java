@@ -35,11 +35,6 @@ public class EmptyAttachment implements IAttachment {
     }
 
     @Override
-    public void invalidate() {
-
-    }
-
-    @Override
     public IAttachment read(CompoundTag nbt) {
 
         return INSTANCE;

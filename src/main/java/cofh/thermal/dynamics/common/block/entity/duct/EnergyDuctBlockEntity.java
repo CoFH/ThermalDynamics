@@ -1,10 +1,10 @@
 package cofh.thermal.dynamics.common.block.entity.duct;
 
+import cofh.core.util.helpers.EnergyHelper;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.api.helper.GridHelper;
 import cofh.thermal.dynamics.common.grid.energy.EnergyGrid;
 import cofh.thermal.dynamics.common.grid.energy.EnergyGridNode;
-import cofh.thermal.lib.util.ThermalEnergyHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -30,7 +30,7 @@ public class EnergyDuctBlockEntity extends DuctBlockEntity<EnergyGrid, EnergyGri
         if (tile == null || GridHelper.getGridHost(tile) != null) {
             return false;
         }
-        return tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), dir.getOpposite()).isPresent();
+        return EnergyHelper.hasEnergyHandlerCap(tile, dir.getOpposite());
     }
 
     @Override
