@@ -2,7 +2,6 @@ package cofh.thermal.dynamics.init.data.providers;
 
 import cofh.lib.init.data.RecipeProviderCoFH;
 import cofh.lib.init.tags.ItemTagsCoFH;
-import cofh.thermal.lib.util.ThermalFlags;
 import cofh.thermal.lib.util.references.ThermalTags;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
@@ -23,7 +22,6 @@ public class TDynRecipeProvider extends RecipeProviderCoFH {
     public TDynRecipeProvider(PackOutput output) {
 
         super(output, ID_THERMAL);
-        manager = ThermalFlags.manager();
     }
 
     @Override

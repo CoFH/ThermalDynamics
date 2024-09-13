@@ -16,16 +16,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.ForgeCapabilities;
-import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import static cofh.lib.util.Constants.BUCKET_VOLUME;
@@ -36,8 +32,8 @@ import static cofh.thermal.dynamics.client.TDynTextures.SERVO_ATTACHMENT_ACTIVE_
 import static cofh.thermal.dynamics.client.TDynTextures.SERVO_ATTACHMENT_LOC;
 import static cofh.thermal.dynamics.init.registries.TDynIDs.ID_SERVO_ATTACHMENT;
 import static cofh.thermal.dynamics.init.registries.TDynIDs.SERVO;
-import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
-import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE;
+import static net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
+import static net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE;
 
 public class FluidServoAttachment implements IFilterableAttachment, IRedstoneControllableAttachment, IConveyableData, MenuProvider {
 
@@ -54,9 +50,9 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     protected BaseFluidFilter filter = new BaseFluidFilter(15);
     protected RedstoneControlLogic rsControl = new RedstoneControlLogic(this);
 
-    protected LazyOptional<IFluidHandler> internalGridCap = LazyOptional.empty();
-    protected LazyOptional<IFluidHandler> gridCap = LazyOptional.empty();
-    protected LazyOptional<IFluidHandler> externalCap = LazyOptional.empty();
+    protected IFluidHandler internalGridCap = null;
+    protected IFluidHandler gridCap = null;
+    protected IFluidHandler extCap = null;
 
     public FluidServoAttachment(IDuct<?, ?> duct, Direction side) {
 
@@ -79,6 +75,14 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
     public Direction side() {
 
         return side;
+    }
+
+    @Override
+    public void invalidate() {
+
+        internalGridCap = null;
+        gridCap = null;
+        extCap = null;
     }
 
     @Override
@@ -113,16 +117,16 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
         if (!rsControl.getState()) {
             return;
         }
-        if (!internalGridCap.isPresent()) {
-            internalGridCap = duct.getGrid().getCapability(ForgeCapabilities.FLUID_HANDLER);
+        if (internalGridCap == null) {
+            internalGridCap = duct.getGrid().getCapability(Capabilities.FluidHandler.BLOCK);
         }
-        externalCap.ifPresent(e -> internalGridCap.ifPresent(i -> {
+        if (extCap != null && internalGridCap != null) {
             amountTransfer += TRANSFER;
             amountTransfer = Math.min(amountTransfer, MAX_TRANSFER);
-            int toFill = i.fill(e.drain(amountTransfer, SIMULATE), SIMULATE);
-            i.fill(e.drain(toFill, EXECUTE), EXECUTE);
+            int toFill = internalGridCap.fill(extCap.drain(amountTransfer, SIMULATE), SIMULATE);
+            internalGridCap.fill(extCap.drain(toFill, EXECUTE), EXECUTE);
             amountTransfer -= toFill;
-        }));
+        }
     }
 
     @Override
@@ -152,50 +156,34 @@ public class FluidServoAttachment implements IFilterableAttachment, IRedstoneCon
 
     @Nullable
     @Override
-    public <T, C> T wrapGridCapability(BlockCapability<T, C> capability, T gridCap) {
+    public <T, C> T wrapGridCapability(BlockCapability<T, C> capability, T gridCapIn) {
 
-        return gridCap;
+        if (capability == Capabilities.FluidHandler.BLOCK) {
+            if (gridCap != null) {
+                return (T) gridCap;
+            }
+            if (gridCapIn instanceof IFluidHandler handler) {
+                gridCap = new WrappedGridFluidHandler(handler);
+                return (T) gridCap;
+            }
+        }
+        return gridCapIn;
     }
 
     @Nullable
     @Override
-    public <T, C> T wrapExternalCapability(BlockCapability<T, C> capability, T extCap) {
+    public <T, C> T wrapExternalCapability(BlockCapability<T, C> capability, T extCapIn) {
 
-        return extCap;
-    }
-
-    @Override
-    public <T> LazyOptional<T> wrapGridCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> gridLazOpt) {
-
-        if (cap == ForgeCapabilities.FLUID_HANDLER) {
-            if (gridCap.isPresent()) {
-                return gridCap.cast();
+        if (capability == Capabilities.FluidHandler.BLOCK) {
+            if (extCap != null) {
+                return (T) extCap;
             }
-            Optional<T> gridOpt = gridLazOpt.resolve();
-            if (gridOpt.isPresent() && gridOpt.get() instanceof IFluidHandler handler) {
-                gridCap = LazyOptional.of(() -> new WrappedGridFluidHandler(handler));
-                gridLazOpt.addListener(e -> gridCap.invalidate());
-                return gridCap.cast();
+            if (extCapIn instanceof IFluidHandler handler) {
+                extCap = new WrappedExternalFluidHandler(handler, e -> rsControl.getState() && filter.valid(e));
+                return (T) extCap;
             }
         }
-        return gridLazOpt;
-    }
-
-    @Override
-    public <T> LazyOptional<T> wrapExternalCapability(@Nonnull Capability<T> cap, @Nonnull LazyOptional<T> extLazOpt) {
-
-        if (cap == ForgeCapabilities.FLUID_HANDLER) {
-            if (externalCap.isPresent()) {
-                return externalCap.cast();
-            }
-            Optional<T> extOpt = extLazOpt.resolve();
-            if (extOpt.isPresent() && extOpt.get() instanceof IFluidHandler handler) {
-                externalCap = LazyOptional.of(() -> new WrappedExternalFluidHandler(handler, e -> rsControl.getState() && filter.valid(e)));
-                extLazOpt.addListener(e -> externalCap.invalidate());
-                return externalCap.cast();
-            }
-        }
-        return extLazOpt;
+        return extCapIn;
     }
 
     // region IFilterableAttachment

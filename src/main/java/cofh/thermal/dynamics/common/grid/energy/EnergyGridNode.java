@@ -4,11 +4,12 @@ import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.ITickableGridNode;
 import cofh.thermal.dynamics.common.attachment.IAttachment;
 import cofh.thermal.dynamics.common.grid.GridNode;
-import cofh.thermal.lib.util.ThermalEnergyHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.DISABLED;
@@ -78,9 +79,11 @@ public class EnergyGridNode extends GridNode<EnergyGrid> implements ITickableGri
         if (tile == null) {
             return;
         }
-        attachment.wrapExternalCapability(ThermalEnergyHelper.getBaseEnergySystem(),
-                        tile.getCapability(ThermalEnergyHelper.getBaseEnergySystem(), dir.getOpposite()).cast())
-                .ifPresent(e -> grid.extractEnergy(e.receiveEnergy(grid.getEnergyStored(), false), false));
+        IEnergyStorage storage = attachment.wrapExternalCapability(Capabilities.EnergyStorage.BLOCK,
+                world.getCapability(Capabilities.EnergyStorage.BLOCK, tile.getBlockPos(), tile.getBlockState(), tile, dir.getOpposite()));
+        if (storage != null) {
+            grid.extractEnergy(storage.receiveEnergy(grid.getEnergyStored(), false), false);
+        }
     }
 
 }

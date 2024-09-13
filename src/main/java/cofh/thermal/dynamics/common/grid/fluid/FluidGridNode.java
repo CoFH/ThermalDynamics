@@ -8,11 +8,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
 import static cofh.thermal.dynamics.api.grid.IDuct.ConnectionType.DISABLED;
-import static net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
+import static net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
 
 public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridNode {
 
@@ -79,9 +80,11 @@ public class FluidGridNode extends GridNode<FluidGrid> implements ITickableGridN
         if (tile == null) {
             return;
         }
-        attachment.wrapExternalCapability(ForgeCapabilities.FLUID_HANDLER,
-                        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, dir.getOpposite()))
-                .ifPresent(e -> grid.drain(e.fill(grid.getFluid(), EXECUTE), EXECUTE));
+        IFluidHandler handler = attachment.wrapExternalCapability(Capabilities.FluidHandler.BLOCK,
+                world.getCapability(Capabilities.FluidHandler.BLOCK, tile.getBlockPos(), tile.getBlockState(), tile, dir.getOpposite()));
+        if (handler != null) {
+            grid.drain(handler.fill(grid.getFluid(), EXECUTE), EXECUTE);
+        }
     }
 
 }

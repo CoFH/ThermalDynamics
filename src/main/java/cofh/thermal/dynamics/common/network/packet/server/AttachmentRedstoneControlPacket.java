@@ -1,71 +1,53 @@
 package cofh.thermal.dynamics.common.network.packet.server;
 
-import cofh.lib.api.control.IRedstoneControllable.ControlMode;
-import cofh.lib.common.network.packet.IPacketServer;
-import cofh.lib.common.network.packet.PacketBase;
-import cofh.thermal.dynamics.ThermalDynamics;
+import cofh.lib.api.control.IRedstoneControllable;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.common.attachment.IRedstoneControllableAttachment;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
+import cofh.thermal.dynamics.common.network.data.server.AttachmentRedstoneControlPayload;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
-import static cofh.core.common.network.packet.PacketIDs.PACKET_REDSTONE_CONTROL;
+import java.util.Optional;
 
-public class AttachmentRedstoneControlPacket extends PacketBase implements IPacketServer {
+public class AttachmentRedstoneControlPacket {
 
-    protected BlockPos pos;
-    protected Direction side;
-    protected int threshold;
-    protected byte mode;
+    public static final AttachmentRedstoneControlPacket INSTANCE = new AttachmentRedstoneControlPacket();
 
-    public AttachmentRedstoneControlPacket() {
+    public static AttachmentRedstoneControlPacket get() {
 
-        super(PACKET_REDSTONE_CONTROL, ThermalDynamics.PACKET_HANDLER);
+        return INSTANCE;
     }
 
-    @Override
-    public void handleServer(ServerPlayer player) {
+    public void handle(final AttachmentRedstoneControlPayload payload, final PlayPayloadContext context) {
 
-        Level world = player.level;
-        if (!world.isLoaded(pos)) {
-            return;
-        }
-        BlockEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof IRedstoneControllableAttachment attachment) {
-            attachment.setControl(threshold, ControlMode.VALUES[mode]);
-        }
-    }
+        context.workHandler().submitAsync(() -> {
 
-    @Override
-    public void write(FriendlyByteBuf buf) {
+            Optional<Player> senderOptional = context.player();
+            if (senderOptional.isEmpty()) {
+                return;
+            }
+            Player player = senderOptional.get();
 
-        buf.writeBlockPos(pos);
-        buf.writeEnum(side);
-        buf.writeInt(threshold);
-        buf.writeByte(mode);
-    }
-
-    @Override
-    public void read(FriendlyByteBuf buf) {
-
-        pos = buf.readBlockPos();
-        side = buf.readEnum(Direction.class);
-        threshold = buf.readInt();
-        mode = buf.readByte();
+            Level world = player.level;
+            if (!world.isLoaded(payload.pos())) {
+                return;
+            }
+            BlockEntity tile = world.getBlockEntity(payload.pos());
+            if (tile instanceof IDuct<?, ?> duct && duct.getAttachment(payload.side()) instanceof IRedstoneControllableAttachment attachment) {
+                attachment.setControl(payload.threshold(), IRedstoneControllable.ControlMode.VALUES[payload.mode()]);
+            }
+        });
     }
 
     public static void sendToServer(IRedstoneControllableAttachment attachment) {
 
-        AttachmentRedstoneControlPacket packet = new AttachmentRedstoneControlPacket();
-        packet.pos = attachment.pos();
-        packet.side = attachment.side();
-        packet.threshold = attachment.redstoneControl().getThreshold();
-        packet.mode = (byte) attachment.redstoneControl().getMode().ordinal();
-        packet.sendToServer();
+        if (attachment == null) {
+            return;
+        }
+        PacketDistributor.SERVER.noArg().send(new AttachmentRedstoneControlPayload(attachment.pos(), attachment.side(), attachment.redstoneControl().getThreshold(), (byte) attachment.redstoneControl().getMode().ordinal()));
     }
 
 }

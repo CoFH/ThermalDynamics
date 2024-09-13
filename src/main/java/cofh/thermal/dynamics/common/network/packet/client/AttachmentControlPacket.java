@@ -1,74 +1,49 @@
 package cofh.thermal.dynamics.common.network.packet.client;
 
-import cofh.core.CoFHCore;
+
 import cofh.core.util.ProxyUtils;
-import cofh.lib.common.network.packet.IPacketClient;
-import cofh.lib.common.network.packet.PacketBase;
 import cofh.lib.util.Utils;
-import cofh.thermal.dynamics.ThermalDynamics;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.common.attachment.IPacketHandlerAttachment;
+import cofh.thermal.dynamics.common.network.data.client.AttachmentControlPayload;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
-import static cofh.core.common.network.packet.PacketIDs.PACKET_CONTROL;
-import static cofh.lib.util.Constants.NETWORK_UPDATE_DISTANCE;
+public class AttachmentControlPacket {
 
-public class AttachmentControlPacket extends PacketBase implements IPacketClient {
+    public static final AttachmentControlPacket INSTANCE = new AttachmentControlPacket();
 
-    protected BlockPos pos;
-    protected Direction side;
-    protected FriendlyByteBuf buffer;
+    public static AttachmentControlPacket get() {
 
-    public AttachmentControlPacket() {
-
-        super(PACKET_CONTROL, ThermalDynamics.PACKET_HANDLER);
+        return INSTANCE;
     }
 
-    @Override
-    public void handleClient() {
+    public void handle(final AttachmentControlPayload payload, final PlayPayloadContext context) {
 
-        Level world = ProxyUtils.getClientWorld();
-        if (world == null) {
-            CoFHCore.LOG.error("Client world is null! (Is this being called on the server?)");
-            return;
-        }
-        BlockEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof IPacketHandlerAttachment attachment) {
-            attachment.handleControlPacket(buffer);
-        }
-    }
+        context.workHandler().submitAsync(() -> {
+            Level world = ProxyUtils.getClientWorld();
 
-    @Override
-    public void write(FriendlyByteBuf buf) {
+            BlockPos pos = payload.pos();
+            Direction side = payload.side();
 
-        buf.writeBlockPos(pos);
-        buf.writeEnum(side);
-        buf.writeBytes(buffer);
-    }
-
-    @Override
-    public void read(FriendlyByteBuf buf) {
-
-        buffer = buf;
-        pos = buffer.readBlockPos();
-        side = buffer.readEnum(Direction.class);
+            BlockEntity tile = world.getBlockEntity(pos);
+            if (tile instanceof IDuct<?, ?> duct && duct.getAttachment(side) instanceof IPacketHandlerAttachment attachment) {
+                attachment.handleControlPacket(payload.buf());
+            }
+        });
     }
 
     public static void sendToClient(IPacketHandlerAttachment attachment) {
 
-        if (attachment.world() == null || Utils.isClientWorld(attachment.world()) || !attachment.hasControlPacket()) {
+        if (attachment == null || attachment.world() == null || attachment.world().isClientSide || !attachment.hasControlPacket()) {
             return;
         }
-        AttachmentControlPacket packet = new AttachmentControlPacket();
-        packet.pos = attachment.pos();
-        packet.side = attachment.side();
-        packet.buffer = attachment.getControlPacket(new FriendlyByteBuf(Unpooled.buffer()));
-        packet.sendToAllAround(packet.pos, NETWORK_UPDATE_DISTANCE, attachment.world().dimension());
+        PacketDistributor.NEAR.with(Utils.createTargetPoint(attachment.world(), attachment.pos())).send(new AttachmentControlPayload(attachment.pos(), attachment.side(), attachment.getControlPacket(new FriendlyByteBuf(Unpooled.buffer()))));
     }
-
 }

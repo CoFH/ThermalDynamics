@@ -430,10 +430,8 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
             for (Grid<?, ?> value : loadedGrids.values()) {
                 value.debugWriteToPacket(buffer);
             }
-            GridDebugPacket debugPacket = new GridDebugPacket(buffer);
-            debugPacket.sendToClients();
+            GridDebugPacket.sendToClients(buffer);
         }
-
         tickCounter++;
     }
 

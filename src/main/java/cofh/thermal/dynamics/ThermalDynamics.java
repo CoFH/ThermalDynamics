@@ -1,6 +1,6 @@
 package cofh.thermal.dynamics;
 
-import cofh.lib.common.network.PacketHandler;
+import cofh.core.common.network.PacketHandler;
 import cofh.lib.util.DeferredRegisterCoFH;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridType;
@@ -11,20 +11,16 @@ import cofh.thermal.dynamics.client.gui.attachment.FluidFilterAttachmentScreen;
 import cofh.thermal.dynamics.client.gui.attachment.FluidServoAttachmentScreen;
 import cofh.thermal.dynamics.client.gui.attachment.FluidTurboServoAttachmentScreen;
 import cofh.thermal.dynamics.common.event.GridEvents;
-import cofh.thermal.dynamics.common.network.packet.client.AttachmentControlPacket;
-import cofh.thermal.dynamics.common.network.packet.client.GridDebugPacket;
-import cofh.thermal.dynamics.common.network.packet.server.AttachmentConfigPacket;
-import cofh.thermal.dynamics.common.network.packet.server.AttachmentRedstoneControlPacket;
 import cofh.thermal.dynamics.init.registries.*;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.neoforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.registries.IForgeRegistry;
 import net.neoforged.neoforge.registries.RegistryBuilder;
@@ -34,13 +30,12 @@ import org.apache.logging.log4j.Logger;
 import java.util.function.Supplier;
 
 import static cofh.core.common.network.packet.PacketIDs.*;
+import static cofh.lib.util.FlagManager.setFlag;
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.core.ThermalCore.BLOCKS;
 import static cofh.thermal.dynamics.init.registries.TDynContainers.*;
 import static cofh.thermal.dynamics.init.registries.TDynIDs.*;
-import static cofh.thermal.dynamics.util.TDynConstants.PACKET_GRID_DEBUG;
 import static cofh.thermal.lib.util.ThermalFlags.FLAG_XP_STORAGE_AUGMENT;
-import static cofh.thermal.lib.util.ThermalFlags.setFlag;
 import static cofh.thermal.lib.util.ThermalIDs.ID_DEVICE_COLLECTOR;
 import static cofh.thermal.lib.util.ThermalIDs.ID_DEVICE_NULLIFIER;
 
@@ -48,7 +43,6 @@ import static cofh.thermal.lib.util.ThermalIDs.ID_DEVICE_NULLIFIER;
 public class ThermalDynamics {
 
     public static final Logger LOG = LogManager.getLogger(ID_THERMAL_DYNAMICS);
-    public static final PacketHandler PACKET_HANDLER = new PacketHandler(new ResourceLocation(ID_THERMAL_DYNAMICS, "general"), LOG);
 
     public static final ResourceLocation GRID_REGISTRY_LOC = new ResourceLocation(ID_THERMAL_DYNAMICS, ID_GRID_TYPE);
     public static final DeferredRegisterCoFH<IGridType<?>> GRIDS = DeferredRegisterCoFH.create(GRID_REGISTRY_LOC, ID_THERMAL_DYNAMICS);
@@ -59,17 +53,15 @@ public class ThermalDynamics {
                     .disableSaving()    // GridTypes don't need id's saved to disk.
             );
 
-    public ThermalDynamics() {
+    public ThermalDynamics(ModContainer modContainer, IEventBus modEventBus) {
 
         setFeatureFlags();
-
-        registerPackets();
-
-        final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::capSetup);
+
+        modEventBus.addListener(PacketHandler::registerNetworking);
 
         GRIDS.register(modEventBus);
 
@@ -81,15 +73,6 @@ public class ThermalDynamics {
         TDynBlockEntities.register();
 
         GridEvents.register();
-    }
-
-    private void registerPackets() {
-
-        PACKET_HANDLER.registerPacket(PACKET_CONTROL, AttachmentControlPacket::new);
-        PACKET_HANDLER.registerPacket(PACKET_CONFIG, AttachmentConfigPacket::new);
-        PACKET_HANDLER.registerPacket(PACKET_REDSTONE_CONTROL, AttachmentRedstoneControlPacket::new);
-
-        PACKET_HANDLER.registerPacket(PACKET_GRID_DEBUG, GridDebugPacket::new);
     }
 
     private void setFeatureFlags() {
