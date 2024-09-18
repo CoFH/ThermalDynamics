@@ -2,8 +2,10 @@ package cofh.thermal.dynamics.api.grid;
 
 import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.common.grid.Grid;
+import cofh.thermal.dynamics.common.grid.GridContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import org.jetbrains.annotations.Nullable;
@@ -50,10 +52,11 @@ public interface IGridContainer {
     void onDuctSideDisconnecting(IDuct<?, ?> duct, Direction side);
 
     @Nullable
-    static IGridContainer getCapability(LevelAccessor la) {
+    static IGridContainer getGrid(LevelAccessor la) {
 
-        if (!(la instanceof Level level)) return null;
-        return level.getCapability(TDynApi.GRID_CONTAINER_CAPABILITY).resolve().orElse(null);
+        if (!(la instanceof ServerLevel level)) return null;
+
+        return GridContainer.getInstance(level);
     }
 
 }

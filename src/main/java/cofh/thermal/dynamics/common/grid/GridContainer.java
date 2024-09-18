@@ -19,9 +19,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.neoforge.event.TickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static cofh.lib.util.Constants.DIRECTIONS;
+import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 import static cofh.thermal.core.ThermalCore.LOG;
 import static cofh.thermal.dynamics.api.helper.GridHelper.*;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
@@ -39,7 +40,7 @@ import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
  * @author covers1624
  */
 @SuppressWarnings ("UnstableApiUsage")
-public class GridContainer implements IGridContainer, INBTSerializable<ListTag> {
+public class GridContainer extends SavedData implements IGridContainer {
 
     private static final boolean DEBUG = GridContainer.class.desiredAssertionStatus();
 
@@ -50,13 +51,29 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
 
     private final Map<UUID, Grid<?, ?>> grids = new HashMap<>();
     private final Map<UUID, Grid<?, ?>> loadedGrids = new HashMap<>();
-    private final Level world;
+    private final ServerLevel world;
 
     private int tickCounter;
 
-    public GridContainer(Level world) {
+    private GridContainer(ServerLevel world) {
 
         this.world = world;
+    }
+
+    private GridContainer(ServerLevel world, CompoundTag tag) {
+
+        this.world = world;
+        load(tag);
+    }
+
+    public static GridContainer getInstance(ServerLevel level) {
+        return level.getDataStorage().computeIfAbsent(
+                new Factory<>(
+                        () -> new GridContainer(level),
+                        t -> new GridContainer(level, t)
+                ),
+                ID_THERMAL_DYNAMICS + "_grids"
+        );
     }
 
     private static boolean canConnectTo(IDuct<?, ?> from, IDuct<?, ?> to, Direction dir) {
@@ -478,40 +495,45 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
         return unsafeCast(grid);
     }
 
-    @Override
-    public ListTag serializeNBT() {
+    private void load(CompoundTag tag) {
 
-        ListTag grids = new ListTag();
-        for (Map.Entry<UUID, Grid<?, ?>> entry : this.grids.entrySet()) {
-            Grid<?, ?> grid = entry.getValue();
-            CompoundTag tag = new CompoundTag();
-            tag.putUUID("id", entry.getKey());
-            tag.putString("type", ThermalDynamics.GRID_TYPE_REGISTRY.get().getKey(grid.getGridType()).toString());
-            tag.merge(grid.serializeNBT());
-            grids.add(tag);
-        }
-        return grids;
-    }
-
-    @Override
-    public void deserializeNBT(ListTag nbt) {
-
+        ListTag nbt = tag.getList("grids", CompoundTag.TAG_COMPOUND);
         assert grids.isEmpty();
         for (int i = 0; i < nbt.size(); ++i) {
-            CompoundTag tag = nbt.getCompound(i);
-            UUID id = tag.getUUID("id");
+            CompoundTag gridTag = nbt.getCompound(i);
+            UUID id = gridTag.getUUID("id");
             assert !grids.containsKey(id) : "Duplicate grid found.";
-            ResourceLocation gridTypeName = new ResourceLocation(tag.getString("type"));
-            IGridType<?> gridType = ThermalDynamics.GRID_TYPE_REGISTRY.get().getValue(gridTypeName);
+            ResourceLocation gridTypeName = new ResourceLocation(gridTag.getString("type"));
+            IGridType<?> gridType = ThermalDynamics.GRID_TYPE_REGISTRY.get(gridTypeName);
             if (gridType == null) {
                 LOGGER.error("Failed to load Grid {} with type {} in world {}. GridType is no longer registered, it will be removed from the world.", id, gridTypeName, world.dimension().location());
                 continue;
             }
-            deserializeGrid(tag, id, unsafeCast(gridType));
+            deserializeGrid(gridTag, id, unsafeCast(gridType));
         }
         if (DEBUG) {
             LOGGER.info("Loaded {} grids for {}.", grids.size(), world.dimension().location());
         }
+    }
+
+    @Override
+    public CompoundTag save(CompoundTag tag) {
+        ListTag grids = new ListTag();
+        for (Map.Entry<UUID, Grid<?, ?>> entry : this.grids.entrySet()) {
+            Grid<?, ?> grid = entry.getValue();
+            CompoundTag gridTag = new CompoundTag();
+            gridTag.putUUID("id", entry.getKey());
+            gridTag.putString("type", ThermalDynamics.GRID_TYPE_REGISTRY.getKey(grid.getGridType()).toString());
+            gridTag.merge(grid.serializeNBT());
+            grids.add(gridTag);
+        }
+        tag.put("grids", grids);
+        return tag;
+    }
+
+    @Override
+    public boolean isDirty() {
+        return true; // Always save this SavedData
     }
 
     private <G extends Grid<G, N>, N extends GridNode<G>> void deserializeGrid(CompoundTag tag, UUID id, IGridType<G> gridType) {

@@ -19,9 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.ForgeCapabilities;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
@@ -255,40 +252,19 @@ public class ItemBufferBlockEntity extends SecurableBlockEntity implements MenuP
     // endregion
 
     // region CAPABILITIES
-    protected LazyOptional<?> inputCap = LazyOptional.empty();
-    protected LazyOptional<?> outputCap = LazyOptional.empty();
-
+    @Deprecated // TODO inline?
     protected void updateHandlers() {
 
-        LazyOptional<?> prevInputCap = inputCap;
-        LazyOptional<?> prevOutputCap = outputCap;
-
-        IItemHandler inputHandler = inventory.getHandler(INPUT);
-        IItemHandler outputHandler = inventory.getHandler(OUTPUT);
-
-        inputCap = LazyOptional.of(() -> inputHandler);
-        outputCap = LazyOptional.of(() -> outputHandler);
-
-        prevInputCap.invalidate();
-        prevOutputCap.invalidate();
+        invalidateCapabilities();
     }
 
     @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            return getItemHandlerCapability(side);
-        }
-        return super.getCapability(cap, side);
-    }
-
-    protected <T> LazyOptional<T> getItemHandlerCapability(@Nullable Direction side) {
+    public IItemHandler getItemHandler(@Nullable Direction side) {
 
         if (side == getBlockState().getValue(FACING_ALL)) {
-            return outputCap.cast();
+            return inventory.getHandler(OUTPUT);
         }
-        return inputCap.cast();
+        return inventory.getHandler(INPUT);
     }
     // endregion
 }

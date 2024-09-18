@@ -52,7 +52,7 @@ public interface IGridType<G extends Grid<G, ?>> {
             @Override
             public String toString() {
 
-                return ThermalDynamics.GRID_TYPE_REGISTRY.get().getKey(this).toString();
+                return ThermalDynamics.GRID_TYPE_REGISTRY.getKey(this).toString();
             }
         };
     }

@@ -7,6 +7,7 @@ import cofh.thermal.dynamics.common.grid.Grid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
@@ -56,7 +57,10 @@ public class GridHelper {
         if (tile instanceof IDuct<?, ?> host) {
             return host;
         }
-        return tile.getCapability(TDynApi.GRID_HOST_CAPABILITY).orElse(null);
+        Level level = tile.getLevel();
+        if (level == null) return null;
+
+        return level.getCapability(TDynApi.GRID_HOST_CAPABILITY, tile.getBlockPos(), tile.getBlockState(), tile, null);
     }
 
     /**

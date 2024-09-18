@@ -204,7 +204,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
         BlockEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof IDuct<?, ?> host) {
             host.neighborChanged(blockIn, fromPos);
-            IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
+            IGridContainer gridContainer = IGridContainer.getGrid(worldIn);
             if (gridContainer != null && gridContainer.onDuctNeighborChanged(host) || worldIn.getBlockEntity(fromPos) instanceof IDuct<?, ?>) {
                 worldIn.scheduleTick(pos, this, 1);
             }
@@ -219,7 +219,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
         }
         BlockEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof IDuct<?, ?> host && !host.hasGrid()) {
-            IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
+            IGridContainer gridContainer = IGridContainer.getGrid(worldIn);
             if (gridContainer != null) {
                 gridContainer.onDuctPlaced(host, null);
             }
@@ -233,7 +233,7 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
             BlockEntity tile = worldIn.getBlockEntity(pos);
             if (tile instanceof DuctBlockEntity<?, ?> host) {
                 host.dropAttachments();
-                IGridContainer gridContainer = IGridContainer.getCapability(worldIn);
+                IGridContainer gridContainer = IGridContainer.getGrid(worldIn);
                 if (gridContainer != null) {
                     gridContainer.onDuctRemoved(host);
                 }

@@ -35,7 +35,7 @@ public class DuctBlockItem extends BlockItemCoFH {
         }
         BlockEntity tile = level.getBlockEntity(pos);
         if (tile instanceof IDuct<?, ?> host) {
-            IGridContainer gridContainer = IGridContainer.getCapability(level);
+            IGridContainer gridContainer = IGridContainer.getGrid(level);
             if (gridContainer != null) {
                 gridContainer.onDuctPlaced(host, computeConnectionPreference(level, ctx.getHitResult()));
             }

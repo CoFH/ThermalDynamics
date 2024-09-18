@@ -1,27 +1,17 @@
 package cofh.thermal.dynamics.api;
 
 import cofh.thermal.dynamics.api.grid.IDuct;
-import cofh.thermal.dynamics.api.grid.IGridContainer;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.CapabilityManager;
-import net.neoforged.neoforge.common.capabilities.CapabilityToken;
-import net.neoforged.neoforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+
+import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 
 public class TDynApi {
 
-    public static final Capability<IDuct> GRID_HOST_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {
-    });
-    public static final Capability<IGridContainer> GRID_CONTAINER_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {
-    });
+    public static final BlockCapability<IDuct, Void> GRID_HOST_CAPABILITY = BlockCapability.createVoid(new ResourceLocation(ID_THERMAL_DYNAMICS, "grid_host"), IDuct.class);
 
     private TDynApi() {
 
-    }
-
-    public static void register(RegisterCapabilitiesEvent event) {
-
-        event.register(IDuct.class);
-        event.register(IGridContainer.class);
     }
 
 }
