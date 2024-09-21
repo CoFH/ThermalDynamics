@@ -2,7 +2,6 @@ package cofh.thermal.dynamics;
 
 import cofh.lib.util.DeferredRegisterCoFH;
 import cofh.thermal.dynamics.api.TDynApi;
-import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridType;
 import cofh.thermal.dynamics.client.DebugRenderer;
 import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
@@ -12,7 +11,6 @@ import cofh.thermal.dynamics.client.gui.attachment.FluidServoAttachmentScreen;
 import cofh.thermal.dynamics.client.gui.attachment.FluidTurboServoAttachmentScreen;
 import cofh.thermal.dynamics.common.block.entity.ItemBufferBlockEntity;
 import cofh.thermal.dynamics.common.block.entity.duct.DuctBlockEntity;
-import cofh.thermal.dynamics.common.block.entity.duct.EnergyDuctBlockEntity;
 import cofh.thermal.dynamics.common.event.GridEvents;
 import cofh.thermal.dynamics.common.network.PacketHandler;
 import cofh.thermal.dynamics.init.registries.*;

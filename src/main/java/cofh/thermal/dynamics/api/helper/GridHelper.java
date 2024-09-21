@@ -58,8 +58,9 @@ public class GridHelper {
             return host;
         }
         Level level = tile.getLevel();
-        if (level == null) return null;
-
+        if (level == null) {
+            return null;
+        }
         return level.getCapability(TDynApi.GRID_HOST_CAPABILITY, tile.getBlockPos(), tile.getBlockState(), tile, null);
     }
 

@@ -1,12 +1,10 @@
 package cofh.thermal.dynamics.api.grid;
 
-import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.common.grid.Grid;
 import cofh.thermal.dynamics.common.grid.GridContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import org.jetbrains.annotations.Nullable;
 

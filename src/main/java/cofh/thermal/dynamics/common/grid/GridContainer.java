@@ -67,6 +67,7 @@ public class GridContainer extends SavedData implements IGridContainer {
     }
 
     public static GridContainer getInstance(ServerLevel level) {
+
         return level.getDataStorage().computeIfAbsent(
                 new Factory<>(
                         () -> new GridContainer(level),
@@ -518,6 +519,7 @@ public class GridContainer extends SavedData implements IGridContainer {
 
     @Override
     public CompoundTag save(CompoundTag tag) {
+
         ListTag grids = new ListTag();
         for (Map.Entry<UUID, Grid<?, ?>> entry : this.grids.entrySet()) {
             Grid<?, ?> grid = entry.getValue();
@@ -533,6 +535,7 @@ public class GridContainer extends SavedData implements IGridContainer {
 
     @Override
     public boolean isDirty() {
+
         return true; // Always save this SavedData
     }
 
