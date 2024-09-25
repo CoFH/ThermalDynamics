@@ -156,7 +156,7 @@ public class EnergyLimiterAttachment implements IAttachment, IRedstoneControllab
                 return (T) extCap;
             }
             if (extCapIn instanceof IEnergyStorage storage) {
-                extCap = new WrappedEnergyStorage(storage, () -> rsControl.getState() ? amountInput : 0, () -> rsControl.getState() ? amountOutput : 0);
+                extCap = new WrappedEnergyStorage(storage, () -> rsControl.getState() ? amountOutput : 0, () -> rsControl.getState() ? amountInput : 0);
                 return (T) extCap;
             }
         }
