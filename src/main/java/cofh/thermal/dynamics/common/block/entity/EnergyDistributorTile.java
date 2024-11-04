@@ -36,7 +36,7 @@
 //
 //        // inventory.addSlot(chargeSlot, INTERNAL);
 //
-//        addAugmentSlots(storageAugments);
+//        addAugmentSlots(ThermalCoreConfig.storageAugments, true, true);
 //        initHandlers();
 //    }
 //

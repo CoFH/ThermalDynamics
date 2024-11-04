@@ -43,7 +43,8 @@ public interface IGridType<G extends Grid<G, ?>> {
      */
     static <G extends Grid<G, ?>> IGridType<G> of(BiFunction<UUID, Level, G> gridFactory) {
 
-        abstract class GridTypeImpl<B extends Grid<B, ?>> implements IGridType<B> {}
+        abstract class GridTypeImpl<B extends Grid<B, ?>> implements IGridType<B> {
+        }
         return new GridTypeImpl<>() {
             //@formatter:off
             @Override public G createGrid(UUID id, Level world) { return gridFactory.apply(id, world); }
