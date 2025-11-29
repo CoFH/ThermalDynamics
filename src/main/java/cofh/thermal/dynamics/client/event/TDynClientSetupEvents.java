@@ -1,11 +1,13 @@
 package cofh.thermal.dynamics.client.event;
 
 import cofh.thermal.dynamics.client.model.DuctModel;
+import cofh.thermal.dynamics.client.renderer.ItemTransportRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelEvent.RegisterGeometryLoaders;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import static cofh.lib.util.constants.ModIds.ID_THERMAL_DYNAMICS;
 
@@ -16,6 +18,11 @@ public class TDynClientSetupEvents {
 
     private TDynClientSetupEvents() {
 
+    }
+
+    @SubscribeEvent
+    public static void clientSetup(final FMLClientSetupEvent event) {
+        event.enqueueWork(ItemTransportRenderer::register);
     }
 
     @SubscribeEvent

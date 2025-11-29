@@ -509,16 +509,17 @@ public class GridContainer implements IGridContainer, INBTSerializable<ListTag> 
                 LOGGER.error("Failed to load Grid {} with type {} in world {}. GridType is no longer registered, it will be removed from the world.", id, gridTypeName, world.dimension().location());
                 continue;
             }
-            deserializeGrid(tag, id, unsafeCast(gridType));
+            deserializeGrid(tag, id, gridType);
         }
         if (DEBUG) {
             LOGGER.info("Loaded {} grids for {}.", grids.size(), world.dimension().location());
         }
     }
 
-    private <G extends Grid<G, N>, N extends GridNode<G>> void deserializeGrid(CompoundTag tag, UUID id, IGridType<G> gridType) {
+    @SuppressWarnings("unchecked")
+    private <G extends Grid<G, N>, N extends GridNode<G>> void deserializeGrid(CompoundTag tag, UUID id, IGridType<?> gridType) {
 
-        G grid = createAndAddGrid(id, gridType, false);
+        G grid = createAndAddGrid(id, (IGridType<G>) gridType, false);
         grid.deserializeNBT(tag);
 
         for (N node : grid.nodeGraph.nodes()) {

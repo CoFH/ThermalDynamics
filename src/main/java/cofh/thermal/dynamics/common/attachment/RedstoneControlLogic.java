@@ -129,6 +129,26 @@ public class RedstoneControlLogic implements IRedstoneControllable {
 
         return mode;
     }
+    
+    /**
+     * Returns true if the device should be active based on redstone control settings
+     */
+    public boolean getState() {
+        if (!isControllable()) {
+            return true; // Always active if not controllable
+        }
+        
+        switch (mode) {
+            case DISABLED:
+                return true; // Active when redstone control is disabled
+            case LOW:
+                return power <= threshold; // Active when signal is low
+            case HIGH:
+                return power > threshold; // Active when signal is high
+            default:
+                return true;
+        }
+    }
 
     @Override
     public void setPower(int power) {

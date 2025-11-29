@@ -4,12 +4,16 @@ import cofh.lib.common.network.PacketHandler;
 import cofh.lib.util.DeferredRegisterCoFH;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridType;
+import cofh.thermal.dynamics.api.TDynApi;
 import cofh.thermal.dynamics.client.DebugRenderer;
 import cofh.thermal.dynamics.client.gui.ItemBufferScreen;
 import cofh.thermal.dynamics.client.gui.attachment.EnergyLimiterAttachmentScreen;
 import cofh.thermal.dynamics.client.gui.attachment.FluidFilterAttachmentScreen;
 import cofh.thermal.dynamics.client.gui.attachment.FluidServoAttachmentScreen;
 import cofh.thermal.dynamics.client.gui.attachment.FluidTurboServoAttachmentScreen;
+import cofh.thermal.dynamics.client.gui.attachment.ItemFilterAttachmentScreen;
+import cofh.thermal.dynamics.client.gui.attachment.ItemServoAttachmentScreen;
+import cofh.thermal.dynamics.client.gui.attachment.ItemTurboServoAttachmentScreen;
 import cofh.thermal.dynamics.common.event.GridEvents;
 import cofh.thermal.dynamics.common.network.packet.client.AttachmentControlPacket;
 import cofh.thermal.dynamics.common.network.packet.client.GridDebugPacket;
@@ -114,7 +118,7 @@ public class ThermalDynamics {
 
     private void capSetup(RegisterCapabilitiesEvent event) {
 
-        event.register(IGridContainer.class);
+        TDynApi.register(event);
     }
     // endregion
 
@@ -127,6 +131,10 @@ public class ThermalDynamics {
         MenuScreens.register(FLUID_FILTER_ATTACHMENT_CONTAINER.get(), FluidFilterAttachmentScreen::new);
         MenuScreens.register(FLUID_SERVO_ATTACHMENT_CONTAINER.get(), FluidServoAttachmentScreen::new);
         MenuScreens.register(FLUID_TURBO_SERVO_ATTACHMENT_CONTAINER.get(), FluidTurboServoAttachmentScreen::new);
+        
+        MenuScreens.register(ITEM_FILTER_ATTACHMENT_CONTAINER.get(), ItemFilterAttachmentScreen::new);
+        MenuScreens.register(ITEM_SERVO_ATTACHMENT_CONTAINER.get(), ItemServoAttachmentScreen::new);
+        MenuScreens.register(ITEM_TURBO_SERVO_ATTACHMENT_CONTAINER.get(), ItemTurboServoAttachmentScreen::new);
     }
 
     private void registerRenderLayers() {
@@ -143,6 +151,11 @@ public class ThermalDynamics {
         ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_ENERGY_DUCT), cutout);
         ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_FLUID_DUCT), cutout);
         ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_FLUID_DUCT_WINDOWED), cutout);
+
+        // Item Duct variants - windowed versions need cutout for transparency
+        ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_ITEM_DUCT), cutout);
+        ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_ITEM_DUCT_DENSE), cutout);
+        ItemBlockRenderTypes.setRenderLayer(BLOCKS.get(ID_ITEM_DUCT_VACUUM), cutout);
     }
     // endregion
 }

@@ -57,6 +57,43 @@ if (System.getenv('MODRINTH_TOKEN') || project.hasProperty('modrinthToken')) {
 minecraft {
     mappings channel: 'official', version: "${mc_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    
+    runs {
+        client {
+            workingDirectory project.file('runs/client').canonicalPath
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                thermal_dynamics {
+                    source sourceSets.main
+                }
+            }
+        }
+        
+        server {
+            workingDirectory project.file('runs/server').canonicalPath
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            args '--nogui'
+            mods {
+                thermal_dynamics {
+                    source sourceSets.main
+                }
+            }
+        }
+        
+        data {
+            workingDirectory project.file('runs/data').canonicalPath
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', mod_id, '--all', '--output', file('src/main/generated/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+            mods {
+                thermal_dynamics {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
 processResources {
@@ -65,8 +102,8 @@ processResources {
                 'mc_version': mc_version,
                 'forge_version': forge_version,
                 'forge_major_version': forge_version.split('\\.')[0],
-                'cofh_core_version_range': "[${cofh_core_version.replace(".+", "")},${cofh_core_max_version})",
-                'thermal_core_version_range': "[${thermal_core_version.replace(".+", "")},${thermal_core_max_version})"
+                'cofh_core_version_range': "[11.0.0,${cofh_core_max_version})",
+                'thermal_core_version_range': "[11.0.0,${thermal_core_max_version})"
     }
 }
 
@@ -83,6 +120,7 @@ repositories {
     maven { url 'https://dvs1.progwml6.com/files/maven/' }
     maven { url 'https://maven.blamejared.com/' }
     maven { url 'https://maven.theillusivec4.top/' }
+    maven { url 'https://api.modrinth.com/maven' } // Spark
 }
 
 dependencies {
@@ -91,8 +129,11 @@ dependencies {
     shadowIn 'net.covers1624:Quack:0.4.0.42' // Quack :D
     compileOnly 'org.jetbrains:annotations:22.0.0'
 
-    implementation fg.deobf("com.teamcofh:cofh_core:${mc_version}-${cofh_core_version}.+")
-    implementation fg.deobf("com.teamcofh:thermal_core:${mc_version}-${thermal_core_version}.+")
+    implementation fg.deobf("com.teamcofh:cofh_core:${mc_version}-${cofh_core_version}")
+    implementation fg.deobf("com.teamcofh:thermal_core:${mc_version}-${thermal_core_version}")
+
+    // Spark profiler for dev environment
+    runtimeOnly fg.deobf("maven.modrinth:spark:1.10.53-forge")
 
 //    implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
 //    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")

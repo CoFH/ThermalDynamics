@@ -3,6 +3,7 @@ package cofh.thermal.dynamics.init.registries;
 import cofh.core.common.block.EntityBlock6Way;
 import cofh.thermal.core.common.config.ThermalCoreConfig;
 import cofh.thermal.dynamics.common.block.DuctBlock;
+import cofh.thermal.dynamics.common.block.ItemDuctBlock;
 import cofh.thermal.dynamics.common.block.entity.ItemBufferBlockEntity;
 import cofh.thermal.dynamics.common.item.DuctBlockItem;
 import net.minecraft.world.level.block.SoundType;
@@ -41,7 +42,29 @@ public class TDynBlocks {
         devicesTab(50, registerBlock(ID_FLUID_DUCT_WINDOWED,
                 () -> new DuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), FLUID_DUCT_WINDOWED_BLOCK_ENTITY),
                 () -> new DuctBlockItem(BLOCKS.get(ID_FLUID_DUCT_WINDOWED), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
+        // Item Duct Base Variants
+        devicesTab(50, registerBlock(ID_ITEM_DUCT,
+                () -> new ItemDuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), true, ITEM_DUCT_BLOCK_ENTITY),
+                () -> new DuctBlockItem(BLOCKS.get(ID_ITEM_DUCT), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
+        devicesTab(50, registerBlock(ID_ITEM_DUCT_OPAQUE,
+                () -> new ItemDuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), false, ITEM_DUCT_OPAQUE_BLOCK_ENTITY),
+                () -> new DuctBlockItem(BLOCKS.get(ID_ITEM_DUCT_OPAQUE), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
 
+        // Item Duct Dense Variants
+        devicesTab(50, registerBlock(ID_ITEM_DUCT_DENSE,
+                () -> new ItemDuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), true, ITEM_DUCT_DENSE_BLOCK_ENTITY),
+                () -> new DuctBlockItem(BLOCKS.get(ID_ITEM_DUCT_DENSE), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
+        devicesTab(50, registerBlock(ID_ITEM_DUCT_DENSE_OPAQUE,
+                () -> new ItemDuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), false, ITEM_DUCT_DENSE_OPAQUE_BLOCK_ENTITY),
+                () -> new DuctBlockItem(BLOCKS.get(ID_ITEM_DUCT_DENSE_OPAQUE), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
+
+        // Item Duct Vacuum Variants
+        devicesTab(50, registerBlock(ID_ITEM_DUCT_VACUUM,
+                () -> new ItemDuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), true, ITEM_DUCT_VACUUM_BLOCK_ENTITY),
+                () -> new DuctBlockItem(BLOCKS.get(ID_ITEM_DUCT_VACUUM), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
+        devicesTab(50, registerBlock(ID_ITEM_DUCT_VACUUM_OPAQUE,
+                () -> new ItemDuctBlock(of().sound(SoundType.LANTERN).strength(1.0F).dynamicShape().noOcclusion(), false, ITEM_DUCT_VACUUM_OPAQUE_BLOCK_ENTITY),
+                () -> new DuctBlockItem(BLOCKS.get(ID_ITEM_DUCT_VACUUM_OPAQUE), itemProperties()).setModId(ID_THERMAL_DYNAMICS)));
 
         IntSupplier storageAugs = () -> ThermalCoreConfig.storageAugments;
 

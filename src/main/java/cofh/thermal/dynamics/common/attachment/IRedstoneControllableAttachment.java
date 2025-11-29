@@ -42,5 +42,9 @@ public interface IRedstoneControllableAttachment extends IAttachment, IPacketHan
 
         return redstoneControl().isControllable();
     }
+    
+    default boolean getState() {
+        return redstoneControl().getState();
+    }
     // endregion
 }

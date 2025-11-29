@@ -1,0 +1,11 @@
+{
+  "parent": "thermal:block/duct_inventory",
+  "textures": {
+    "duct": "thermal:block/ducts/signalum_item_duct_impulse",
+    "duct_end": "thermal:block/ducts/signalum_item_duct_impulse_windowed",
+    "fill": "thermal:block/blank"
+  },
+  "visibility": {
+    "inv": true
+  }
+}

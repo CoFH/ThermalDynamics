@@ -11,6 +11,7 @@ import cofh.thermal.core.common.item.RedprintItem;
 import cofh.thermal.dynamics.api.grid.IDuct;
 import cofh.thermal.dynamics.api.grid.IGridContainer;
 import cofh.thermal.dynamics.api.grid.IGridHostLuminous;
+import cofh.thermal.dynamics.client.model.data.DuctModelData;
 import cofh.thermal.dynamics.common.block.entity.duct.DuctBlockEntity;
 import cofh.thermal.dynamics.common.item.AttachmentItem;
 import com.google.common.collect.ImmutableSet;
@@ -122,9 +123,9 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 
         if (worldIn.getBlockEntity(pos) instanceof DuctBlockEntity<?, ?> duct) {
             duct.calcDuctModelDataServer();
+            ItemStack heldStack = player.getItemInHand(handIn);
             HitResult rawHit = RayTracer.retrace(player, ClipContext.Fluid.NONE);
             if (rawHit instanceof VoxelShapeBlockHitResult advHit) {
-                ItemStack heldStack = player.getItemInHand(handIn);
                 if (Utils.isWrench(heldStack)) {
                     if (Utils.isClientWorld(worldIn)) {
                         return InteractionResult.SUCCESS;
@@ -165,7 +166,8 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
                         return InteractionResult.SUCCESS;
                     }
                     if (advHit.subHit == 0) {
-                        if (duct.attemptAttachmentInstall(advHit.getDirection(), player, attachmentItem.getAttachmentType(heldStack))) {
+                        boolean success = duct.attemptAttachmentInstall(advHit.getDirection(), player, attachmentItem.getAttachmentType(heldStack));
+                        if (success) {
                             if (!player.getAbilities().instabuild) {
                                 player.setItemInHand(handIn, consumeItem(heldStack, 1));
                             }
@@ -174,14 +176,67 @@ public class DuctBlock extends Block implements EntityBlock, SimpleWaterloggedBl
                         }
                         return InteractionResult.SUCCESS;
                     } else if (advHit.subHit >= 7) {
-                        if (duct.attemptAttachmentInstall(DIRECTIONS[advHit.subHit - 7], player, attachmentItem.getAttachmentType(heldStack))) {
+                        Direction installSide = DIRECTIONS[advHit.subHit - 7];
+                        boolean success = duct.attemptAttachmentInstall(installSide, player, attachmentItem.getAttachmentType(heldStack));
+                        if (success) {
                             if (!player.getAbilities().instabuild) {
                                 player.setItemInHand(handIn, consumeItem(heldStack, 1));
                             }
                         } else {
-                            duct.openAttachmentGui(DIRECTIONS[advHit.subHit - 7], player);
+                            duct.openAttachmentGui(installSide, player);
                         }
                         return InteractionResult.SUCCESS;
+                    }
+                }
+            } else if (rawHit instanceof BlockHitResult basicHit) {
+                // Server-side fallback for attachments when detailed raytrace isn't available
+                if (heldStack.getItem() instanceof AttachmentItem attachmentItem) {
+                    if (!Utils.isClientWorld(worldIn)) {
+                        // Find any external connection to a storage block
+                        duct.calcDuctModelDataServer();
+                        DuctModelData modelData = duct.getDuctModelData();
+
+                        for (Direction dir : DIRECTIONS) {
+                            // External connection without internal connection = connection to storage block
+                            if (modelData.hasExternalConnection(dir) && !modelData.hasInternalConnection(dir)) {
+                                boolean success = duct.attemptAttachmentInstall(dir, player, attachmentItem.getAttachmentType(heldStack));
+                                if (success) {
+                                    if (!player.getAbilities().instabuild) {
+                                        player.setItemInHand(handIn, consumeItem(heldStack, 1));
+                                    }
+                                } else {
+                                    duct.openAttachmentGui(dir, player);
+                                }
+                                return InteractionResult.SUCCESS;
+                            }
+                        }
+
+                        // If no storage block connections found, try any external connection
+                        for (Direction dir : DIRECTIONS) {
+                            if (modelData.hasExternalConnection(dir)) {
+                                boolean success = duct.attemptAttachmentInstall(dir, player, attachmentItem.getAttachmentType(heldStack));
+                                if (success) {
+                                    if (!player.getAbilities().instabuild) {
+                                        player.setItemInHand(handIn, consumeItem(heldStack, 1));
+                                    }
+                                } else {
+                                    duct.openAttachmentGui(dir, player);
+                                }
+                                return InteractionResult.SUCCESS;
+                            }
+                        }
+
+                        // If no external connections, allow attachment on any side (for ducts in middle of networks)
+                        // Try each direction until we find one that works
+                        for (Direction dir : DIRECTIONS) {
+                            boolean success = duct.attemptAttachmentInstall(dir, player, attachmentItem.getAttachmentType(heldStack));
+                            if (success) {
+                                if (!player.getAbilities().instabuild) {
+                                    player.setItemInHand(handIn, consumeItem(heldStack, 1));
+                                }
+                                return InteractionResult.SUCCESS;
+                            }
+                        }
                     }
                 }
             }

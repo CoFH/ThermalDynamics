@@ -1,0 +1,8 @@
+{
+  "parent": "thermal:block/duct",
+  "textures": {
+    "duct": "thermal:block/ducts/item_duct",
+    "duct_connector": "thermal:block/ducts/item_duct_connector",
+    "fill": "thermal:block/blank"
+  }
+}

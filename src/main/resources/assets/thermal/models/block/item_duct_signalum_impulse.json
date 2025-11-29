@@ -1,0 +1,8 @@
+{
+  "parent": "thermal:block/duct",
+  "textures": {
+    "duct": "thermal:block/ducts/signalum_item_duct_impulse_windowed",
+    "duct_connector": "thermal:block/ducts/signalum_item_duct_impulse_connector",
+    "fill": "thermal:block/blank"
+  }
+}

@@ -129,14 +129,16 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     }
 
     public boolean attemptAttachmentInstall(Direction side, Player player, String type) {
-
         if (attachments[side.ordinal()] != EmptyAttachment.INSTANCE) {
             return false;
         }
+        
         IAttachment attachment = AttachmentRegistry.getAttachment(type, new CompoundTag(), this, side);
+        
         if (attachment == null || attachment == EmptyAttachment.INSTANCE) {
             return false;
         }
+        
         attachments[side.ordinal()] = attachment;
         connections[side.ordinal()] = FORCED;
 
@@ -201,7 +203,6 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
     }
 
     public boolean openAttachmentGui(Direction side, Player player) {
-
         if (side != null && attachments[side.ordinal()] instanceof MenuProvider provider) {
             AttachmentHelper.openAttachmentScreen((ServerPlayer) player, provider, pos(), side);
             return true;
@@ -341,7 +342,6 @@ public abstract class DuctBlockEntity<G extends Grid<G, N>, N extends GridNode<G
 
     @Override
     public void handleStatePacket(FriendlyByteBuf buffer) {
-
         for (int i = 0; i < 6; ++i) {
             connections[i] = ConnectionType.VALUES[buffer.readByte()];
         }

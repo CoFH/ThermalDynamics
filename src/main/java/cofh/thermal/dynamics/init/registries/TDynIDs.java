@@ -16,6 +16,17 @@ public class TDynIDs {
     public static final String ID_ENERGY_DUCT = "energy_duct";
     public static final String ID_FLUID_DUCT = "fluid_duct";
     public static final String ID_FLUID_DUCT_WINDOWED = "fluid_duct_windowed";
+    // Item Duct Base Variants
+    public static final String ID_ITEM_DUCT = "item_duct";
+    public static final String ID_ITEM_DUCT_OPAQUE = "item_duct_opaque";
+
+    // Item Duct Dense Variants
+    public static final String ID_ITEM_DUCT_DENSE = "item_duct_dense";
+    public static final String ID_ITEM_DUCT_DENSE_OPAQUE = "item_duct_dense_opaque";
+
+    // Item Duct Vacuum Variants
+    public static final String ID_ITEM_DUCT_VACUUM = "item_duct_vacuum";
+    public static final String ID_ITEM_DUCT_VACUUM_OPAQUE = "item_duct_vacuum_opaque";
 
     public static final String ID_ENERGY_DISTRIBUTOR = "energy_distributor";
 
